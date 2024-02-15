@@ -9,6 +9,5 @@ public class NexgEsmApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(NexgEsmApplication.class, args);
 	}
-
 	
 }
