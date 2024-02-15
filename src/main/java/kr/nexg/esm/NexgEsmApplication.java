@@ -10,4 +10,5 @@ public class NexgEsmApplication {
 		SpringApplication.run(NexgEsmApplication.class, args);
 	}
 
+	
 }
