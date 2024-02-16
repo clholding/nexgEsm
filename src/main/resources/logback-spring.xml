@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="60 seconds">
 	<!-- property name="LOG_DIR" value="/logs"></property-->
-	<property name="LOG_DIR" value="/home/lsel_admin/was/logs"></property>	
+	<property name="LOG_DIR" value="/home/ubuntu/log"></property>	
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS}[%-5level] : %msg%n</pattern>
