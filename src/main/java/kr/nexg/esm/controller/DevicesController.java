@@ -2,22 +2,32 @@ package kr.nexg.esm.controller;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import kr.nexg.esm.common.StatusEnum;
 import kr.nexg.esm.dto.MessageVo;
+import kr.nexg.esm.service.DevicesService;
+import lombok.extern.slf4j.Slf4j;
 
+
+@Slf4j
 @RestController
 @RequestMapping("/devices")
 public class DevicesController {
 
+	@Autowired
+	DevicesService devicesService;
+	
     @PostMapping("/addPrivateNetwork")
     public ResponseEntity<MessageVo> addPrivateNetwork() throws IOException  {
     	
@@ -27,7 +37,7 @@ public class DevicesController {
         MessageVo message = MessageVo.builder()
             	.status(StatusEnum.OK)
             	.message("성공 코드")
-            	.data("")
+            	.entitys("")
             	.build();
     	
         return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -43,7 +53,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -59,7 +69,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -75,7 +85,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -91,7 +101,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -107,7 +117,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -123,7 +133,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -139,7 +149,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -155,7 +165,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -171,7 +181,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -187,7 +197,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -203,7 +213,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -219,7 +229,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -235,7 +245,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -251,7 +261,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -267,7 +277,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -283,7 +293,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -299,7 +309,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -315,7 +325,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -331,7 +341,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -347,7 +357,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -363,7 +373,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -379,7 +389,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -395,7 +405,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -411,7 +421,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -427,7 +437,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -443,7 +453,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -459,23 +469,44 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
     	
     } 
     
+    /*
+     * 제품정보 리스트
+     */
     @PostMapping("/getProductList")
-    public ResponseEntity<MessageVo> getProductList() throws IOException  {
+    public ResponseEntity<MessageVo> getProductList(@RequestParam Map<String,String> paramMap) throws IOException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
+//    	log.info("devicesVo : "+paramMap.get("datas"));
+//    	
+//    	String jsonString = paramMap.get("datas");
+//    	
+//        // ObjectMapper 생성
+//        ObjectMapper objectMapper = new ObjectMapper();
+//
+//        // JSON 데이터 파싱
+//        JsonNode jsonNode = objectMapper.readTree(jsonString);
+//
+//        // 특정 키에 대한 값(value) 꺼내기
+//        String type = jsonNode.get("type").asText();
+//        
+//        // 결과 출력
+//        log.info("type : "+type);
+
     	MessageVo message = MessageVo.builder()
-    			.status(StatusEnum.OK)
-    			.message("성공 코드")
-    			.data("")
+    			.success("true")
+    			.message("")
+    			.errMsg("")
+    			.errTitle("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -491,7 +522,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -507,7 +538,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -523,7 +554,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -539,7 +570,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -555,7 +586,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -571,7 +602,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -587,7 +618,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -603,7 +634,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -619,7 +650,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -635,7 +666,7 @@ public class DevicesController {
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.data("")
+    			.entitys("")
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);

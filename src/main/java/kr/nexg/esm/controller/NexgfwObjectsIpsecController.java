@@ -18,83 +18,83 @@ import kr.nexg.esm.dto.MessageVo;
 @RequestMapping("/nexgfw_objects_ipsec")
 public class NexgfwObjectsIpsecController {
 
-    @PostMapping("/addObj")
-    public ResponseEntity<MessageVo> addObj() throws IOException  {
-    	
-    	HttpHeaders headers= new HttpHeaders();
-        headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
-
-        MessageVo message = MessageVo.builder()
-            	.status(StatusEnum.OK)
-            	.message("성공 코드")
-            	.data("")
-            	.build();
-    	
-        return new ResponseEntity<>(message, headers, HttpStatus.OK);
-    	
-    } 
-    
-    @PostMapping("/deleteObj")
-    public ResponseEntity<MessageVo> deleteObj() throws IOException  {
-    	
-    	HttpHeaders headers= new HttpHeaders();
-    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
-    	
-    	MessageVo message = MessageVo.builder()
-    			.status(StatusEnum.OK)
-    			.message("성공 코드")
-    			.data("")
-    			.build();
-    	
-    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
-    	
-    } 
-    
-    @PostMapping("/getUsedObjects")
-    public ResponseEntity<MessageVo> getUsedObjects() throws IOException  {
-    	
-    	HttpHeaders headers= new HttpHeaders();
-    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
-    	
-    	MessageVo message = MessageVo.builder()
-    			.status(StatusEnum.OK)
-    			.message("성공 코드")
-    			.data("")
-    			.build();
-    	
-    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
-    	
-    } 
-    
-    @PostMapping("/ipsec")
-    public ResponseEntity<MessageVo> ipsec() throws IOException  {
-    	
-    	HttpHeaders headers= new HttpHeaders();
-    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
-    	
-    	MessageVo message = MessageVo.builder()
-    			.status(StatusEnum.OK)
-    			.message("성공 코드")
-    			.data("")
-    			.build();
-    	
-    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
-    	
-    } 
-    
-    @PostMapping("/modifyObj")
-    public ResponseEntity<MessageVo> modifyObj() throws IOException  {
-    	
-    	HttpHeaders headers= new HttpHeaders();
-    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
-    	
-    	MessageVo message = MessageVo.builder()
-    			.status(StatusEnum.OK)
-    			.message("성공 코드")
-    			.data("")
-    			.build();
-    	
-    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
-    	
-    } 
+//    @PostMapping("/addObj")
+//    public ResponseEntity<MessageVo> addObj() throws IOException  {
+//    	
+//    	HttpHeaders headers= new HttpHeaders();
+//        headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+//
+//        MessageVo message = MessageVo.builder()
+//            	.status(StatusEnum.OK)
+//            	.message("성공 코드")
+//            	.data("")
+//            	.build();
+//    	
+//        return new ResponseEntity<>(message, headers, HttpStatus.OK);
+//    	
+//    } 
+//    
+//    @PostMapping("/deleteObj")
+//    public ResponseEntity<MessageVo> deleteObj() throws IOException  {
+//    	
+//    	HttpHeaders headers= new HttpHeaders();
+//    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+//    	
+//    	MessageVo message = MessageVo.builder()
+//    			.status(StatusEnum.OK)
+//    			.message("성공 코드")
+//    			.data("")
+//    			.build();
+//    	
+//    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
+//    	
+//    } 
+//    
+//    @PostMapping("/getUsedObjects")
+//    public ResponseEntity<MessageVo> getUsedObjects() throws IOException  {
+//    	
+//    	HttpHeaders headers= new HttpHeaders();
+//    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+//    	
+//    	MessageVo message = MessageVo.builder()
+//    			.status(StatusEnum.OK)
+//    			.message("성공 코드")
+//    			.data("")
+//    			.build();
+//    	
+//    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
+//    	
+//    } 
+//    
+//    @PostMapping("/ipsec")
+//    public ResponseEntity<MessageVo> ipsec() throws IOException  {
+//    	
+//    	HttpHeaders headers= new HttpHeaders();
+//    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+//    	
+//    	MessageVo message = MessageVo.builder()
+//    			.status(StatusEnum.OK)
+//    			.message("성공 코드")
+//    			.data("")
+//    			.build();
+//    	
+//    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
+//    	
+//    } 
+//    
+//    @PostMapping("/modifyObj")
+//    public ResponseEntity<MessageVo> modifyObj() throws IOException  {
+//    	
+//    	HttpHeaders headers= new HttpHeaders();
+//    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+//    	
+//    	MessageVo message = MessageVo.builder()
+//    			.status(StatusEnum.OK)
+//    			.message("성공 코드")
+//    			.data("")
+//    			.build();
+//    	
+//    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
+//    	
+//    } 
 }

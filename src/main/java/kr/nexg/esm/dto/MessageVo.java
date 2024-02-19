@@ -11,11 +11,11 @@ import lombok.Data;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MessageVo {
 	private StatusEnum status;
+    private String success;
     private String message;
     private int totalCount;
-    private Object data;
-    private Object files;
-    private Object prevNextData;
-    private Object pinupData;
+    private String errMsg;
+    private String errTitle;
+    private Object entitys;
 
 }
