@@ -6,6 +6,5 @@ import lombok.Data;
 @Data
 public class DevicesVo
 {
-    private String id;
-    private String name;
+    private String rsType;
 }

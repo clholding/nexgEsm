@@ -2,6 +2,7 @@ package kr.nexg.esm.controller;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import kr.nexg.esm.common.StatusEnum;
+import kr.nexg.esm.dto.DevicesRVo;
+import kr.nexg.esm.dto.DevicesVo;
 import kr.nexg.esm.dto.MessageVo;
 import kr.nexg.esm.service.DevicesService;
 import lombok.extern.slf4j.Slf4j;
@@ -501,12 +504,17 @@ public class DevicesController {
 //        // 결과 출력
 //        log.info("type : "+type);
 
+    	DevicesVo devicesVo = new DevicesVo();
+    	
+    	List<DevicesRVo> list = devicesService.selectGetProductList(devicesVo);
+    	
     	MessageVo message = MessageVo.builder()
     			.success("true")
     			.message("")
     			.errMsg("")
     			.errTitle("")
-    			.entitys("")
+    			.entitys(list)
+    			.totalCount(list.size())
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
