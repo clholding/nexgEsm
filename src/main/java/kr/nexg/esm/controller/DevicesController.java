@@ -508,24 +508,7 @@ public class DevicesController {
     	
     	log.info("devicesVo : "+paramMap.get("datas"));
     	
-    	String datas = paramMap.get("datas");
-    	
-        // ObjectMapper 생성
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        // JSON 데이터 파싱
-        JsonNode jsonNode = objectMapper.readTree(datas);
-
-        // 특정 키에 대한 값(value) 꺼내기
-        String type = jsonNode.get("type").asText();
-        
-        // 결과 출력
-        log.info("type : "+type);
-
-    	DevicesVo devicesVo = new DevicesVo();
-    	devicesVo.setType(type);
-    	
-    	List<DevicesRVo> list = devicesService.getProductList(devicesVo);
+    	List<DevicesRVo> list = devicesService.getProductList(paramMap);
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
