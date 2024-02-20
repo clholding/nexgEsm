@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import kr.nexg.esm.common.StatusEnum;
 import kr.nexg.esm.dto.DevicesRVo;
 import kr.nexg.esm.dto.DevicesVo;
@@ -176,15 +179,30 @@ public class DevicesController {
     } 
     
     @PostMapping("/deviceAll")
-    public ResponseEntity<MessageVo> deviceAll() throws IOException  {
+    public ResponseEntity<MessageVo> deviceAll(@RequestParam Map<String,String> paramMap) throws IOException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
+    	String datas = paramMap.get("datas");
+    	String mode = paramMap.get("mode");
+    	
+        // ObjectMapper 생성
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        // JSON 데이터 파싱
+        JsonNode jsonNode = objectMapper.readTree(datas);
+
+        // 특정 키에 대한 값(value) 꺼내기
+        String type = jsonNode.get("type").asText();
+        String auth = jsonNode.get("auth").asText();
+        
+        
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.entitys("")
+//    			.entitys(list)
+//    			.totalCount(list.size())
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -488,31 +506,30 @@ public class DevicesController {
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
-//    	log.info("devicesVo : "+paramMap.get("datas"));
-//    	
-//    	String jsonString = paramMap.get("datas");
-//    	
-//        // ObjectMapper 생성
-//        ObjectMapper objectMapper = new ObjectMapper();
-//
-//        // JSON 데이터 파싱
-//        JsonNode jsonNode = objectMapper.readTree(jsonString);
-//
-//        // 특정 키에 대한 값(value) 꺼내기
-//        String type = jsonNode.get("type").asText();
-//        
-//        // 결과 출력
-//        log.info("type : "+type);
+    	log.info("devicesVo : "+paramMap.get("datas"));
+    	
+    	String datas = paramMap.get("datas");
+    	
+        // ObjectMapper 생성
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        // JSON 데이터 파싱
+        JsonNode jsonNode = objectMapper.readTree(datas);
+
+        // 특정 키에 대한 값(value) 꺼내기
+        String type = jsonNode.get("type").asText();
+        
+        // 결과 출력
+        log.info("type : "+type);
 
     	DevicesVo devicesVo = new DevicesVo();
+    	devicesVo.setType(type);
     	
-    	List<DevicesRVo> list = devicesService.selectGetProductList(devicesVo);
+    	List<DevicesRVo> list = devicesService.getProductList(devicesVo);
     	
     	MessageVo message = MessageVo.builder()
-    			.success("true")
-    			.message("")
-    			.errMsg("")
-    			.errTitle("")
+    			.status(StatusEnum.OK)
+    			.message("성공 코드")
     			.entitys(list)
     			.totalCount(list.size())
     			.build();

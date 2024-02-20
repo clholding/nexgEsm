@@ -6,5 +6,7 @@ import lombok.Data;
 @Data
 public class DevicesVo
 {
-    private String rsType;
+    private String type;
+    private String auth;
+    private String mode;
 }

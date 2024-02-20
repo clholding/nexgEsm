@@ -15,8 +15,8 @@ public class DevicesService {
 	@Autowired
 	DevicesMapper devicesMapper;
 	
-	public List<DevicesRVo> selectGetProductList(DevicesVo devicesVo){
+	public List<DevicesRVo> getProductList(DevicesVo devicesVo){
 		
-		return devicesMapper.selectGetProductList(devicesVo);
+		return devicesMapper.getProductList(devicesVo);
 	};
 }

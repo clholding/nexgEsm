@@ -12,7 +12,7 @@ import kr.nexg.esm.dto.DevicesVo;
 @Mapper
 public interface DevicesMapper {
 	
-	public List<DevicesRVo> selectGetProductList(DevicesVo devicesVo);
+	public List<DevicesRVo> getProductList(DevicesVo devicesVo);
 	
 	
 }
