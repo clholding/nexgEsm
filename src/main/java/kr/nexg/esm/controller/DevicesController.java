@@ -5,6 +5,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,8 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import kr.nexg.esm.common.StatusEnum;
-import kr.nexg.esm.dto.DevicesRVo;
-import kr.nexg.esm.dto.DevicesVo;
 import kr.nexg.esm.dto.MessageVo;
 import kr.nexg.esm.service.DevicesService;
 import lombok.extern.slf4j.Slf4j;
@@ -176,15 +175,18 @@ public class DevicesController {
     } 
     
     @PostMapping("/deviceAll")
-    public ResponseEntity<MessageVo> deviceAll() throws IOException  {
+    public ResponseEntity<MessageVo> deviceAll(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
+    	List<Map<String, Object>> list = devicesService.deviceAll(paramMap);
+    	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.entitys("")
+    			.entitys(list)
+//    			.totalCount(list.size())
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -483,36 +485,18 @@ public class DevicesController {
      * 제품정보 리스트
      */
     @PostMapping("/getProductList")
-    public ResponseEntity<MessageVo> getProductList(@RequestParam Map<String,String> paramMap) throws IOException  {
+    public ResponseEntity<MessageVo> getProductList(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
-//    	log.info("devicesVo : "+paramMap.get("datas"));
-//    	
-//    	String jsonString = paramMap.get("datas");
-//    	
-//        // ObjectMapper 생성
-//        ObjectMapper objectMapper = new ObjectMapper();
-//
-//        // JSON 데이터 파싱
-//        JsonNode jsonNode = objectMapper.readTree(jsonString);
-//
-//        // 특정 키에 대한 값(value) 꺼내기
-//        String type = jsonNode.get("type").asText();
-//        
-//        // 결과 출력
-//        log.info("type : "+type);
-
-    	DevicesVo devicesVo = new DevicesVo();
+    	log.info("devicesVo : "+paramMap.get("datas"));
     	
-    	List<DevicesRVo> list = devicesService.selectGetProductList(devicesVo);
+    	List<Map<String, String>> list = devicesService.getProductList(paramMap);
     	
     	MessageVo message = MessageVo.builder()
-    			.success("true")
-    			.message("")
-    			.errMsg("")
-    			.errTitle("")
+    			.status(StatusEnum.OK)
+    			.message("성공 코드")
     			.entitys(list)
     			.totalCount(list.size())
     			.build();

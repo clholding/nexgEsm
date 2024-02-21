@@ -2,9 +2,27 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="kr.nexg.esm.mapper.DevicesMapper">
 
-	<select id="selectGetProductList" parameterType="kr.nexg.esm.dto.DevicesVo" resultType="kr.nexg.esm.dto.DevicesRVo">
-		/* DevicesMapper.selectGetProductList */	
-		CALL sesm.getProductList( #{rsType} );
+	<select id="getDeviceGroupByLogin" parameterType="kr.nexg.esm.dto.DevicesVo" resultType="map">
+		/* DevicesMapper.getDeviceGroupByLogin */	
+		CALL sesm.getDeviceGroupByLogin( #{id}, #{mode} );
+	</select>
+	<select id="getDeviceListByLogin" parameterType="kr.nexg.esm.dto.DevicesVo" resultType="map">
+		/* DevicesMapper.getDeviceListByLogin */	
+		CALL sesm.getDeviceListByLogin( #{id}, '2', #{mode} );
+	</select>
+	<select id="getDeviceGroup" resultType="map">
+		/* DevicesMapper.getDeviceGroup */	
+		CALL sesm.getDeviceGroup();
+	</select>
+	<select id="getDeviceList" resultType="map">
+		/* DevicesMapper.getDeviceList */	
+		CALL sesm.getDeviceList(2);
+	</select>
+	
+	
+	<select id="getProductList" parameterType="kr.nexg.esm.dto.DevicesVo" resultType="map">
+		/* DevicesMapper.getProductList */	
+		CALL sesm.getProductList( #{type} );
 	</select>
 
 </mapper>
