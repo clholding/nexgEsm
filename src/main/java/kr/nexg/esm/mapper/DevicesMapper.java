@@ -1,18 +1,23 @@
 package kr.nexg.esm.mapper;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
-import kr.nexg.esm.dto.DevicesRVo;
 import kr.nexg.esm.dto.DevicesVo;
 
 @Repository
 @Mapper
 public interface DevicesMapper {
 	
-	public List<DevicesRVo> getProductList(DevicesVo devicesVo);
+	public List<Object[]> getDeviceGroupByLogin(DevicesVo devicesVo);
+	public List<Object[]> getDeviceListByLogin(DevicesVo devicesVo);
+	public List<Object[]> getDeviceGroup();
+	public List<Object[]> getDeviceList();
+	
+	public List<Map<String, String>> getProductList(DevicesVo devicesVo);
 	
 	
 }

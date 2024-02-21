@@ -5,6 +5,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -15,11 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import kr.nexg.esm.common.StatusEnum;
-import kr.nexg.esm.dto.DevicesRVo;
 import kr.nexg.esm.dto.MessageVo;
 import kr.nexg.esm.service.DevicesService;
 import lombok.extern.slf4j.Slf4j;
@@ -178,29 +175,17 @@ public class DevicesController {
     } 
     
     @PostMapping("/deviceAll")
-    public ResponseEntity<MessageVo> deviceAll(@RequestParam Map<String,String> paramMap) throws IOException  {
+    public ResponseEntity<MessageVo> deviceAll(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
-    	String datas = paramMap.get("datas");
-    	String mode = paramMap.get("mode");
+    	List<Map<String, Object>> list = devicesService.deviceAll(paramMap);
     	
-        // ObjectMapper 생성
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        // JSON 데이터 파싱
-        JsonNode jsonNode = objectMapper.readTree(datas);
-
-        // 특정 키에 대한 값(value) 꺼내기
-        String type = jsonNode.get("type").asText();
-        String auth = jsonNode.get("auth").asText();
-        
-        
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-//    			.entitys(list)
+    			.entitys(list)
 //    			.totalCount(list.size())
     			.build();
     	
@@ -500,14 +485,14 @@ public class DevicesController {
      * 제품정보 리스트
      */
     @PostMapping("/getProductList")
-    public ResponseEntity<MessageVo> getProductList(@RequestParam Map<String,String> paramMap) throws IOException  {
+    public ResponseEntity<MessageVo> getProductList(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
     	log.info("devicesVo : "+paramMap.get("datas"));
     	
-    	List<DevicesRVo> list = devicesService.getProductList(paramMap);
+    	List<Map<String, String>> list = devicesService.getProductList(paramMap);
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
