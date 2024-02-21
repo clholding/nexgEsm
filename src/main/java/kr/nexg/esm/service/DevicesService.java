@@ -67,7 +67,7 @@ public class DevicesService {
             
             DevicesVo devicesVo = new DevicesVo();
             devicesVo.setId("admin");
-            devicesVo.setMode(rsMode);
+            devicesVo.setMode(modeValue);
             
             List<Object[]> temp = devicesMapper.getDeviceGroupByLogin(devicesVo);
             
