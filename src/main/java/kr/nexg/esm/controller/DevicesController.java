@@ -20,7 +20,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.nexg.esm.common.StatusEnum;
 import kr.nexg.esm.dto.DevicesRVo;
-import kr.nexg.esm.dto.DevicesVo;
 import kr.nexg.esm.dto.MessageVo;
 import kr.nexg.esm.service.DevicesService;
 import lombok.extern.slf4j.Slf4j;
