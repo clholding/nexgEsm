@@ -10,6 +10,7 @@ import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.nexg.esm.dto.DevicesVo;
@@ -30,114 +31,96 @@ public class DevicesService {
     	String datas = paramMap.get("datas");
     	String mode = paramMap.get("mode");
     	
-        List<Object[]> group_list;
-        List<Object[]> dev_list;
+    	List<Map<String, Object>> group_list;
+    	List<Map<String, Object>> dev_list;
     	
         String schType = "all";
         String rsAuth = "0";
         String rsExmode = null;
         String rsMode = "ESM";
         
-        try {
-        	
-            Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
-
-            schType = (String)config.setValue(rsDatas, "type", "all");  // all, group, detail
-            rsAuth = (String)config.setValue(rsDatas, "auth", "0");
-            rsExmode = (String)config.setValue(rsDatas, "mode", "None");
-            rsMode = mode;  // FW, VForce, SW
-            
-        } catch (Exception e) {
-            schType = "all";
-            rsAuth = "0";
-            rsMode = "ESM";  // FW, VForce, SW
-        }
-    	
-        if ("1".equals(rsAuth)) {
-            int modeValue = 0;
-            if (!"None".equals(rsExmode)) {
-                if ("ALL".equals(rsExmode)) {
-                    modeValue = 0;
-                }
-            } else {
-                modeValue = mode_convert.convert_modedata(rsMode);
-            }
-
-            group_list = new ArrayList<>();
-            
-            DevicesVo devicesVo = new DevicesVo();
-            devicesVo.setId("admin");
-            devicesVo.setMode(modeValue);
-            
-            List<Object[]> temp = devicesMapper.getDeviceGroupByLogin(devicesVo);
-            
-            group_list.add(new Object[]{0, "전체", 0, 0});
-
-            List<Integer> hashList = new ArrayList<>();
-            for (Object[] el : temp) {
-                hashList.add((Integer) el[0]);
-            }
-
-            int pid = 0;
-            for (Object[] el : temp) {
-                pid = (Integer) el[2];
-                if ((Integer) el[2] > 0 && !hashList.contains((Integer) el[2])) {
-                    pid = 0;
-                }
-                group_list.add(new Object[]{el[0], el[1], pid, el[3], el[4], el[5], el[6], el[7]});
-            }
-
-            dev_list = devicesMapper.getDeviceListByLogin(devicesVo);
-        } else {
-            group_list = devicesMapper.getDeviceGroup();
-            dev_list = devicesMapper.getDeviceList();
-        }
-        
-        List<Map<String, Object>> resultList = new ArrayList<>();
-        List<Object[]> res = getChildren(0, "group", true, group_list, dev_list);
-
-        int total = res.size();
-        int cnt = 0;
+//        try {
+//        	
+//            Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
+//
+//            schType = (String)config.setValue(rsDatas, "type", "all");  // all, group, detail
+//            rsAuth = (String)config.setValue(rsDatas, "auth", "0");
+//            rsExmode = (String)config.setValue(rsDatas, "mode", "None");
+//            rsMode = mode;  // FW, VForce, SW
+//            
+//        } catch (Exception e) {
+//            schType = "all";
+//            rsAuth = "0";
+//            rsMode = "ESM";  // FW, VForce, SW
+//        }
+//    	
+//        if ("1".equals(rsAuth)) {
+//            int modeValue = 0;
+//            if (!"None".equals(rsExmode)) {
+//                if ("ALL".equals(rsExmode)) {
+//                    modeValue = 0;
+//                }
+//            } else {
+//                modeValue = mode_convert.convert_modedata(rsMode);
+//            }
+//
+//            group_list = new ArrayList<>();
+//            
+//            DevicesVo devicesVo = new DevicesVo();
+//            devicesVo.setId("admin");
+//            devicesVo.setMode(modeValue);
+//            
+//            List<Map<String, Object>> temp = devicesMapper.getDeviceGroupByLogin(devicesVo);
+//
+//            Map<String, Object> newElement = new HashMap<>();
+//            newElement.put("id", 0);
+//            newElement.put("1", 0);
+//            newElement.put("name", "전체");
+//            newElement.put("group_id", 0);
+//
+//            group_list.add(newElement);
+//            
+//            List<Integer> hashList = new ArrayList<>();
+//            for (Map<String, Object> el : temp) {
+//                hashList.add((Integer) el.get(0));
+//            }
+//
+//            int pid = 0;
+//            for (Map<String, Object> el : temp) {
+//                pid = (Integer) el.get(2);
+//                if ((Integer) el.get(2) > 0 && !hashList.contains((Integer) el.get(2))) {
+//                    pid = 0;
+//                }
+//                group_list.add(new Object[]{el[0], el[1], pid, el[3], el[4], el[5], el[6], el[7]});
+//            }
+//
+//            dev_list = devicesMapper.getDeviceListByLogin(devicesVo);
+//        } else {
+//            group_list = devicesMapper.getDeviceGroup();
+//            dev_list = devicesMapper.getDeviceList();
+//        }
+//        
+//        List<Map<String, Object>> resultList = new ArrayList<>();
+//        List<Object[]> res = getChildren(0, "group", true, group_list, dev_list);
+//
+//        int total = res.size();
+//        int cnt = 0;
         List<Map<String, Object>> list = new ArrayList<>();
-        while (cnt < total) {
-            Map<String, Object> gt = new HashMap<>();
-            gt.put("id", res.get(cnt)[0]);
-            gt.put("text", res.get(cnt)[1]);
-            gt.put("children", new ArrayList<>());
-
-            List<Map<String, Object>> child = (List<Map<String, Object>>) loadChildGroup((Integer) res.get(cnt)[0], 1, new ArrayList<>(), gt, schType, group_list, dev_list);
-            list.add(gt);
-            cnt++;
-        }
+//        while (cnt < total) {
+//            Map<String, Object> gt = new HashMap<>();
+//            gt.put("id", res.get(cnt)[0]);
+//            gt.put("text", res.get(cnt)[1]);
+//            gt.put("children", new ArrayList<>());
+//
+//            List<Map<String, Object>> child = (List<Map<String, Object>>) loadChildGroup((Integer) res.get(cnt)[0], 1, new ArrayList<>(), gt, schType, group_list, dev_list);
+//            list.add(gt);
+//            cnt++;
+//        }
 
         
         return list;
 	};
 	
-	
-    public static List<Object[]> getChildren(int pgid, String type, boolean isRoot, List<Object[]> group_list, List<Object[]> dev_list) {
-        List<Object[]> result = new ArrayList<>();
-
-        if ("group".equals(type)) {
-            for (Object[] g : group_list) {
-                if (isRoot && g[0].equals(pgid)) {
-                    result.add(g);
-                    break;
-                } else if (g[2].equals(pgid) && !g[0].equals(pgid)) {
-                    result.add(g);
-                }
-            }
-        } else {
-            for (Object[] d : dev_list) {
-                if (d[2].equals(pgid)) {
-                    result.add(d);
-                }
-            }
-        }
-
-        return result;
-    }
-    
     public static Map<String, Object> loadChildGroup(int pgid, int depth, List<Map<String, Object>> arr, Map<String, Object> ro, String schType, List<Object[]> group_list, List<Object[]> dev_list) {
         List<Object[]> res = getChildren(pgid, "group", false, group_list, dev_list);
         int total = res.size();
@@ -182,7 +165,35 @@ public class DevicesService {
         }
 
         return ro;
-    }    
+    }  
+    
+    public static List<Object[]> getChildren(int pgid, String type, boolean isRoot, List<Object[]> group_list, List<Object[]> dev_list) {
+        List<Object[]> result = new ArrayList<>();
+
+        log.info("pgid : "+pgid);
+        log.info("type : "+type);
+        log.info("isRoot : "+isRoot);
+        log.info("group_list : "+group_list);
+        log.info("dev_list : "+group_list);
+        if ("group".equals(type)) {
+            for (Object[] g : group_list) {
+            	  log.info("g[] : "+g[0]);
+                if (isRoot && g[0].equals(pgid)) {
+                    result.add(g);
+                } else if (g[2].equals(pgid) && !g[0].equals(pgid)) {
+                    result.add(g);
+                }
+            }
+        } else {
+            for (Object[] d : dev_list) {
+                if (d[2].equals(pgid)) {
+                    result.add(d);
+                }
+            }
+        }
+
+        return result;
+    }
     
     public static List<Map<String, Object>> loadChildDevice(int pgid, String schType, List<Object[]> group_list, List<Object[]> dev_list) {
         List<Object[]> res = getChildren(pgid, "dev", false, group_list, dev_list);
@@ -236,19 +247,59 @@ public class DevicesService {
         return devArr;
     }
     
-	public List<Map<String, String>> getProductList(Map<String,String> paramMap) throws IOException, ParseException{
+	public List<Map<String, Object>> getDeviceGroupList() throws IOException, ParseException{
 		
-    	String datas = paramMap.get("datas");
-    	
-    	Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
-    	String type = (String)config.setValue(rsDatas, "type", "null");
-    	
-        DevicesVo devicesVo = new DevicesVo();
-        devicesVo.setType(type);
+		return devicesMapper.getDeviceGroup();
+	}
+	
+    /*
+     * 장비 리스트 정보 조회
+     */
+	public List<Map<String, Object>> getDeviceInfoList(Map<String,String> paramMap) throws IOException, ParseException{
+		
+		String datas = paramMap.get("datas");
+		
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readTree(datas);
+        JsonNode deviceIDsNode = jsonNode.get("deviceIDs");
         
-        // 결과 출력
+        StringBuilder deviceIDs = new StringBuilder();
+        if (deviceIDsNode != null && deviceIDsNode.isArray()) {
+        	int i = 0;
+            for (JsonNode idNode : deviceIDsNode) {
+                String idValue = idNode.get("id").asText();
+                if(i == 0) {
+                	deviceIDs.append(idValue);
+                }else {
+                	deviceIDs.append(","+idValue);
+                }
+                
+                i++;
+            }
+        }
+		DevicesVo devicesVo = new DevicesVo();
+		devicesVo.setDeviceIDs(deviceIDs.toString());
+//		// 결과 출력
+		log.info("deviceIDs : "+devicesVo.getDeviceIDs());
+		
+		return devicesMapper.getDeviceInfoList(devicesVo);
+	}
+	
+    /*
+     * 제품정보 리스트
+     */
+	public List<Map<String, Object>> getProductList(Map<String,String> paramMap) throws IOException, ParseException{
+		
+		String datas = paramMap.get("datas");
+		
+		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
+		String type = (String)config.setValue(rsDatas, "type", null);
+		
         log.info("type : "+type);
-    	
+
+        DevicesVo devicesVo = new DevicesVo();
+        devicesVo.setType(type);		
+		
 		return devicesMapper.getProductList(devicesVo);
 	}
 

@@ -20,6 +20,11 @@
 	</select>
 	
 	
+	<select id="getDeviceInfoList" parameterType="kr.nexg.esm.dto.DevicesVo" resultType="map">
+		/* DevicesMapper.getDeviceInfoList */	
+		CALL sesm.getDeviceInfoList( #{deviceIDs} );
+	</select>
+	
 	<select id="getProductList" parameterType="kr.nexg.esm.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.getProductList */	
 		CALL sesm.getProductList( #{type} );

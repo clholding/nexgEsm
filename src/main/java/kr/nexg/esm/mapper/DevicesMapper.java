@@ -12,12 +12,14 @@ import kr.nexg.esm.dto.DevicesVo;
 @Mapper
 public interface DevicesMapper {
 	
-	public List<Object[]> getDeviceGroupByLogin(DevicesVo devicesVo);
-	public List<Object[]> getDeviceListByLogin(DevicesVo devicesVo);
-	public List<Object[]> getDeviceGroup();
-	public List<Object[]> getDeviceList();
+	public List<Map<String, Object>> getDeviceGroupByLogin(DevicesVo devicesVo);
+	public List<Map<String, Object>> getDeviceListByLogin(DevicesVo devicesVo);
+	public List<Map<String, Object>> getDeviceGroup();
+	public List<Map<String, Object>> getDeviceList();
 	
-	public List<Map<String, String>> getProductList(DevicesVo devicesVo);
+	public List<Map<String, Object>> getDeviceInfoList(DevicesVo devicesVo);
+	
+	public List<Map<String, Object>> getProductList(DevicesVo devicesVo);
 	
 	
 }
