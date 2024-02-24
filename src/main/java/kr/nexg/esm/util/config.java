@@ -23,4 +23,19 @@ public class config {
         }
     }
     
+    public static Object listToString(Object[] object) {
+        int cnt = 0;
+        StringBuilder result = new StringBuilder();
+        
+        for (Object el : object) {
+            if (cnt == 0) {
+                result.append(el);
+            } else {
+                result.append(",").append(el);
+            }
+            cnt++;
+        }
+
+        return result.toString();
+    }
 }

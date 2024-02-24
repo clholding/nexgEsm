@@ -9,5 +9,6 @@ public class DevicesVo
     private String id;
     private String type;
     private String auth;
-    private String mode;
+    private String deviceIDs;
+    private int mode;
 }

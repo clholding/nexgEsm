@@ -306,15 +306,18 @@ public class DevicesController {
     } 
     
     @PostMapping("/getDeviceGroupList")
-    public ResponseEntity<MessageVo> getDeviceGroupList() throws IOException  {
+    public ResponseEntity<MessageVo> getDeviceGroupList() throws IOException, ParseException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
+    	List<Map<String, Object>> list = devicesService.getDeviceGroupList();
+    	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.entitys("")
+    			.entitys(list)
+    			.totalCount(list.size())
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -337,16 +340,21 @@ public class DevicesController {
     	
     } 
     
+    /*
+     * 장비 리스트 정보 조회
+     */
     @PostMapping("/getDeviceInfoList")
-    public ResponseEntity<MessageVo> getDeviceInfoList() throws IOException  {
+    public ResponseEntity<MessageVo> getDeviceInfoList(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
+    	List<Map<String, Object>> list = devicesService.getDeviceInfoList(paramMap);
+    	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
     			.message("성공 코드")
-    			.entitys("")
+    			.entitys(list)
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -492,7 +500,7 @@ public class DevicesController {
     	
     	log.info("devicesVo : "+paramMap.get("datas"));
     	
-    	List<Map<String, String>> list = devicesService.getProductList(paramMap);
+    	List<Map<String, Object>> list = devicesService.getProductList(paramMap);
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
