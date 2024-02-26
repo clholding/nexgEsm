@@ -3,21 +3,29 @@ package kr.nexg.esm.default1.controller;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import kr.nexg.esm.common.StatusEnum;
 import kr.nexg.esm.common.dto.MessageVo;
+import kr.nexg.esm.jwt.dto.AuthVo;
+import kr.nexg.esm.jwt.dto.TokenVo;
+import kr.nexg.esm.jwt.service.AuthService;
 
 @RestController
 @RequestMapping("/default")
 public class DefaultController {
 
+	@Autowired
+	AuthService authService;
+	
 //    @PostMapping("/call")
 //    public ResponseEntity<MessageVo> call() throws IOException  {
 //    	
@@ -273,7 +281,7 @@ public class DefaultController {
 //    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
 //    	
 //    } 
-//    
+    
 //    @PostMapping("/logincheck")
 //    public ResponseEntity<MessageVo> logincheck() throws IOException  {
 //    	
@@ -289,7 +297,15 @@ public class DefaultController {
 //    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
 //    	
 //    } 
-//    
+    
+	@PostMapping("/logincheck")
+	public TokenVo login(@RequestBody AuthVo authVo) {
+
+		TokenVo tokenVo = authService.login(authVo);
+		
+		return tokenVo;
+	}
+	
 //    @PostMapping("/logout")
 //    public ResponseEntity<MessageVo> logout() throws IOException  {
 //    	

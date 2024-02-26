@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.nexg.esm.default1.mapper.DefaultMapper">
+
+	<select id="selectLogin" parameterType="String" resultType="kr.nexg.esm.jwt.dto.AuthVo">
+		/* DefaultMapper.selectLogin */	
+		select *
+		  from user
+		 where 1 = 1
+		 <if test="login neq '' and login != null">
+		   and login = #{login}
+		 </if>
+	</select>
+	
+</mapper>
