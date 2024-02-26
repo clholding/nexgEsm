@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="kr.nexg.esm.mapper.DevicesMapper">
+<mapper namespace="kr.nexg.esm.devices.mapper.DevicesMapper">
 
-	<select id="getDeviceGroupByLogin" parameterType="kr.nexg.esm.dto.DevicesVo" resultType="map">
+	<select id="getDeviceGroupByLogin" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.getDeviceGroupByLogin */	
 		CALL sesm.getDeviceGroupByLogin( #{id}, #{mode} );
 	</select>
-	<select id="getDeviceListByLogin" parameterType="kr.nexg.esm.dto.DevicesVo" resultType="map">
+	<select id="getDeviceListByLogin" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.getDeviceListByLogin */	
 		CALL sesm.getDeviceListByLogin( #{id}, '2', #{mode} );
 	</select>
@@ -20,12 +20,12 @@
 	</select>
 	
 	
-	<select id="getDeviceInfoList" parameterType="kr.nexg.esm.dto.DevicesVo" resultType="map">
+	<select id="getDeviceInfoList" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.getDeviceInfoList */	
 		CALL sesm.getDeviceInfoList( #{deviceIDs} );
 	</select>
 	
-	<select id="getProductList" parameterType="kr.nexg.esm.dto.DevicesVo" resultType="map">
+	<select id="getProductList" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.getProductList */	
 		CALL sesm.getProductList( #{type} );
 	</select>
