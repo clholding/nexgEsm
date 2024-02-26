@@ -38,7 +38,7 @@ public class DevicesController {
 
         MessageVo message = MessageVo.builder()
             	.status(StatusEnum.OK)
-            	.message("성공 코드")
+            	.message("")
             	.entitys("")
             	.build();
     	
@@ -54,7 +54,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -70,7 +70,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -86,7 +86,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -102,7 +102,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -118,7 +118,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -134,7 +134,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -150,7 +150,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -166,7 +166,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -184,9 +184,9 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys(list)
-//    			.totalCount(list.size())
+    			.totalCount(list.size())
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -201,7 +201,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -217,7 +217,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -233,7 +233,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -249,7 +249,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -258,15 +258,20 @@ public class DevicesController {
     } 
     
     @PostMapping("/getDeviceFailInfo")
-    public ResponseEntity<MessageVo> getDeviceFailInfo() throws IOException  {
+    public ResponseEntity<MessageVo> getDeviceFailInfo(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+
+    	log.info("devicesVo : "+paramMap.get("datas"));
+    	
+    	List<Map<String, Object>> list = devicesService.getDeviceFailInfo(paramMap);
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
-    			.entitys("")
+    			.message("")
+    			.entitys(list)
+    			.totalCount(list.size())
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -281,7 +286,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -290,15 +295,20 @@ public class DevicesController {
     } 
     
     @PostMapping("/getDeviceGroupInfo")
-    public ResponseEntity<MessageVo> getDeviceGroupInfo() throws IOException  {
+    public ResponseEntity<MessageVo> getDeviceGroupInfo(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
+    	log.info("devicesVo : "+paramMap.get("datas"));
+    	
+    	Map<String, Object> result = devicesService.getDeviceGroupInfo(paramMap);
+    	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
-    			.entitys("")
+    			.message("")
+    			.entitys(result)
+    			.totalCount(0)
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -315,7 +325,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys(list)
     			.totalCount(list.size())
     			.build();
@@ -324,16 +334,24 @@ public class DevicesController {
     	
     } 
     
+    /*
+     * 장비 정보 조회
+     */
     @PostMapping("/getDeviceInfo")
-    public ResponseEntity<MessageVo> getDeviceInfo() throws IOException  {
+    public ResponseEntity<MessageVo> getDeviceInfo(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
+    	log.info("devicesVo : "+paramMap.get("datas"));
+    	
+    	Map<String, Object> result = devicesService.getDeviceInfo(paramMap);
+    	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
-    			.entitys("")
+    			.message("")
+    			.entitys(result)
+    			.totalCount(0)
     			.build();
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -353,7 +371,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys(list)
     			.build();
     	
@@ -369,7 +387,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -385,7 +403,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -401,7 +419,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -417,7 +435,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -433,7 +451,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -449,7 +467,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -465,7 +483,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -481,7 +499,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -504,7 +522,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys(list)
     			.totalCount(list.size())
     			.build();
@@ -521,7 +539,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -537,7 +555,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -553,7 +571,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -569,7 +587,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -585,7 +603,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -601,7 +619,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -617,7 +635,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -633,7 +651,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -642,14 +660,19 @@ public class DevicesController {
     } 
     
     @PostMapping("/setFailMemo")
-    public ResponseEntity<MessageVo> setFailMemo() throws IOException  {
+    public ResponseEntity<MessageVo> setFailMemo(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
+    	log.info("devicesVo : "+paramMap.get("datas"));
+    	
+    	int result = devicesService.setFailMemo(paramMap);
+    	
+    	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("메모내용이 입력되었습니다.")
     			.entitys("")
     			.build();
     	
@@ -665,7 +688,7 @@ public class DevicesController {
     	
     	MessageVo message = MessageVo.builder()
     			.status(StatusEnum.OK)
-    			.message("성공 코드")
+    			.message("")
     			.entitys("")
     			.build();
     	
@@ -673,3 +696,4 @@ public class DevicesController {
     	
     } 
 }
+

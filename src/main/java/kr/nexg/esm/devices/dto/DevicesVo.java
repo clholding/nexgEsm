@@ -10,5 +10,7 @@ public class DevicesVo
     private String type;
     private String auth;
     private String deviceIDs;
+    private String memo;
+    private String failID;
     private int mode;
 }

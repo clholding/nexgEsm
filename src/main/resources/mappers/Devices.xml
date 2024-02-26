@@ -25,9 +25,29 @@
 		CALL sesm.getDeviceInfoList( #{deviceIDs} );
 	</select>
 	
+	<select id="getDeviceGroupInfo" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
+		/* DevicesMapper.getDeviceGroupInfo */	
+		CALL sesm.getDeviceGroupInfo( #{id} );
+	</select>
+	
+	<select id="getDeviceInfo" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
+		/* DevicesMapper.getDeviceInfo */	
+		CALL sesm.getDeviceInfo( #{id} );
+	</select>
+	
 	<select id="getProductList" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.getProductList */	
 		CALL sesm.getProductList( #{type} );
 	</select>
+	
+	<select id="getDeviceFailInfo" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
+		/* DevicesMapper.getDeviceFailInfo */	
+		Call sesm.getDeviceFailInfo( #{failID} );
+	</select>
+	
+	<update id="setFailMemo" parameterType="kr.nexg.esm.devices.dto.DevicesVo">
+		/* DevicesMapper.setFailMemo */	
+		Call sesm.setFailMemo( #{failID}, #{type}, #{id}, #{memo} );
+	</update>
 
 </mapper>
