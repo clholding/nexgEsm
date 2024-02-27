@@ -1,0 +1,11 @@
+======== getUserInfo ========
+CREATE DEFINER=`sesm`@`%` PROCEDURE `sesm`.`getUserInfo`(IN id INT)
+BEGIN
+  -- 관리자 상세 정보 및 설정 조회
+  SELECT user.id, user.name, user.login, user.pwd, user.group_id, user_group.name as user_group_name,
+    GROUP_CONCAT(dg.name) as dg_name, user.device_state, user.recent_fail_device, user.resource_top5, user.week_log_stats, user.week_fail_state, GROUP_CONCAT(dg.id) as dg_id, user.desc, user.def_mode, user.session_time, user.alarm, user.active, user.email, user.login_expire_date, user.login_active_lifetime, user.pwd_expire_cycle, user.device_id, user.device_sort, user.device_order, user.popup_time, user.allow_ip1, user.allow_ip2
+    FROM user LEFT JOIN user_group ON user.group_id = user_group.id
+    LEFT JOIN user_dgroup ud ON ud.user_id = user.id
+    LEFT JOIN device_group dg ON ud.device_group_id = dg.id
+    WHERE user.id = id;
+END
