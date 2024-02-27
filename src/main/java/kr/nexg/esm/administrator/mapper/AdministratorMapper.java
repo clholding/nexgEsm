@@ -14,5 +14,7 @@ public interface AdministratorMapper {
 	
 	public List<Map<String, Object>> getUserInfo(AdministratorVo vo);
 	
+	public List<Map<String, Object>> getUser(AdministratorVo vo);
+	
 	
 }

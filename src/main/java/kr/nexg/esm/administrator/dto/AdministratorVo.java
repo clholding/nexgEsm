@@ -1,8 +1,9 @@
 package kr.nexg.esm.administrator.dto;
 
+import kr.nexg.esm.common.dto.CommonVo;
 import lombok.Data;
 
 @Data
-public class AdministratorVo {
+public class AdministratorVo extends CommonVo {
     private String adminID;
 }

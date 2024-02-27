@@ -1,7 +1,7 @@
 package kr.nexg.esm.administrator.controller;
 
-import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import kr.nexg.esm.common.StatusEnum;
+import kr.nexg.esm.administrator.dto.AdministratorEnum;
 import kr.nexg.esm.administrator.dto.AdministratorVo;
-import kr.nexg.esm.common.dto.MessageVo;
 import kr.nexg.esm.administrator.service.AdministratorService;
+import kr.nexg.esm.common.dto.MessageVo;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -60,14 +60,14 @@ public class AdministratorController {
         try {
         	message = MessageVo.builder()
                 	.success("true")
-                	.message("성공 코드")
+                	.message("")
                 	.totalCount(totalCount)
                 	.entitys(list)
                 	.build();
 		} catch (Exception e) {
 			message = MessageVo.builder()
 	            	.success("false")
-	            	.message("에러 코드")
+	            	.message("")
 	            	.errMsg(e.getMessage())
 	            	.errTitle("")
 	            	.build();
@@ -94,14 +94,14 @@ public class AdministratorController {
         try {
         	message = MessageVo.builder()
                 	.success("true")
-                	.message("성공 코드")
+                	.message("")
                 	.totalCount(0)
                 	.entitys("")
                 	.build();
 		} catch (Exception e) {
 			message = MessageVo.builder()
 	            	.success("false")
-	            	.message("에러 코드")
+	            	.message("")
 	            	.errMsg(e.getMessage())
 	            	.errTitle("")
 	            	.build();

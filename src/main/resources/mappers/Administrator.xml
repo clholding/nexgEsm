@@ -6,5 +6,10 @@
 		/* AdministratorMapper.getUserInfo */	
 		CALL sesm.getUserInfo( #{adminID} );
 	</select>
+	
+	<select id="getUser" parameterType="kr.nexg.esm.administrator.dto.AdministratorVo" resultType="map">
+		/* AdministratorMapper.getUser */	
+		CALL sesm.getUser( #{adminID}, #{searchKeyword}, (#{pageIndex}-1)*#{pageSize}, #{pageSize} );
+	</select>
 
 </mapper>
