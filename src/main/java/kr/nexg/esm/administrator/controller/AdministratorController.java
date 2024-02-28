@@ -52,12 +52,13 @@ public class AdministratorController {
         	vo.setAdminID("1");
         }
         
-        List<Map<String, Object>> list = administratorService.getUserInfo(vo);
-        int totalCount = list.size();
-        
         MessageVo message;
         
         try {
+        	
+        	List<Map<String, Object>> list = administratorService.getUserInfo(vo);
+            int totalCount = list.size();
+        	
         	message = MessageVo.builder()
                 	.success("true")
                 	.message("")
@@ -92,11 +93,23 @@ public class AdministratorController {
         MessageVo message;
         
         try {
+        	
+        	List<Map<String, Object>> list = administratorService.getUser(vo);
+            
+            int totalCount = 0;
+            if(list.size() > 0) {
+            	totalCount = (int) list.get(0).get("totalCount");
+            }
+            
+            for (Map<String, Object> map : list) {
+                map.remove("totalCount");
+            }
+        	
         	message = MessageVo.builder()
                 	.success("true")
                 	.message("")
-                	.totalCount(0)
-                	.entitys("")
+                	.totalCount(totalCount)
+                	.entitys(list)
                 	.build();
 		} catch (Exception e) {
 			message = MessageVo.builder()

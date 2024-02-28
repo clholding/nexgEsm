@@ -1,4 +1,4 @@
-======== getUserInfo ========
+***** getUserInfo *****
 CREATE DEFINER=`sesm`@`%` PROCEDURE `sesm`.`getUserInfo`(IN id INT)
 BEGIN
   -- 관리자 상세 정보 및 설정 조회
@@ -8,4 +8,56 @@ BEGIN
     LEFT JOIN user_dgroup ud ON ud.user_id = user.id
     LEFT JOIN device_group dg ON ud.device_group_id = dg.id
     WHERE user.id = id;
+END
+
+
+***** getUser *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `sesm`.`getUser`(IN login VARCHAR(128),  IN searchText VARCHAR(128), IN skip VARCHAR(8), IN limits VARCHAR(8))
+BEGIN
+  -- 관리자 정보 및 권한 조회
+  DECLARE strLimit VARCHAR(32);
+  DECLARE strWhere VARCHAR(255);
+  DECLARE sel_user_id INT DEFAULT 0;
+  DECLARE result INT DEFAULT 0;
+  SET strWhere = "";
+  SET strLimit = "";
+
+  SELECT user_group.role1 INTO result
+    FROM user, user_group
+    WHERE user.group_id = user_group.id AND user.login = login;
+
+  SELECT user.id INTO sel_user_id
+     FROM user, user_group
+     WHERE user.group_id = user_group.id AND user.login = login;
+
+  SET @Total = (SELECT COUNT(*) FROM sesm.user);
+  IF searchText != "" THEN
+    SET strWhere = CONCAT("WHERE (user.name like '%", searchText, "%' OR user.login like '%", searchText, "%') ");
+    SET @Total = (SELECT COUNT(*) FROM sesm.user strWhere);
+  END IF;
+
+  -- 슈퍼관리자가 아닐 경우
+  IF result = 0 THEN
+    IF strWhere != "" THEN
+      SET strWhere = CONCAT(strWhere, "AND user.id = ", sel_user_id, " ");
+    ELSE
+      SET strWhere = CONCAT("WHERE user.id = ", sel_user_id, " ");
+    END IF;
+    SET @Total = (SELECT COUNT(*) FROM sesm.user strWhere);
+  END IF;
+
+  IF (NULLIF(skip, "") IS NOT NULL) AND (NULLIF(limits, "") IS NOT NULL) THEN
+    SET strLimit = CONCAT(strLimit, "LIMIT ", skip, ",", limits);
+  END IF;
+
+  set @query = CONCAT("SELECT user.id, user.login, user.name, user.group_id, user_group.name as user_group_name,
+    user.ip1, user.ip2, role1, role2, role3, role4, role5, role6, role7, role8, role9, role10, GROUP_CONCAT(dg.name) as dg_name, ", @Total ," as totalCount, user.def_mode , user.session_time, user.alarm, user.popup_time, GROUP_CONCAT(dg.id) as dg_id
+    FROM user LEFT JOIN user_group ON user.group_id = user_group.id
+    LEFT JOIN user_dgroup ud ON ud.user_id = user.id
+    LEFT JOIN device_group dg ON ud.device_group_id = dg.id ", strWhere, "GROUP BY user.id ORDER BY user.id ASC ", strLimit);
+
+  PREPARE stmt FROM @query;
+  EXECUTE stmt;
+  DEALLOCATE PREPARE stmt;
+
 END
