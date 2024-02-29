@@ -16,5 +16,7 @@ public interface AdministratorMapper {
 	
 	public List<Map<String, Object>> getUser(AdministratorVo vo);
 	
+	public int delUser(String adminIds);
+	
 	
 }

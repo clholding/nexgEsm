@@ -1,18 +1,25 @@
 package kr.nexg.esm.administrator.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import kr.nexg.esm.administrator.dto.AdministratorEnum;
 import kr.nexg.esm.administrator.dto.AdministratorVo;
 import kr.nexg.esm.administrator.mapper.AdministratorMapper;
+import kr.nexg.esm.common.util.ClientIpUtil;
 import kr.nexg.esm.common.util.EnumUtil;
 import kr.nexg.esm.nexgesm.mariadb.Log;
+import kr.nexg.esm.nexgesm.mariadb.User;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -23,7 +30,7 @@ public class AdministratorService {
 	AdministratorMapper administratorMapper;
 	
 	@Autowired
-	Log.EsmAuditLog esmAuditLog;
+	User.User1 user;
 	
 	public List<Map<String, Object>> getUserInfo(AdministratorVo vo) {
 		List<Map<String, Object>> list = administratorMapper.getUserInfo(vo);
@@ -67,8 +74,6 @@ public class AdministratorService {
 	}
 	
 	public List<Map<String, Object>> getUser(AdministratorVo vo) {
-		String sessionId = "admin";
-		vo.setSessionId(sessionId);
 		
 		List<Map<String, Object>> list = administratorMapper.getUser(vo);
 		List<Map<String, Object>> result = new ArrayList<>();
@@ -129,9 +134,18 @@ public class AdministratorService {
 		return result;
 	}
 	
-	public void delUser(AdministratorVo vo) {
-		esmAuditLog.esmlog(6, "admin", "127.0.0.1", "Logout");
+	public List<String> delUser( AdministratorVo vo) {
+		List<String> admin_names = new ArrayList<>();
+		if(vo.getAdminIDs().size() > 0) {
+			for(String id : vo.getAdminIDs()) {
+				List<Map<String, Object>> list = user.get_user_info(id);
+				admin_names.add((String) list.get(0).get("login"));
+			}
+		}
 		
+		String adminIds = String.join(",", vo.getAdminIDs());
+		administratorMapper.delUser(adminIds);
+		return admin_names;
 	}
 	
 	

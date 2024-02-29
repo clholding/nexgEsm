@@ -11,5 +11,10 @@
 		/* AdministratorMapper.getUser */	
 		CALL sesm.getUser( #{sessionId}, #{searchKeyword}, (#{pageIndex}-1)*#{pageSize}, #{pageSize} );
 	</select>
+	
+	<delete id="delUser" parameterType="String">
+		/* AdministratorMapper.delUser */	
+		CALL sesm.delUser( #{adminIds} );
+	</delete>
 
 </mapper>

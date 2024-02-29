@@ -21,7 +21,7 @@ public class Log {
 			Map<String, Object> map = new HashMap<String, Object>();
 			map.put("level", level);
 			map.put("user", user);
-			map.put("user", user);
+			map.put("host", host);
 			map.put("action", action);
 			logMapper.addAuditLog(map);
 		}

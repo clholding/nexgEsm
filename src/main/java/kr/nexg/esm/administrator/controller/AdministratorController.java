@@ -2,14 +2,21 @@ package kr.nexg.esm.administrator.controller;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +26,8 @@ import kr.nexg.esm.administrator.dto.AdministratorEnum;
 import kr.nexg.esm.administrator.dto.AdministratorVo;
 import kr.nexg.esm.administrator.service.AdministratorService;
 import kr.nexg.esm.common.dto.MessageVo;
+import kr.nexg.esm.common.util.ClientIpUtil;
+import kr.nexg.esm.nexgesm.mariadb.Log;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -34,6 +43,9 @@ public class AdministratorController {
 	
 	@Autowired
 	AdministratorService administratorService;
+	
+	@Autowired
+	Log.EsmAuditLog esmAuditLog;
 
 	/**
 	* 관리자정보 조회
@@ -87,6 +99,13 @@ public class AdministratorController {
 	*/
 	@PostMapping("/getUser")
     public ResponseEntity<MessageVo> getUser(@RequestBody AdministratorVo vo) {
+		
+		SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        
+        String sessionId = authentication.getName();
+		vo.setSessionId(sessionId);
     	
     	HttpHeaders headers= new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -133,22 +152,31 @@ public class AdministratorController {
 	* @ exception 예외사항
 	*/
 	@PostMapping("/delUser")
-    public ResponseEntity<MessageVo> delUser(@RequestBody AdministratorVo vo) {
-    	
+    public ResponseEntity<MessageVo> delUser(HttpServletRequest request, @RequestBody AdministratorVo vo) {
+
+		SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        
+        String sessionId = authentication.getName();
+        String clientIp = ClientIpUtil.getClientIP(request);
+		
     	HttpHeaders headers= new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
         
         MessageVo message;
         
         try {
-        	administratorService.delUser(vo);
+        	List<String> admin_names = administratorService.delUser(vo);
+        	String arr = String.join(",", admin_names);
         	
         	message = MessageVo.builder()
                 	.success("true")
                 	.message("")
-                	.totalCount(0)
                 	.entitys("")
                 	.build();
+        	
+        	esmAuditLog.esmlog(6, sessionId, clientIp, String.format("[설정/관리자] 관리자 삭제가 성공하였습니다. (id=%s)", arr));
 		} catch (Exception e) {
 			log.error("Error : ", e);
 			message = MessageVo.builder()
@@ -157,6 +185,8 @@ public class AdministratorController {
 	            	.errMsg(e.getMessage())
 	            	.errTitle("")
 	            	.build();
+			
+			esmAuditLog.esmlog(4, sessionId, clientIp, "[설정/관리자] 관리자 삭제에 실패했습니다.");
 		}
     	
         return new ResponseEntity<>(message, headers, HttpStatus.OK);
