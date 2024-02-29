@@ -122,4 +122,40 @@ public class AdministratorController {
     	
         return new ResponseEntity<>(message, headers, HttpStatus.OK);
     }
+	
+	/**
+	* 관리자정보 삭제
+	* 
+	* @ param AdministratorVo
+	* @ return 없음
+	* @ exception 예외사항
+	*/
+	@PostMapping("/delUser")
+    public ResponseEntity<MessageVo> delUser(@RequestBody AdministratorVo vo) {
+    	
+    	HttpHeaders headers= new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+        
+        MessageVo message;
+        
+        try {
+        	administratorService.delUser(vo);
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("")
+                	.totalCount(0)
+                	.entitys("")
+                	.build();
+		} catch (Exception e) {
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}
+    	
+        return new ResponseEntity<>(message, headers, HttpStatus.OK);
+    }
 }

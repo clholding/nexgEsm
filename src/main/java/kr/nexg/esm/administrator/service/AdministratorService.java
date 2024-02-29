@@ -12,6 +12,7 @@ import kr.nexg.esm.administrator.dto.AdministratorEnum;
 import kr.nexg.esm.administrator.dto.AdministratorVo;
 import kr.nexg.esm.administrator.mapper.AdministratorMapper;
 import kr.nexg.esm.common.util.EnumUtil;
+import kr.nexg.esm.nexgesm.mariadb.Log;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -20,6 +21,9 @@ public class AdministratorService {
 	
 	@Autowired
 	AdministratorMapper administratorMapper;
+	
+	@Autowired
+	Log.EsmAuditLog esmAuditLog;
 	
 	public List<Map<String, Object>> getUserInfo(AdministratorVo vo) {
 		List<Map<String, Object>> list = administratorMapper.getUserInfo(vo);
@@ -123,6 +127,11 @@ public class AdministratorService {
 		}
 		
 		return result;
+	}
+	
+	public void delUser(AdministratorVo vo) {
+		esmAuditLog.esmlog(6, "admin", "127.0.0.1", "Logout");
+		
 	}
 	
 	
