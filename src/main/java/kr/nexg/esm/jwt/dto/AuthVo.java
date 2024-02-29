@@ -36,18 +36,18 @@ public class AuthVo implements UserDetails {
     private String cdate;
     private String udate;
     private String ldate;
-    private String adminRole;
+    private String groupId;
  
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         ArrayList<GrantedAuthority> auth = new ArrayList<GrantedAuthority>();
-        auth.add(new SimpleGrantedAuthority(adminRole));
+        auth.add(new SimpleGrantedAuthority(groupId));
         return auth;
     }
     
     @Override
     public String getUsername() {
-        return login;
+    	return login;
     }
  
     @Override

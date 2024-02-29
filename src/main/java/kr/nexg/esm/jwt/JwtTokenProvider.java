@@ -69,8 +69,8 @@ public class JwtTokenProvider {
                 .grantType("Bearer")
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .tAdminId(authentication.getName())
-//                .tAdminNm(adminVo.getAdminNm())
+//                .tAdminId(authentication.getName())
+//                .tAdminNm(authentication.getAuthorities())
                 .build();
     }
  

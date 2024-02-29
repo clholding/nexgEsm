@@ -3,6 +3,7 @@ package kr.nexg.esm.devices.service;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -11,6 +12,10 @@ import java.util.Map;
 
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -31,6 +36,10 @@ public class DevicesService {
 	
 	public List<Map<String, Object>> deviceAll(Map<String,String> paramMap) throws IOException, ParseException{
 		
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        
     	String datas = paramMap.get("datas");
     	String mode = paramMap.get("mode");
     	
@@ -71,7 +80,7 @@ public class DevicesService {
             group_list = new ArrayList<>();
             
             DevicesVo devicesVo = new DevicesVo();
-            devicesVo.setId("admin");
+            devicesVo.setId(authentication.getName());
             devicesVo.setMode(modeValue);
             
             List<Map<String, Object>> temp = devicesMapper.getDeviceGroupByLogin(devicesVo);
