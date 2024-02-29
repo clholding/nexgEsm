@@ -66,6 +66,7 @@ public class AdministratorController {
                 	.entitys(list)
                 	.build();
 		} catch (Exception e) {
+			log.error("Error : ", e);
 			message = MessageVo.builder()
 	            	.success("false")
 	            	.message("")
@@ -112,6 +113,7 @@ public class AdministratorController {
                 	.entitys(list)
                 	.build();
 		} catch (Exception e) {
+			log.error("Error : ", e);
 			message = MessageVo.builder()
 	            	.success("false")
 	            	.message("")
@@ -148,6 +150,7 @@ public class AdministratorController {
                 	.entitys("")
                 	.build();
 		} catch (Exception e) {
+			log.error("Error : ", e);
 			message = MessageVo.builder()
 	            	.success("false")
 	            	.message("")
