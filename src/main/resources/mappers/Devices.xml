@@ -45,6 +45,16 @@
 		Call sesm.getDeviceFailInfo( #{failID} );
 	</select>
 	
+	<select id="getGroupToDeviceListByLogin" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="String">
+		/* DevicesMapper.getGroupToDeviceListByLogin */	
+		Call sesm.getGroupToDeviceListByLogin( #{groupID}, #{id}, #{mode} );
+	</select>
+	
+	<select id="searchDeviceInfoList" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
+		/* DevicesMapper.searchDeviceInfoList */	
+		Call sesm.searchDeviceInfoList( #{deviceIDs}, #{productId}, #{dname}, #{gname}, #{ip}, #{serial}, #{os}, #{agent}, #{desc}, #{company}, #{phone1}, #{fax}, #{zip}, #{address}, #{customer}, #{phone2}, #{email}, #{page}, #{viewCount} );
+	</select>
+	
 	<update id="setFailMemo" parameterType="kr.nexg.esm.devices.dto.DevicesVo">
 		/* DevicesMapper.setFailMemo */	
 		Call sesm.setFailMemo( #{failID}, #{type}, #{id}, #{memo} );

@@ -36,10 +36,6 @@ public class DevicesService {
 	
 	public List<Map<String, Object>> deviceAll(Map<String,String> paramMap) throws IOException, ParseException{
 		
-        SecurityContext context = SecurityContextHolder.getContext();
-        Authentication authentication = context.getAuthentication();
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        
     	String datas = paramMap.get("datas");
     	String mode = paramMap.get("mode");
     	
@@ -78,6 +74,10 @@ public class DevicesService {
             }
 
             group_list = new ArrayList<>();
+            
+            SecurityContext context = SecurityContextHolder.getContext();
+            Authentication authentication = context.getAuthentication();
+//            Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
             
             DevicesVo devicesVo = new DevicesVo();
             devicesVo.setId(authentication.getName());
@@ -313,6 +313,107 @@ public class DevicesService {
 		
 		return devicesMapper.getDeviceFailInfo(devicesVo);
 	}
+	
+	/*
+	 * 장비 리스트 조건 검색
+	 */
+	public List<Map<String, Object>> searchDeviceInfoList(Map<String,String> paramMap) throws IOException, ParseException{
+		
+		String rsMode = paramMap.get("mode");
+		String datas = paramMap.get("datas");
+		
+		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
+		String rsGroupID = (String)config.setValue(rsDatas, "groupID", "");
+		log.info("rsGroupID : "+rsGroupID);
+
+		String rsDeviceIDs = "";
+		int mode = 0;
+		
+		if("".equals(rsGroupID)) {
+	        ObjectMapper objectMapper = new ObjectMapper();
+	        JsonNode jsonNode = objectMapper.readTree(datas);
+	        JsonNode deviceIDsNode = jsonNode.get("deviceIDs");
+	        
+	        StringBuilder deviceIDs = new StringBuilder();
+	        if (deviceIDsNode != null && deviceIDsNode.isArray()) {
+	        	int i = 0;
+	            for (JsonNode idNode : deviceIDsNode) {
+	                String idValue = idNode.asText();
+	                if(i == 0) {
+	                	deviceIDs.append(idValue);
+	                }else {
+	                	deviceIDs.append(","+idValue);
+	                }
+	                
+	                i++;
+	            }
+	        }
+	        
+	        rsDeviceIDs = deviceIDsNode.toString().replace("\"", "");
+	        rsDeviceIDs = rsDeviceIDs.replace("[", "").replace("]", "");
+	        log.info("deviceIDsNode : "+deviceIDsNode.toString());
+			
+		}else {
+			
+	        SecurityContext context = SecurityContextHolder.getContext();
+	        Authentication authentication = context.getAuthentication();
+//	        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+	        
+			mode = mode_convert.convert_modedata(rsMode);
+			
+			DevicesVo devicesVo = new DevicesVo();
+			devicesVo.setGroupID(Integer.parseInt(rsGroupID));
+			devicesVo.setId(authentication.getName());
+			devicesVo.setMode(mode);
+			rsDeviceIDs = devicesMapper.getGroupToDeviceListByLogin(devicesVo);
+		}
+		
+	    String rsDname 		= (String)config.setValue(rsDatas, "dn", "");  				// 장비이름
+	    String rsGname 		= (String)config.setValue(rsDatas, "gn", "");  				// 그룹이름
+	    String rsProductId  = (String)config.setValue(rsDatas, "product_id", null);     // 제품id
+	    String rsIp 		= (String)config.setValue(rsDatas, "ip", "");  				// 장비ip
+	    String rsSerial 	= (String)config.setValue(rsDatas, "serial", "");  		    // 시리얼
+	    String rsOs 		= (String)config.setValue(rsDatas, "os", "");  				// 장비os
+	    String rsAgent 		= (String)config.setValue(rsDatas, "agent", "");  			// agent 버전
+	    String rsDesc 		= (String)config.setValue(rsDatas, "desc", "");  			// 장비설명
+	    String rsCompany	= (String)config.setValue(rsDatas, "company", "");  		// 고객사
+	    String rsPhone1 	= (String)config.setValue(rsDatas, "phone1", "");  		    // 전화1
+	    String rsFax 		= (String)config.setValue(rsDatas, "fax", "");  			// fax
+	    String rsZip 		= (String)config.setValue(rsDatas, "zip", "");  			// 우편번호
+	    String rsAddress 	= (String)config.setValue(rsDatas, "address", "");  		// 주소
+	    String rsCustomer 	= (String)config.setValue(rsDatas, "customer", "");  		// 고객이름
+	    String rsPhone2 	= (String)config.setValue(rsDatas, "phone2", "");  			// 전화2
+	    String rsEmail 		= (String)config.setValue(rsDatas, "email", "");  			// 이메일
+		
+	    int rsPage 			= Integer.valueOf((String) config.setValue(rsDatas, "page", "1"));
+		int rsViewCount 	= Integer.valueOf((String) config.setValue(rsDatas, "viewCount", "25"));
+	    rsPage 				= ((rsPage) - 1) * ((rsViewCount));
+	    	    
+		DevicesVo devicesVo = new DevicesVo();
+		devicesVo.setDeviceIDs(rsDeviceIDs);
+		devicesVo.setDname(rsDname);
+		devicesVo.setGname(rsGname);
+		devicesVo.setProductId(rsProductId);
+		devicesVo.setIp(rsIp);
+		devicesVo.setSerial(rsSerial);
+		devicesVo.setOs(rsOs);
+		devicesVo.setAgent(rsAgent);
+		devicesVo.setDesc(rsDesc);
+		devicesVo.setCompany(rsCompany);
+		devicesVo.setPhone1(rsPhone1);
+		devicesVo.setFax(rsFax);
+		devicesVo.setZip(rsZip);
+		devicesVo.setAddress(rsAddress);
+		devicesVo.setCustomer(rsCustomer);
+		devicesVo.setPhone2(rsPhone2);
+		devicesVo.setEmail(rsEmail);
+		devicesVo.setPage(String.valueOf(rsPage));
+		devicesVo.setViewCount(String.valueOf(rsViewCount));
+		
+		return devicesMapper.searchDeviceInfoList(devicesVo);
+	}
+	
+	
 	
 	/*
 	 * 메모내용 수정

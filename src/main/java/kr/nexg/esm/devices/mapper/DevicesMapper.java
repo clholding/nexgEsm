@@ -26,6 +26,10 @@ public interface DevicesMapper {
 	
 	public List<Map<String, Object>> getDeviceFailInfo(DevicesVo devicesVo);
 	
+	public String getGroupToDeviceListByLogin(DevicesVo devicesVo);
+	
+	public List<Map<String, Object>> searchDeviceInfoList(DevicesVo devicesVo);
+	
 	public int setFailMemo(DevicesVo devicesVo);
 	
 }

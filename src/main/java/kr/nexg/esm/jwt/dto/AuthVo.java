@@ -36,7 +36,27 @@ public class AuthVo implements UserDetails {
     private String cdate;
     private String udate;
     private String ldate;
+    private String loginExpireDate;
+    private String pwdExpireDate;
+    private String loginActiveLifetime;
+    private String pwdExpireCycle;
+    private String failcount;
     private String groupId;
+    private String ip1;
+    private String ip2;
+    private String deviceState;
+    private String recentFailDevice;
+    private String resourceTop5;
+    private String weekLogStats;
+    private String weekFailState;
+    private String deviceSort;
+    private String deviceOrder;
+    private String status;
+    private String logout;
+    private String hbtime;
+    private String monitoringIntergrated;
+    private String allowIp1;
+    private String allowIp2;
  
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

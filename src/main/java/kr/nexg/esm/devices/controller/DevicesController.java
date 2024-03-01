@@ -180,14 +180,28 @@ public class DevicesController {
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
-    	List<Map<String, Object>> list = devicesService.deviceAll(paramMap);
-    	
-    	MessageVo message = MessageVo.builder()
-    			.status(StatusEnum.OK)
-    			.message("")
-    			.entitys(list)
-    			.totalCount(list.size())
-    			.build();
+        MessageVo message;
+        
+        try {
+        	
+        	List<Map<String, Object>> list = devicesService.deviceAll(paramMap);
+            int totalCount = list.size();
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("")
+                	.totalCount(totalCount)
+                	.entitys(list)
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}    	
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
     	
@@ -265,14 +279,28 @@ public class DevicesController {
 
     	log.info("devicesVo : "+paramMap.get("datas"));
     	
-    	List<Map<String, Object>> list = devicesService.getDeviceFailInfo(paramMap);
-    	
-    	MessageVo message = MessageVo.builder()
-    			.status(StatusEnum.OK)
-    			.message("")
-    			.entitys(list)
-    			.totalCount(list.size())
-    			.build();
+        MessageVo message;
+        
+        try {
+        	
+        	List<Map<String, Object>> list = devicesService.getDeviceFailInfo(paramMap);
+            int totalCount = list.size();
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("")
+                	.totalCount(totalCount)
+                	.entitys(list)
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}    	
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
     	
@@ -302,14 +330,28 @@ public class DevicesController {
     	
     	log.info("devicesVo : "+paramMap.get("datas"));
     	
-    	Map<String, Object> result = devicesService.getDeviceGroupInfo(paramMap);
-    	
-    	MessageVo message = MessageVo.builder()
-    			.status(StatusEnum.OK)
-    			.message("")
-    			.entitys(result)
-    			.totalCount(0)
-    			.build();
+        MessageVo message;
+        
+        try {
+        	
+        	Map<String, Object> result = devicesService.getDeviceGroupInfo(paramMap);
+            int totalCount = 0;
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("")
+                	.totalCount(totalCount)
+                	.entitys(result)
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}    	    	
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
     	
@@ -321,15 +363,29 @@ public class DevicesController {
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
-    	List<Map<String, Object>> list = devicesService.getDeviceGroupList();
-    	
-    	MessageVo message = MessageVo.builder()
-    			.status(StatusEnum.OK)
-    			.message("")
-    			.entitys(list)
-    			.totalCount(list.size())
-    			.build();
-    	
+        MessageVo message;
+        
+        try {
+        	
+        	List<Map<String, Object>> list = devicesService.getDeviceGroupList();
+            int totalCount = list.size();
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("")
+                	.totalCount(totalCount)
+                	.entitys(list)
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}    	
+        
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
     	
     } 
@@ -345,14 +401,28 @@ public class DevicesController {
     	
     	log.info("devicesVo : "+paramMap.get("datas"));
     	
-    	Map<String, Object> result = devicesService.getDeviceInfo(paramMap);
-    	
-    	MessageVo message = MessageVo.builder()
-    			.status(StatusEnum.OK)
-    			.message("")
-    			.entitys(result)
-    			.totalCount(0)
-    			.build();
+        MessageVo message;
+        
+        try {
+        	
+        	Map<String, Object> result = devicesService.getDeviceInfo(paramMap);
+            int totalCount = 0;
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("")
+                	.totalCount(totalCount)
+                	.entitys(result)
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}     	
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
     	
@@ -367,13 +437,28 @@ public class DevicesController {
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
-    	List<Map<String, Object>> list = devicesService.getDeviceInfoList(paramMap);
-    	
-    	MessageVo message = MessageVo.builder()
-    			.status(StatusEnum.OK)
-    			.message("")
-    			.entitys(list)
-    			.build();
+        MessageVo message;
+        
+        try {
+        	
+        	List<Map<String, Object>> list = devicesService.getDeviceInfoList(paramMap);
+            int totalCount = list.size();
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("")
+                	.totalCount(totalCount)
+                	.entitys(list)
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}    	    	
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
     	
@@ -518,14 +603,28 @@ public class DevicesController {
     	
     	log.info("devicesVo : "+paramMap.get("datas"));
     	
-    	List<Map<String, Object>> list = devicesService.getProductList(paramMap);
-    	
-    	MessageVo message = MessageVo.builder()
-    			.status(StatusEnum.OK)
-    			.message("")
-    			.entitys(list)
-    			.totalCount(list.size())
-    			.build();
+        MessageVo message;
+        
+        try {
+        	
+        	List<Map<String, Object>> list = devicesService.getProductList(paramMap);
+            int totalCount = list.size();
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("")
+                	.totalCount(totalCount)
+                	.entitys(list)
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}    	    	
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
     	
@@ -563,17 +662,39 @@ public class DevicesController {
     	
     } 
     
+	/*
+	 * 장비 리스트 조건 검색
+	 */
     @PostMapping("/searchDeviceInfoList")
-    public ResponseEntity<MessageVo> searchDeviceInfoList() throws IOException  {
+    public ResponseEntity<MessageVo> searchDeviceInfoList(@RequestParam Map<String,String> paramMap) throws IOException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
-    	MessageVo message = MessageVo.builder()
-    			.status(StatusEnum.OK)
-    			.message("")
-    			.entitys("")
-    			.build();
+    	log.info("devicesVo : "+paramMap.get("datas"));
+    	
+        MessageVo message;
+        
+        try {
+        	
+        	List<Map<String, Object>> list = devicesService.searchDeviceInfoList(paramMap);
+            int totalCount = list.size();
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("")
+                	.totalCount(totalCount)
+                	.entitys(list)
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		} 
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
     	
@@ -667,15 +788,29 @@ public class DevicesController {
     	
     	log.info("devicesVo : "+paramMap.get("datas"));
     	
-    	int result = devicesService.setFailMemo(paramMap);
-    	
-    	
-    	MessageVo message = MessageVo.builder()
-    			.status(StatusEnum.OK)
-    			.message("메모내용이 입력되었습니다.")
-    			.entitys("")
-    			.build();
-    	
+        MessageVo message;
+        
+        try {
+        	
+        	int result = devicesService.setFailMemo(paramMap);
+//            int totalCount = 0;
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("메모내용이 입력되었습니다.")
+//                	.totalCount(totalCount)
+                	.entitys(result)
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}    	
+        
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
     	
     } 
