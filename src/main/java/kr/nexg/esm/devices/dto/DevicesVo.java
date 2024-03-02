@@ -6,8 +6,13 @@ import lombok.Data;
 @Data
 public class DevicesVo
 {
-    private String id;
+    private String sessionId;
     private String type;
+    private String gp;
+    private String code1;
+    private String code2;
+    private String memo1;
+    private String memo2;
     private String auth;
     private String deviceIDs;
     private String memo;
@@ -16,6 +21,7 @@ public class DevicesVo
     private String productId;
     private String dname;
     private String gname;
+    private String name;
     private String ip;
     private String serial;
     private String os;

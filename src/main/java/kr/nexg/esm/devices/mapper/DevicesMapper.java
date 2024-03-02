@@ -30,6 +30,10 @@ public interface DevicesMapper {
 	
 	public List<Map<String, Object>> searchDeviceInfoList(DevicesVo devicesVo);
 	
+	public int deviceGroupCnt(DevicesVo devicesVo);
+	
+	public Map<String, Object> setDeviceGroupInfo(DevicesVo devicesVo);
+	
 	public int setFailMemo(DevicesVo devicesVo);
 	
 }

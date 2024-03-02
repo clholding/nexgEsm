@@ -4,11 +4,11 @@
 
 	<select id="getDeviceGroupByLogin" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.getDeviceGroupByLogin */	
-		CALL sesm.getDeviceGroupByLogin( #{id}, #{mode} );
+		CALL sesm.getDeviceGroupByLogin( #{sessionId}, #{mode} );
 	</select>
 	<select id="getDeviceListByLogin" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.getDeviceListByLogin */	
-		CALL sesm.getDeviceListByLogin( #{id}, '2', #{mode} );
+		CALL sesm.getDeviceListByLogin( #{sessionId}, '2', #{mode} );
 	</select>
 	<select id="getDeviceGroup" resultType="map">
 		/* DevicesMapper.getDeviceGroup */	
@@ -27,12 +27,12 @@
 	
 	<select id="getDeviceGroupInfo" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.getDeviceGroupInfo */	
-		CALL sesm.getDeviceGroupInfo( #{id} );
+		CALL sesm.getDeviceGroupInfo( #{sessionId} );
 	</select>
 	
 	<select id="getDeviceInfo" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.getDeviceInfo */	
-		CALL sesm.getDeviceInfo( #{id} );
+		CALL sesm.getDeviceInfo( #{sessionId} );
 	</select>
 	
 	<select id="getProductList" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
@@ -47,7 +47,7 @@
 	
 	<select id="getGroupToDeviceListByLogin" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="String">
 		/* DevicesMapper.getGroupToDeviceListByLogin */	
-		Call sesm.getGroupToDeviceListByLogin( #{groupID}, #{id}, #{mode} );
+		Call sesm.getGroupToDeviceListByLogin( #{groupID}, #{sessionId}, #{mode} );
 	</select>
 	
 	<select id="searchDeviceInfoList" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
@@ -55,9 +55,19 @@
 		Call sesm.searchDeviceInfoList( #{deviceIDs}, #{productId}, #{dname}, #{gname}, #{ip}, #{serial}, #{os}, #{agent}, #{desc}, #{company}, #{phone1}, #{fax}, #{zip}, #{address}, #{customer}, #{phone2}, #{email}, #{page}, #{viewCount} );
 	</select>
 	
+	<select id="deviceGroupCnt" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="int">
+		/* DevicesMapper.deviceGroupCnt */	
+		SELECT count(1) cnt FROM device_group WHERE name = #{name}
+	</select>
+	
+	<select id="setDeviceGroupInfo" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
+		/* DevicesMapper.setDeviceGroupInfo */	
+		Call sesm.setDeviceGroupInfo( #{groupID}, #{name}, #{desc}, #{gp}, #{sessionId}, #{code1}, #{code2}, #{company}, #{customer}, #{email}, #{zip}, #{address}, #{phone1}, #{phone2}, #{fax}, #{memo1}, #{memo2} );
+	</select>
+	
 	<update id="setFailMemo" parameterType="kr.nexg.esm.devices.dto.DevicesVo">
 		/* DevicesMapper.setFailMemo */	
-		Call sesm.setFailMemo( #{failID}, #{type}, #{id}, #{memo} );
+		Call sesm.setFailMemo( #{failID}, #{type}, #{sessionId}, #{memo} );
 	</update>
 
 </mapper>

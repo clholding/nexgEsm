@@ -1,10 +1,7 @@
 package kr.nexg.esm.devices.service;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -13,7 +10,6 @@ import java.util.Map;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -80,7 +76,7 @@ public class DevicesService {
 //            Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
             
             DevicesVo devicesVo = new DevicesVo();
-            devicesVo.setId(authentication.getName());
+            devicesVo.setSessionId(authentication.getName());
             devicesVo.setMode(modeValue);
             
             List<Map<String, Object>> temp = devicesMapper.getDeviceGroupByLogin(devicesVo);
@@ -139,7 +135,7 @@ public class DevicesService {
         
         Map<String, Object> groupMap = new LinkedHashMap<>();
         groupMap.put("text", group_list.get(0).get("name"));
-        groupMap.put("state", group_list.get(0).get("1"));
+//        groupMap.put("state", group_list.get(0).get("state"));
         groupMap.put("id", group_list.get(0).get("id"));
 
         List<Map<String, Object>> children = loadChildGroup(group_list, dev_list);
@@ -159,8 +155,12 @@ public class DevicesService {
         		
         		log.info(""+group.get("id"));
 	            Map<String, Object> groupMap = new LinkedHashMap<>();
+	            groupMap.put("code1", group.get("code1"));
+	            groupMap.put("state", group.get("state"));
+	            groupMap.put("fail", group.get("fail"));
 	            groupMap.put("text", group.get("name"));
-	            groupMap.put("state", group.get("1"));
+	            groupMap.put("code2", group.get("code2"));
+	            groupMap.put("total", group.get("total"));
 	            groupMap.put("id", group.get("id"));
 	
 	            List<Map<String, Object>> children = loadChildDevice(devList, (int) group.get("id"));
@@ -180,10 +180,10 @@ public class DevicesService {
             if (dev.get("group_id").equals(groupId)) {
                 Map<String, Object> devMap = new LinkedHashMap<>();
                 devMap.put("id", dev.get("id"));
-                devMap.put("leaf", dev.get("true"));
-                devMap.put("text", dev.get("name"));
+                devMap.put("leaf", dev.get("leaf"));
+                devMap.put("text", dev.get("text"));
                 devMap.put("ip", dev.get("ip"));
-                devMap.put("state", 1);
+                devMap.put("state", dev.get("state"));
                 devMap.put("serial", dev.get("serial"));
                 devMap.put("registerDate", dev.get("cdate"));
                 devMap.put("active", dev.get("active"));
@@ -192,11 +192,15 @@ public class DevicesService {
                 devMap.put("code1", dev.get("code1"));
                 devMap.put("code2", dev.get("code2"));
                 devMap.put("os", dev.get("os"));
+                devMap.put("vrrps", dev.get("vrrps"));
+                devMap.put("intfs", dev.get("intfs"));
+                devMap.put("intlist", dev.get("intlist"));
+                devMap.put("eixs", dev.get("eixs"));
             	
 //                List<Map<String, Object>> emptyChildren = new ArrayList<>();
 //                devMap.put("children", emptyChildren);  // Dev nodes don't have further children
 
-                children.add(dev);
+                children.add(devMap);
             }
         }
 
@@ -222,7 +226,7 @@ public class DevicesService {
 		log.info("id : "+id);
 		
 		DevicesVo devicesVo = new DevicesVo();
-		devicesVo.setId(id);		
+		devicesVo.setSessionId(id);		
 		
 		return devicesMapper.getDeviceGroupInfo(devicesVo);
 	}
@@ -240,7 +244,7 @@ public class DevicesService {
         log.info("id : "+id);
 
         DevicesVo devicesVo = new DevicesVo();
-        devicesVo.setId(id);		
+        devicesVo.setSessionId(id);		
         
 		return devicesMapper.getDeviceInfo(devicesVo);
 	}
@@ -258,16 +262,11 @@ public class DevicesService {
         
         StringBuilder deviceIDs = new StringBuilder();
         if (deviceIDsNode != null && deviceIDsNode.isArray()) {
-        	int i = 0;
             for (JsonNode idNode : deviceIDsNode) {
-                String idValue = idNode.get("id").asText();
-                if(i == 0) {
-                	deviceIDs.append(idValue);
-                }else {
-                	deviceIDs.append(","+idValue);
+                if (deviceIDs.length() > 0) {
+                    deviceIDs.append(',');
                 }
-                
-                i++;
+                deviceIDs.append(idNode.get("id").asText());
             }
         }
 		DevicesVo devicesVo = new DevicesVo();
@@ -336,16 +335,11 @@ public class DevicesService {
 	        
 	        StringBuilder deviceIDs = new StringBuilder();
 	        if (deviceIDsNode != null && deviceIDsNode.isArray()) {
-	        	int i = 0;
 	            for (JsonNode idNode : deviceIDsNode) {
-	                String idValue = idNode.asText();
-	                if(i == 0) {
-	                	deviceIDs.append(idValue);
-	                }else {
-	                	deviceIDs.append(","+idValue);
+	                if (deviceIDs.length() > 0) {
+	                    deviceIDs.append(',');
 	                }
-	                
-	                i++;
+	                deviceIDs.append(idNode.asText());
 	            }
 	        }
 	        
@@ -363,7 +357,7 @@ public class DevicesService {
 			
 			DevicesVo devicesVo = new DevicesVo();
 			devicesVo.setGroupID(Integer.parseInt(rsGroupID));
-			devicesVo.setId(authentication.getName());
+			devicesVo.setSessionId(authentication.getName());
 			devicesVo.setMode(mode);
 			rsDeviceIDs = devicesMapper.getGroupToDeviceListByLogin(devicesVo);
 		}
@@ -413,7 +407,84 @@ public class DevicesService {
 		return devicesMapper.searchDeviceInfoList(devicesVo);
 	}
 	
-	
+	/*
+	 * 그룹 추가/수정
+	 */
+	public Map<String, Object> setDeviceGroupInfo(Map<String,String> paramMap) throws IOException, ParseException{
+		
+		String datas = paramMap.get("datas");
+		
+		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
+		
+	    String rsGroupID 		= (String)config.setValue(rsDatas, "id", null);
+	    String rsName			= (String)config.setValue(rsDatas, "name", "");
+	    	    
+//	    	    validation.groupAdd_name(rs_name);
+	    String rsDesc		    = (String)config.setValue(rsDatas, "desc", "");
+	    String rsParentsGroupID = (String)config.setValue(rsDatas, "pGroupID", "");
+	    String rsCode1 			= (String)config.setValue(rsDatas, "code1", "00000000");    // 그룹 관리번호
+	    String rsCode2 			= (String)config.setValue(rsDatas, "code2", "0");    		// 등급 (1~10)
+	    String rsCompany 		= (String)config.setValue(rsDatas, "company", "");  		// 고객사
+	    String rsCustomer 		= (String)config.setValue(rsDatas, "customer", "");  		// 고객이름
+	    String rsEmail 			= (String)config.setValue(rsDatas, "email", "");  			// 이메일
+	    String rsZip 			= (String)config.setValue(rsDatas, "zip", "");  			// 우편번호
+	    String rsAddress 		= (String)config.setValue(rsDatas, "address", "");  		// 주소
+	    String rsPhone1 		= (String)config.setValue(rsDatas, "phone1", "");  			// 전화1
+	    String rsPhone2 		= (String)config.setValue(rsDatas, "phone2", "");  			// 전화2
+	    String rsFax 			= (String)config.setValue(rsDatas, "fax", "");  			// fax
+	    String rsMemo1 			= (String)config.setValue(rsDatas, "memo1", "");  			// memo1
+	    String rsMemo2 			= (String)config.setValue(rsDatas, "memo2", "");  			// memo2
+	    
+		String message = "장비/그룹이 수정되었습니다.";
+	    
+	    if(rsGroupID == null) {
+	    	message = "장비/그룹이 추가되었습니다.";
+	    }
+	    
+	    int gp = 0;
+        if (!rsParentsGroupID.equals("")) {
+        	gp = Integer.parseInt(rsParentsGroupID);
+        }
+        
+        String topGroup = "전체";
+        
+        DevicesVo devicesVo = new DevicesVo();
+        devicesVo.setName(rsName);
+        int cnt = devicesMapper.deviceGroupCnt(devicesVo);
+        if ((cnt > 0 || rsName.equals(topGroup)) && rsGroupID == null) {
+        	message = "동일한 장비 그룹 이름이 존재합니다.";
+        }else {
+            SecurityContext context = SecurityContextHolder.getContext();
+            Authentication authentication = context.getAuthentication();
+            
+        	devicesVo.setGroupID(Integer.parseInt(rsGroupID));
+        	devicesVo.setDesc(rsDesc);
+        	devicesVo.setName(rsName);
+        	devicesVo.setGp(String.valueOf(gp));
+        	devicesVo.setSessionId(authentication.getName());
+        	devicesVo.setCode1(rsCode1);
+        	devicesVo.setCode2(rsCode2);
+        	devicesVo.setCompany(rsCompany);
+        	devicesVo.setCustomer(rsCustomer);
+        	devicesVo.setEmail(rsEmail);
+        	devicesVo.setZip(rsZip);
+        	devicesVo.setAddress(rsAddress);
+        	devicesVo.setPhone1(rsPhone1);
+        	devicesVo.setPhone2(rsPhone2);
+        	devicesVo.setFax(rsFax);
+        	devicesVo.setMemo1(rsMemo1);
+        	devicesVo.setMemo2(rsMemo2);
+        	Map<String, Object> map = devicesMapper.setDeviceGroupInfo(devicesVo);
+        	if("0".equals(map.get("select_id"))) {
+        		message = "동일한 장비 그룹 이름이 존재합니다.";
+        	}
+        }
+        
+        Map<String, Object> map = new HashMap<String,Object>(); 
+        map.put("message", message);
+        
+		return map;
+	}
 	
 	/*
 	 * 메모내용 수정
