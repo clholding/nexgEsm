@@ -441,7 +441,7 @@ public class DevicesController {
     } 
     
     /*
-     * 장비 리스트 정보 조회
+     * 제품 인터페이스 리스트 조회
      */
     @PostMapping("/getDeviceInfoList")
     public ResponseEntity<MessageVo> getDeviceInfoList(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
@@ -476,22 +476,39 @@ public class DevicesController {
     	
     } 
     
-//    @PostMapping("/getDeviceInterface")
-//    public ResponseEntity<MessageVo> getDeviceInterface() throws IOException  {
-//    	
-//    	HttpHeaders headers= new HttpHeaders();
-//    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
-//    	
-//    	MessageVo message = MessageVo.builder()
-//    			.status(StatusEnum.OK)
-//    			.message("")
-//    			.entitys("")
-//    			.build();
-//    	
-//    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
-//    	
-//    } 
-//    
+    @PostMapping("/getDeviceInterface")
+    public ResponseEntity<MessageVo> getDeviceInterface(@RequestParam Map<String,String> paramMap) throws IOException  {
+    	
+    	HttpHeaders headers= new HttpHeaders();
+    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+    	
+        MessageVo message;
+        
+        try {
+        	
+        	List<Map<String, Object>> list = devicesService.getDeviceInterface(paramMap);
+            int totalCount = list.size();
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("")
+                	.totalCount(totalCount)
+                	.entitys(list)
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		} 
+    	
+    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
+    	
+    } 
+    
 //    @PostMapping("/getDeviceInterfaceList")
 //    public ResponseEntity<MessageVo> getDeviceInterfaceList() throws IOException  {
 //    	
@@ -587,7 +604,7 @@ public class DevicesController {
 //    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
 //    	
 //    } 
-//    
+    
 //    @PostMapping("/getPrivateNetworkList")
 //    public ResponseEntity<MessageVo> getPrivateNetworkList() throws IOException  {
 //    	

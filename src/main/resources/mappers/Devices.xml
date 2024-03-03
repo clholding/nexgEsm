@@ -35,6 +35,11 @@
 		CALL sesm.getDeviceInfo( #{sessionId} );
 	</select>
 	
+	<select id="getDeviceInterface" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
+		/* DevicesMapper.getDeviceInterface */	
+		Call sesm.getDeviceInterface( #{id}, #{isActive} );
+	</select>
+	
 	<select id="getProductList" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.getProductList */	
 		CALL sesm.getProductList( #{type} );

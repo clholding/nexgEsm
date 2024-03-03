@@ -7,6 +7,8 @@ import lombok.Data;
 public class DevicesVo
 {
     private String sessionId;
+    private String id;
+    private String isActive;
     private String type;
     private String gp;
     private String code1;

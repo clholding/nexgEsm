@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import kr.nexg.esm.administrator.dto.AdministratorEnum;
 import kr.nexg.esm.devices.dto.DevicesVo;
 import kr.nexg.esm.devices.mapper.DevicesMapper;
 import kr.nexg.esm.util.config;
@@ -275,6 +276,44 @@ public class DevicesService {
 		log.info("deviceIDs : "+devicesVo.getDeviceIDs());
 		
 		return devicesMapper.getDeviceInfoList(devicesVo);
+	}
+	
+	/*
+	 * 제품 인터페이스 리스트 조회
+	 */
+	public List<Map<String, Object>> getDeviceInterface(Map<String,String> paramMap) throws IOException, ParseException{
+		
+		String datas = paramMap.get("datas");
+		
+		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
+		String rsId = (String)config.setValue(rsDatas, "deviceID", "");
+		String rsIsActive = (String)config.setValue(rsDatas, "isActive", "");
+	    
+		DevicesVo devicesVo = new DevicesVo();
+		devicesVo.setId(rsId);
+		devicesVo.setIsActive(rsIsActive);
+		
+		List<Map<String, Object>> result = new ArrayList<>();
+		List<Map<String, Object>> list = devicesMapper.getDeviceInterface(devicesVo);
+		for (Map<String, Object> vo : list) {
+			
+			Map<String, Object> map = new LinkedHashMap<>();
+			map.put("id", vo.get("id"));
+			map.put("name", vo.get("name"));
+			map.put("active", vo.get("active"));
+			map.put("ip", vo.get("id"));
+			map.put("netmask", vo.get("netmask"));
+			map.put("mac", vo.get("mac"));
+			map.put("location", vo.get("location"));
+			map.put("desc", vo.get("desc"));
+			map.put("state", vo.get("status"));
+			map.put("wan", vo.get("wan"));
+			
+			result.add(map);
+		}
+		
+
+		return result;
 	}
 	
     /*
