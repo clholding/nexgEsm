@@ -479,6 +479,7 @@ public class DevicesController {
     @PostMapping("/getDeviceInterface")
     public ResponseEntity<MessageVo> getDeviceInterface(@RequestParam Map<String,String> paramMap) throws IOException  {
     	
+    	log.info("getDeviceInterface ================");
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
