@@ -1,5 +1,6 @@
 package kr.nexg.esm.jwt.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -23,31 +24,6 @@ public class AuthService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtTokenProvider jwtTokenProvider;
  
-//    public String encodePassword(String rawPassword) {
-//        try {
-//            // Compute SHA-256 hash
-//            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-//            byte[] encodedhash = digest.digest(
-//                    rawPassword.getBytes(StandardCharsets.UTF_8));
-//
-//            // Convert to hexadecimal format
-//            StringBuilder hexString = new StringBuilder(2 * encodedhash.length);
-//            for (byte b : encodedhash) {
-//                String hex = Integer.toHexString(0xff & b);
-//                if (hex.length() == 1) {
-//                    hexString.append('0');
-//                }
-//                hexString.append(hex);
-//            }
-//
-//            return hexString.toString();
-//
-//        } catch (NoSuchAlgorithmException e) {
-//            e.printStackTrace();
-//            return null; // Handle the exception appropriately in your application
-//        }
-//    }
-    
     @Transactional
     public TokenVo login(AuthVo authVo) {
     	

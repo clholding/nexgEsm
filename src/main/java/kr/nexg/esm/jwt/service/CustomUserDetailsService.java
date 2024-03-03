@@ -40,6 +40,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 			throw new BadCredentialsException(loginId + " -> 사용자가 없습니다.");
 		}
 
+//		System.out.println("authVo.getUsername() : "+ authVo.getUsername());
+//		System.out.println("authVo.getPassword() : "+ authVo.getPassword());
+//		System.out.println("authVo.getGroupId() : "+ authVo.getGroupId());
 		return User.builder()
 				.username(authVo.getUsername())
 				.password(authVo.getPassword())
