@@ -311,7 +311,6 @@ public class DevicesService {
 			
 			result.add(map);
 		}
-		
 
 		return result;
 	}
