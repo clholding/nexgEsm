@@ -771,16 +771,42 @@ public class DevicesController {
     } 
     
     @PostMapping("/setDeviceInfo")
-    public ResponseEntity<MessageVo> setDeviceInfo() throws IOException  {
+    public ResponseEntity<MessageVo> setDeviceInfo(HttpServletRequest request, @RequestParam Map<String,String> paramMap) throws IOException  {
     	
+//		SecurityContext context = SecurityContextHolder.getContext();
+//        Authentication authentication = context.getAuthentication();
+//        
+//        String sessionId = authentication.getName();
+//        String clientIp = ClientIpUtil.getClientIP(request);
+        
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
-    	MessageVo message = MessageVo.builder()
-    			.status(StatusEnum.OK)
-    			.message("")
-    			.entitys("")
-    			.build();
+        MessageVo message;
+        
+        try {
+        	
+        	Map<String, Object> result = devicesService.setDeviceInfo(paramMap);
+            int totalCount = 0;
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message(String.valueOf(result.get("message")))
+                	.totalCount(totalCount)
+                	.entitys("")
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+			
+//			setAuditInfo("setDeviceGroupInfo", results["success"])
+//			esmAuditLog.esmlog(4, sessionId, clientIp, "장비/그룹정보");
+		} 
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
     	

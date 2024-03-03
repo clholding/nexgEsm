@@ -487,6 +487,135 @@ public class DevicesService {
 	}
 	
 	/*
+	 * 장비 추가/수정
+	 */
+	public Map<String, Object> setDeviceInfo(Map<String,String> paramMap) throws IOException, ParseException{
+		
+		String datas = paramMap.get("datas");
+		String rsSetType = paramMap.get("setType");
+		String rsMode = paramMap.get("mode");
+		
+		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
+		
+	    int mode = mode_convert.convert_modedata(rsMode);
+
+	    String rsOverwriteid 	 = (String)config.setValue(rsDatas, "overwriteid", "");   // 교체할 장비 id
+	    String rsGid			 = (String)config.setValue(rsDatas, "pGroupID", "0");  	  // 상위그룹id[필수]
+//	    # 유효성 검사
+//	    validation.deviceAdd_gid(rs_gid)
+	    String rsId 			 = (String)config.setValue(rsDatas, "id", null);  	  	  // 장비 id (신규추가인 경우 NULL)
+	    String rsName 			 = (String)config.setValue(rsDatas, "dn", "");  		  // 장비이름[필수]
+//	    # 유효성 검사
+//	    validation.deviceAdd_name(rs_name)
+	    String rsDesc			 = (String)config.setValue(rsDatas, "desc", "");  		  // 장비설명
+	    String rsIp				 = (String)config.setValue(rsDatas, "ip", "");  		  // 장비ip[필수]
+//	    # 유효성 검사
+//	    validation.deviceAdd_ip(rs_ip)
+	    String rsActive			 = (String)config.setValue(rsDatas, "active", "0");  	  // 활성화 여부(0:비활성화, 1:활성화)
+	    String rsLog 			 = (String)config.setValue(rsDatas, "log", "0");  		  // 원본로그저장 여부(0:비활성화, 1:활성화)
+	    String rsAlarm 			 = (String)config.setValue(rsDatas, "alarm", "0");  	  // 이벤트 이메일 전송 여부(0:비활성화, 1:활성화)
+	    String rsLicence		 = (String)config.setValue(rsDatas, "licence", "");  	  // 라이센스
+	    String rsSerial 		 = (String)config.setValue(rsDatas, "serial", "");  	  // 시리얼
+//	    ## 유효성 검사
+//	    validation.deviceAdd_serial(rs_serial)
+		String rsOs 			 = (String)config.setValue(rsDatas, "os", "");  		  // 장비os
+		String rsHostname 		 = (String)config.setValue(rsDatas, "hostname", "");  	  // 장비 호스트이름
+		String rsCompany 		 = (String)config.setValue(rsDatas, "company", "");  	  // 고객사[필수]
+		String rsCustomer 		 = (String)config.setValue(rsDatas, "customer", "");  	  // 고객이름[필수]
+		String rsEmail 			 = (String)config.setValue(rsDatas, "email", "");  		  // 이메일
+		String rsZip 			 = (String)config.setValue(rsDatas, "zip", "");  		  // 우편번호
+		String rsAddress 		 = (String)config.setValue(rsDatas, "address", "");  	  // 주소
+		String rsPhone1  		 = (String)config.setValue(rsDatas, "phone1", ""); 		  // 전화1
+		String rsPhone2 		 = (String)config.setValue(rsDatas, "phone2", "");  	  // 전화2
+		String rsFax			 = (String)config.setValue(rsDatas, "fax", "");  		  // fax
+		String rsMid 			 = (String)config.setValue(rsDatas, "mid", "");  		  // 관리계정 id
+		String rsMpass 			 = (String)config.setValue(rsDatas, "mpass", "");  		  // 관리계정 pw
+	    String rsProduct_id 	 = (String)config.setValue(rsDatas, "product_id", "2");   // 제품id
+//	    ## 유효성 검사
+//	    validation.deviceAdd_product(rs_product_id)
+	    String rsSnmpVersion	 = (String)config.setValue(rsDatas, "snmp_version", "");   // snmp 버전
+	    String rsSnmpCommunity   = (String)config.setValue(rsDatas, "snmp_community", ""); // snmp community
+	    String rsSnmpUseInherit  = (String)config.setValue(rsDatas, "snmp_use_inherit", "0");  // snmp use_inherit
+	    String rsSnmpLevel 		 = (String)config.setValue(rsDatas, "snmp_level", "");     // snmp level
+	    String rsSnmpUser 		 = (String)config.setValue(rsDatas, "snmp_user", "");  	   // snmp user
+	    String rsSnmpAuthprot 	 = (String)config.setValue(rsDatas, "snmp_authprot", "");  // snmp authprot
+	    String rsSnmpAuthpass 	 = (String)config.setValue(rsDatas, "snmp_authpass", "");  // snmp authpass
+	    String rsSnmpPrivprot 	 = (String)config.setValue(rsDatas, "snmp_privprot", "");  // snmp privprot
+	    String rsSnmpPrivpass 	 = (String)config.setValue(rsDatas, "snmp_privpass", "");  // snmp privpass
+	    String rsMemo1 			 = (String)config.setValue(rsDatas, "memo1", "");  		   // memo1
+	    String rsMemo2			 = (String)config.setValue(rsDatas, "memo2", "");  		   // memo2
+	    String rsCode1			 = (String)config.setValue(rsDatas, "code1", "00000000");  // 장비 관리번호
+	    String rsCode2			 = (String)config.setValue(rsDatas, "code2", "0000");      // 장비 일련번호
+    
+		String message = "장비가 추가되었습니다.";
+		
+//		 try {
+//            int overDId = 0;
+//            String overDName = "";
+//            int overDGroupId = -1;
+//            int overDActive = 0;
+//
+//            if (!"".equals(rsOverwriteid)) {
+//                // Fetch overwrite device details
+//                Object[] overwriteDevice = dManager.select("SELECT id, name, group_id, active FROM device WHERE id = " + rsOverwriteId).get(0);
+//                overDId = Integer.parseInt(overwriteDevice[0].toString());
+//                overDName = overwriteDevice[1].toString();
+//                overDGroupId = Integer.parseInt(overwriteDevice[2].toString());
+//                overDActive = Integer.parseInt(overwriteDevice[3].toString());
+//            }
+//
+//            int totalDeviceCount = Integer.parseInt(dManager.select("SELECT COUNT(*) FROM device WHERE active=1").get(0).get(0).toString());
+//            if ((overDId == 0 && totalDeviceCount > 4096) || (overDId > 0 && overDActive == 0 && totalDeviceCount > 4096)) {
+//                results.put("success", "false");
+//                results.put("message", "최대 등록가능 장비 대수는 4096대 입니다.");
+//                return results.toString();
+//            }
+//
+//            List<Object[]> chkGroupMaximumChecker;
+//            if (modeValue == 0) {
+//                chkGroupMaximumChecker = dManager.select("SELECT COUNT(*) FROM device WHERE group_id=" + rsGid);
+//            } else {
+//                chkGroupMaximumChecker = dManager.select("SELECT COUNT(*) FROM device, product p WHERE p.id = device.product_id AND p.type = " + modeValue + " AND group_id=" + rsGid);
+//            }
+//
+//            results.put("totalCount", chkGroupMaximumChecker.get(0)[0].toString());
+//            if (Integer.parseInt(chkGroupMaximumChecker.get(0)[0].toString()) >= 150 && (overDGroupId != Integer.parseInt(rsGid))) {
+//                results.put("success", "false");
+//                results.put("message", "하나의 그룹에 150개 이상의 장비가 추가 될수 없습니다.");
+//                return results.toString();
+//            }
+//
+//            if (!rsId.equals("null")) {
+//                results.put("message", "장비가 수정되었습니다.");
+//            }
+//
+//            if (rsId.equals("null")) {
+//                // Check Duplicated device name
+//                List<Object[]> chkName = dManager.select("SELECT id, name FROM device WHERE name='" + rsName + "'");
+//                if (chkName.size() > 0) {
+//                    // Duplicated device name found
+//                    results.put("success", "false");
+//                    results.put("message", "동일한 장비 이름이 존재합니다.");
+//                    return results.toString();
+//                }
+//            }
+//
+//            // Rest of the code for updating or adding the device
+//            // ...
+//
+//        } catch (Exception e) {
+//            results.put("errMsg", "A failure has occurred.");
+//            results.put("success", "false");
+//            results.put("message", "db connection error");
+//        }
+	
+        Map<String, Object> map = new HashMap<String,Object>(); 
+        map.put("message", message);
+        
+		return map;
+	}
+	
+	/*
 	 * 메모내용 수정
 	 */
 	public int setFailMemo(Map<String,String> paramMap) throws IOException, ParseException{
