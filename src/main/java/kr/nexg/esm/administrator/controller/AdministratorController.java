@@ -52,7 +52,6 @@ public class AdministratorController {
 	* 
 	* @ param AdministratorVo
 	* @ return ResponseEntity
-	* @ exception 예외사항
 	*/
 	@PostMapping("/getUserInfo")
     public ResponseEntity<MessageVo> getUserInfo(@RequestBody AdministratorVo vo) {
@@ -95,7 +94,6 @@ public class AdministratorController {
 	* 
 	* @ param AdministratorVo
 	* @ return ResponseEntity
-	* @ exception 예외사항
 	*/
 	@PostMapping("/getUser")
     public ResponseEntity<MessageVo> getUser(@RequestBody AdministratorVo vo) {
@@ -148,8 +146,7 @@ public class AdministratorController {
 	* 관리자정보 삭제
 	* 
 	* @ param AdministratorVo
-	* @ return 없음
-	* @ exception 예외사항
+	* @ return ResponseEntity
 	*/
 	@PostMapping("/delUser")
     public ResponseEntity<MessageVo> delUser(HttpServletRequest request, @RequestBody AdministratorVo vo) {
@@ -187,6 +184,61 @@ public class AdministratorController {
 	            	.build();
 			
 			esmAuditLog.esmlog(4, sessionId, clientIp, "[설정/관리자] 관리자 삭제에 실패했습니다.");
+		}
+    	
+        return new ResponseEntity<>(message, headers, HttpStatus.OK);
+    }
+	
+	/**
+	* 관리자정보 그룹 삭제
+	* 
+	* @ param AdministratorVo
+	* @ return ResponseEntity
+	*/
+	@PostMapping("/delUserGroup")
+    public ResponseEntity<MessageVo> delUserGroup(HttpServletRequest request, @RequestBody AdministratorVo vo) {
+
+		SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        
+        String sessionId = authentication.getName();
+        String clientIp = ClientIpUtil.getClientIP(request);
+		
+    	HttpHeaders headers= new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+        
+        MessageVo message;
+        
+        try {
+        	List<Map<String, Object>> list = administratorService.selectUserGroup(vo);
+        	if(list.size() > 0) {
+        		message = MessageVo.builder()
+                    	.success("false")
+                    	.message("사용 중인 그룹은 삭제할 수 없습니다.")
+                    	.entitys("")
+                    	.build();
+        	} else {
+        		message = MessageVo.builder()
+                    	.success("true")
+                    	.message("")
+                    	.entitys("")
+                    	.build();
+        	}
+        	List<String> user_group_names = administratorService.delUserGroup(vo);
+        	String arr = String.join(",", user_group_names);
+        	
+        	esmAuditLog.esmlog(6, sessionId, clientIp, String.format("[설정/관리자] 관리자 그룹 삭제가 성공하였습니다. (id=%s)", arr));
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+			
+			esmAuditLog.esmlog(4, sessionId, clientIp, "[설정/관리자] 관리자 그룹 삭제에 실패했습니다.");
 		}
     	
         return new ResponseEntity<>(message, headers, HttpStatus.OK);

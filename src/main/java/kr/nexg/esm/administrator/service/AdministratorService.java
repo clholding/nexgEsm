@@ -32,6 +32,9 @@ public class AdministratorService {
 	@Autowired
 	User.User1 user;
 	
+	@Autowired
+	User.UserGroup userGroup;
+	
 	public List<Map<String, Object>> getUserInfo(AdministratorVo vo) {
 		List<Map<String, Object>> list = administratorMapper.getUserInfo(vo);
 		
@@ -141,11 +144,31 @@ public class AdministratorService {
 				List<Map<String, Object>> list = user.get_user_info(id);
 				admin_names.add((String) list.get(0).get("login"));
 			}
+			
+			String adminIds = String.join(",", vo.getAdminIDs());
+			administratorMapper.delUser(adminIds);
 		}
 		
-		String adminIds = String.join(",", vo.getAdminIDs());
-		administratorMapper.delUser(adminIds);
 		return admin_names;
+	}
+	
+	public List<Map<String, Object>> selectUserGroup( AdministratorVo vo) {
+		return administratorMapper.selectUserGroup(vo);
+	}
+	
+	public List<String> delUserGroup( AdministratorVo vo) {
+		List<String> user_group_names = new ArrayList<>();
+		if(vo.getAdminGroupIDs().size() > 0) {
+			for(String id : vo.getAdminGroupIDs()) {
+				List<Map<String, Object>> list = userGroup.get_user_group_info(id);
+				user_group_names.add((String) list.get(0).get("name"));
+			}
+			
+			String adminGroupIds = String.join(",", vo.getAdminGroupIDs());
+			administratorMapper.delUserGroup(adminGroupIds);
+		}
+		
+		return user_group_names;
 	}
 	
 	

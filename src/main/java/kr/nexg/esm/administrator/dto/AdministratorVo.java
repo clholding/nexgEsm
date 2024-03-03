@@ -10,4 +10,5 @@ public class AdministratorVo extends CommonVo {
 	private String sessionId;
     private String adminID;
     private List<String> adminIDs;
+    private List<String> adminGroupIDs;
 }

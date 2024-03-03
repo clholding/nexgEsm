@@ -18,5 +18,9 @@ public interface AdministratorMapper {
 	
 	public int delUser(String adminIds);
 	
+	public List<Map<String, Object>> selectUserGroup(AdministratorVo vo);
+	
+	public int delUserGroup(String adminGroupIds);
+	
 	
 }
