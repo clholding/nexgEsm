@@ -17,6 +17,11 @@
 		CALL sesm.delUser( #{adminIds} );
 	</delete>
 	
+	<select id="selectAdminGroup" parameterType="kr.nexg.esm.administrator.dto.AdministratorVo" resultType="map">
+		/* AdministratorMapper.selectAdminGroup */	
+		SELECT login, group_id FROM user WHERE group_id = #{adminGroupID}
+	</select>
+	
 	<select id="selectUserGroup" parameterType="kr.nexg.esm.administrator.dto.AdministratorVo" resultType="map">
 		/* AdministratorMapper.selectUserGroup */	
 		SELECT login, group_id FROM user WHERE group_id in 

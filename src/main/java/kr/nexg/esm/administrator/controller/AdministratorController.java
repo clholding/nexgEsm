@@ -100,7 +100,6 @@ public class AdministratorController {
 		
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         
         String sessionId = authentication.getName();
 		vo.setSessionId(sessionId);
@@ -153,7 +152,6 @@ public class AdministratorController {
 
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         
         String sessionId = authentication.getName();
         String clientIp = ClientIpUtil.getClientIP(request);
@@ -200,7 +198,6 @@ public class AdministratorController {
 
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         
         String sessionId = authentication.getName();
         String clientIp = ClientIpUtil.getClientIP(request);
@@ -239,6 +236,47 @@ public class AdministratorController {
 	            	.build();
 			
 			esmAuditLog.esmlog(4, sessionId, clientIp, "[설정/관리자] 관리자 그룹 삭제에 실패했습니다.");
+		}
+    	
+        return new ResponseEntity<>(message, headers, HttpStatus.OK);
+    }
+	
+	/**
+	* 관리자정보 추가/수정
+	* 
+	* @ param AdministratorVo
+	* @ return ResponseEntity
+	*/
+	@PostMapping("/setUserInfo")
+    public ResponseEntity<MessageVo> setUserInfo(HttpServletRequest request, @RequestBody AdministratorVo vo) {
+
+		SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        
+        String sessionId = authentication.getName();
+        String clientIp = ClientIpUtil.getClientIP(request);
+		
+    	HttpHeaders headers= new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+        
+        MessageVo message;
+        
+        try {
+        	int result = administratorService.setUserInfo(vo);
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("")
+                	.entitys("")
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+			
 		}
     	
         return new ResponseEntity<>(message, headers, HttpStatus.OK);

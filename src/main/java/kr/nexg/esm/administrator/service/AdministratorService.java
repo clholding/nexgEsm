@@ -20,6 +20,7 @@ import kr.nexg.esm.common.util.ClientIpUtil;
 import kr.nexg.esm.common.util.EnumUtil;
 import kr.nexg.esm.nexgesm.mariadb.Log;
 import kr.nexg.esm.nexgesm.mariadb.User;
+import kr.nexg.esm.util.Validation;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -137,7 +138,7 @@ public class AdministratorService {
 		return result;
 	}
 	
-	public List<String> delUser( AdministratorVo vo) {
+	public List<String> delUser(AdministratorVo vo) {
 		List<String> admin_names = new ArrayList<>();
 		if(vo.getAdminIDs().size() > 0) {
 			for(String id : vo.getAdminIDs()) {
@@ -152,11 +153,11 @@ public class AdministratorService {
 		return admin_names;
 	}
 	
-	public List<Map<String, Object>> selectUserGroup( AdministratorVo vo) {
+	public List<Map<String, Object>> selectUserGroup(AdministratorVo vo) {
 		return administratorMapper.selectUserGroup(vo);
 	}
 	
-	public List<String> delUserGroup( AdministratorVo vo) {
+	public List<String> delUserGroup(AdministratorVo vo) {
 		List<String> user_group_names = new ArrayList<>();
 		if(vo.getAdminGroupIDs().size() > 0) {
 			for(String id : vo.getAdminGroupIDs()) {
@@ -169,6 +170,29 @@ public class AdministratorService {
 		}
 		
 		return user_group_names;
+	}
+	
+	public int setUserInfo(AdministratorVo vo) throws Exception {
+		
+		if(vo.getAdminID().isBlank()) {
+        	vo.setAdminID("null");
+        }
+		if(vo.getAdminName().isBlank()) {
+        	vo.setAdminName("");
+        }
+		Validation.userAdd_adminName(vo.getAdminName());
+		
+		if(vo.getDesc().isBlank()) {
+        	vo.setDesc("");
+        }
+		if(vo.getAdminGroupID().isBlank()) {
+			vo.setAdminGroupID("");
+		}
+		List<Map<String, Object>> AdminGroupList = administratorMapper.selectAdminGroup(vo);
+		Validation.userAdd_adminGroupID(AdminGroupList);
+		
+		return 0;
+		
 	}
 	
 	
