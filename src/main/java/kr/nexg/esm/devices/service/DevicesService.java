@@ -203,7 +203,7 @@ public class DevicesService {
 					pid = 0;
 				}
 				
-				List<Map<String, Object>> children = new ArrayList<>();
+//				List<Map<String, Object>> children = new ArrayList<>();
 				
 				Map<String, Object> element = new HashMap<>();
 				element.put("id", el.get("id"));
@@ -438,6 +438,30 @@ public class DevicesService {
 		devicesVo.setFailID(failID);		
 		
 		return devicesMapper.getDeviceFailInfo(devicesVo);
+	}
+	
+	/*
+	 * 제품실패 정보 리스트
+	 */
+	public List<Map<String, Object>> getDeviceFailList(Map<String,String> paramMap) throws IOException, ParseException{
+		
+		String datas = paramMap.get("datas");
+		String rsPage = paramMap.get("page");
+		String rsLimit = paramMap.get("limit");
+		
+		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
+		String deviceID = (String)config.setValue(rsDatas, "deviceID", "");
+		
+		int rsStart = (Integer.parseInt(rsPage) - 1) * Integer.parseInt(rsLimit);
+		
+		log.info("deviceID : "+deviceID);
+		
+		DevicesVo devicesVo = new DevicesVo();
+		devicesVo.setDeviceID(deviceID);
+		devicesVo.setPage(String.valueOf(rsStart));
+		devicesVo.setLimit(rsLimit);
+		
+		return devicesMapper.getDeviceFailList(devicesVo);
 	}
 	
 	/*

@@ -60,6 +60,11 @@
 		Call sesm.getDeviceFailInfo( #{failID} );
 	</select>
 	
+	<select id="getDeviceFailList" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
+		/* DevicesMapper.getDeviceFailList */	
+		Call sesm.getDeviceFailList( #{deviceID}, #{page}, #{limit} );
+	</select>
+	
 	<select id="getGroupToDeviceListByLogin" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="String">
 		/* DevicesMapper.getGroupToDeviceListByLogin */	
 		Call sesm.getGroupToDeviceListByLogin( #{groupID}, #{sessionId}, #{mode} );
