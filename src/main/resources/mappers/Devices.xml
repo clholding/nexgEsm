@@ -10,6 +10,12 @@
 		/* DevicesMapper.getDeviceListByLogin */	
 		CALL sesm.getDeviceListByLogin( #{sessionId}, '2', #{mode} );
 	</select>
+	
+	<select id="deviceCandidate" resultType="map">
+		/* DevicesMapper.deviceCandidate */	
+		CALL sesm.getCandidateList( #{mode} );
+	</select>
+	
 	<select id="getDeviceGroup" resultType="map">
 		/* DevicesMapper.getDeviceGroup */	
 		CALL sesm.getDeviceGroup();

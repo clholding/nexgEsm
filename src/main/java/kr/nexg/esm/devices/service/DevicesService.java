@@ -148,6 +148,21 @@ public class DevicesService {
         return result;
 	};
 	
+    /*
+     * 장비관리 > 장비추가리스트
+     */
+	public List<Map<String, Object>> deviceCandidate(Map<String,String> paramMap) throws IOException, ParseException{
+		
+		String rsMode = paramMap.get("mode");
+		
+		int mode = mode_convert.convert_modedata(rsMode);
+		
+		DevicesVo devicesVo = new DevicesVo();
+		devicesVo.setMode(mode);
+		
+		return devicesMapper.deviceCandidate(devicesVo);
+	}
+	
 	public List<Map<String, Object>> getAlarmDeviceGroupListNDeviceListAll(Map<String,String> paramMap) throws IOException, ParseException{
 		
 		String datas = paramMap.get("datas");
