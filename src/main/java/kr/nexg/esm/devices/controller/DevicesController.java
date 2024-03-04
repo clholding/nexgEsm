@@ -73,23 +73,44 @@ public class DevicesController {
 //    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
 //    	
 //    } 
-//    
-//    @PostMapping("/applyDevice")
-//    public ResponseEntity<MessageVo> applyDevice() throws IOException  {
-//    	
-//    	HttpHeaders headers= new HttpHeaders();
-//    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
-//    	
-//    	MessageVo message = MessageVo.builder()
-//    			.status(StatusEnum.OK)
-//    			.message("")
-//    			.entitys("")
-//    			.build();
-//    	
-//    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
-//    	
-//    } 
-//    
+    
+    @PostMapping("/applyDevice")
+    public ResponseEntity<MessageVo> applyDevice(HttpServletRequest request) throws IOException  {
+    	
+		SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        
+        String sessionId = authentication.getName();
+        String clientIp = ClientIpUtil.getClientIP(request);
+        
+    	HttpHeaders headers= new HttpHeaders();
+    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+    	
+        MessageVo message;
+        
+        try {
+        	
+            int totalCount = 0;
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("")
+                	.totalCount(totalCount)
+                	.entitys("")
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}  
+    	
+    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
+    	
+    } 
+    
 //    @PostMapping("/applyDeviceInterface")
 //    public ResponseEntity<MessageVo> applyDeviceInterface() throws IOException  {
 //    	
@@ -121,23 +142,44 @@ public class DevicesController {
 //    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
 //    	
 //    } 
-//    
-//    @PostMapping("/checkManagedCode")
-//    public ResponseEntity<MessageVo> checkManagedCode() throws IOException  {
-//    	
-//    	HttpHeaders headers= new HttpHeaders();
-//    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
-//    	
-//    	MessageVo message = MessageVo.builder()
-//    			.status(StatusEnum.OK)
-//    			.message("")
-//    			.entitys("")
-//    			.build();
-//    	
-//    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
-//    	
-//    } 
-//    
+
+	/*
+	 * 정보 > 기본정보 > 관리번호 중복 체크
+	 */
+    @PostMapping("/checkManagedCode")
+    public ResponseEntity<MessageVo> checkManagedCode(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
+    	
+    	HttpHeaders headers= new HttpHeaders();
+    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+    	
+        MessageVo message;
+        
+        Map<String, Object> result = devicesService.checkManagedCode(paramMap);
+        
+        try {
+        	
+            int totalCount = 0;
+        	message = MessageVo.builder()
+                	.success(String.valueOf(result.get("success")))
+                	.message(String.valueOf(result.get("message")))
+                	.totalCount(totalCount)
+                	.entitys("")
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+					.success(String.valueOf(result.get("success")))
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+			
+		} 
+    	
+    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
+    	
+    } 
+    
 //    @PostMapping("/delCandidate")
 //    public ResponseEntity<MessageVo> delCandidate() throws IOException  {
 //    	
@@ -541,7 +583,6 @@ public class DevicesController {
     @PostMapping("/getDeviceInterface")
     public ResponseEntity<MessageVo> getDeviceInterface(@RequestParam Map<String,String> paramMap) throws IOException  {
     	
-    	log.info("getDeviceInterface ================");
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
@@ -620,21 +661,42 @@ public class DevicesController {
 //    	
 //    } 
 //    
-//    @PostMapping("/getDeviceStatus")
-//    public ResponseEntity<MessageVo> getDeviceStatus() throws IOException  {
-//    	
-//    	HttpHeaders headers= new HttpHeaders();
-//    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
-//    	
-//    	MessageVo message = MessageVo.builder()
-//    			.status(StatusEnum.OK)
-//    			.message("")
-//    			.entitys("")
-//    			.build();
-//    	
-//    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
-//    	
-//    } 
+    
+    /*
+     * 제품 상태
+     */    
+    @PostMapping("/getDeviceStatus")
+    public ResponseEntity<MessageVo> getDeviceStatus(@RequestParam Map<String,String> paramMap) throws IOException  {
+    	
+    	HttpHeaders headers= new HttpHeaders();
+    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+    	
+        MessageVo message;
+        
+        try {
+        	
+        	List<Map<String, Object>> list = devicesService.getDeviceStatus(paramMap);
+            int totalCount = list.size();
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("")
+                	.totalCount(totalCount)
+                	.entitys(list)
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}   
+    	
+    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
+    	
+    } 
 //    
 //    @PostMapping("/getDeviceTrackInfoList")
 //    public ResponseEntity<MessageVo> getDeviceTrackInfoList() throws IOException  {
@@ -927,40 +989,40 @@ public class DevicesController {
 	/*
 	 * 메모내용 수정
 	 */
-    @PostMapping("/setFailMemo")
-    public ResponseEntity<MessageVo> setFailMemo(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
-    	
-    	HttpHeaders headers= new HttpHeaders();
-    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
-    	
-    	log.info("devicesVo : "+paramMap.get("datas"));
-    	
-        MessageVo message;
-        
-        try {
-        	
-        	int result = devicesService.setFailMemo(paramMap);
-            int totalCount = 0;
-        	
-        	message = MessageVo.builder()
-                	.success("true")
-                	.message("메모내용이 입력되었습니다.")
-                	.totalCount(totalCount)
-                	.entitys(result)
-                	.build();
-		} catch (Exception e) {
-			log.error("Error : ", e);
-			message = MessageVo.builder()
-	            	.success("false")
-	            	.message("")
-	            	.errMsg(e.getMessage())
-	            	.errTitle("")
-	            	.build();
-		}    	
-        
-    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
-    	
-    } 
+//    @PostMapping("/setFailMemo")
+//    public ResponseEntity<MessageVo> setFailMemo(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
+//    	
+//    	HttpHeaders headers= new HttpHeaders();
+//    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+//    	
+//    	log.info("devicesVo : "+paramMap.get("datas"));
+//    	
+//        MessageVo message;
+//        
+//        try {
+//        	
+//        	int result = devicesService.setFailMemo(paramMap);
+//            int totalCount = 0;
+//        	
+//        	message = MessageVo.builder()
+//                	.success("true")
+//                	.message("메모내용이 입력되었습니다.")
+//                	.totalCount(totalCount)
+//                	.entitys(result)
+//                	.build();
+//		} catch (Exception e) {
+//			log.error("Error : ", e);
+//			message = MessageVo.builder()
+//	            	.success("false")
+//	            	.message("")
+//	            	.errMsg(e.getMessage())
+//	            	.errTitle("")
+//	            	.build();
+//		}    	
+//        
+//    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
+//    	
+//    } 
     
 //    @PostMapping("/updateDeviceInterface")
 //    public ResponseEntity<MessageVo> updateDeviceInterface() throws IOException  {
