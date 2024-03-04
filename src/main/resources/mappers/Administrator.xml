@@ -9,7 +9,7 @@
 	
 	<select id="getUser" parameterType="kr.nexg.esm.administrator.dto.AdministratorVo" resultType="map">
 		/* AdministratorMapper.getUser */	
-		CALL sesm.getUser( #{sessionId}, #{searchKeyword}, (#{pageIndex}-1)*#{pageSize}, #{pageSize} );
+		CALL sesm.getUser( #{sessionId}, #{search}, (#{page}-1)*#{limit}, #{limit} );
 	</select>
 	
 	<delete id="delUser" parameterType="String">

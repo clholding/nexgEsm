@@ -20,6 +20,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import kr.nexg.esm.administrator.dto.AdministratorEnum;
@@ -54,20 +55,16 @@ public class AdministratorController {
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/getUserInfo")
-    public ResponseEntity<MessageVo> getUserInfo(@RequestBody AdministratorVo vo) {
+    public ResponseEntity<MessageVo> getUserInfo(@RequestParam Map<String,String> paramMap) {
     	
     	HttpHeaders headers= new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
-        
-        if(vo.getAdminID().isBlank()) {
-        	vo.setAdminID("1");
-        }
         
         MessageVo message;
         
         try {
         	
-        	List<Map<String, Object>> list = administratorService.getUserInfo(vo);
+        	List<Map<String, Object>> list = administratorService.getUserInfo(paramMap);
             int totalCount = list.size();
         	
         	message = MessageVo.builder()
@@ -96,13 +93,13 @@ public class AdministratorController {
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/getUser")
-    public ResponseEntity<MessageVo> getUser(@RequestBody AdministratorVo vo) {
+    public ResponseEntity<MessageVo> getUser(@RequestParam Map<String,Object> paramMap) {
 		
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         
         String sessionId = authentication.getName();
-		vo.setSessionId(sessionId);
+        paramMap.put("sessionId", sessionId);
     	
     	HttpHeaders headers= new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -111,7 +108,7 @@ public class AdministratorController {
         
         try {
         	
-        	List<Map<String, Object>> list = administratorService.getUser(vo);
+        	List<Map<String, Object>> list = administratorService.getUser(paramMap);
             
             int totalCount = 0;
             if(list.size() > 0) {
@@ -148,7 +145,7 @@ public class AdministratorController {
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/delUser")
-    public ResponseEntity<MessageVo> delUser(HttpServletRequest request, @RequestBody AdministratorVo vo) {
+    public ResponseEntity<MessageVo> delUser(HttpServletRequest request, @RequestParam Map<String,Object> paramMap) {
 
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
@@ -162,7 +159,7 @@ public class AdministratorController {
         MessageVo message;
         
         try {
-        	List<String> admin_names = administratorService.delUser(vo);
+        	List<String> admin_names = administratorService.delUser(paramMap);
         	String arr = String.join(",", admin_names);
         	
         	message = MessageVo.builder()
@@ -194,7 +191,7 @@ public class AdministratorController {
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/delUserGroup")
-    public ResponseEntity<MessageVo> delUserGroup(HttpServletRequest request, @RequestBody AdministratorVo vo) {
+    public ResponseEntity<MessageVo> delUserGroup(HttpServletRequest request, @RequestParam Map<String,Object> paramMap) {
 
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
@@ -208,7 +205,7 @@ public class AdministratorController {
         MessageVo message;
         
         try {
-        	List<Map<String, Object>> list = administratorService.selectUserGroup(vo);
+        	List<Map<String, Object>> list = administratorService.selectUserGroup(paramMap);
         	if(list.size() > 0) {
         		message = MessageVo.builder()
                     	.success("false")
@@ -222,7 +219,7 @@ public class AdministratorController {
                     	.entitys("")
                     	.build();
         	}
-        	List<String> user_group_names = administratorService.delUserGroup(vo);
+        	List<String> user_group_names = administratorService.delUserGroup(paramMap);
         	String arr = String.join(",", user_group_names);
         	
         	esmAuditLog.esmlog(6, sessionId, clientIp, String.format("[설정/관리자] 관리자 그룹 삭제가 성공하였습니다. (id=%s)", arr));

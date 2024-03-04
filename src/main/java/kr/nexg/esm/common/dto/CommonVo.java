@@ -55,5 +55,11 @@ public class CommonVo {
 
     /** total count */
     private int totalCount = 0;
+    
+    /** 현재페이지 */
+    private int page = 1;
+
+    /** 페이지사이즈 */
+    private int limit = 10;
 
 }

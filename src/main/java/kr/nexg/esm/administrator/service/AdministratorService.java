@@ -1,10 +1,12 @@
 package kr.nexg.esm.administrator.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -12,6 +14,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.nexg.esm.administrator.dto.AdministratorEnum;
 import kr.nexg.esm.administrator.dto.AdministratorVo;
@@ -21,6 +27,7 @@ import kr.nexg.esm.common.util.EnumUtil;
 import kr.nexg.esm.nexgesm.mariadb.Log;
 import kr.nexg.esm.nexgesm.mariadb.User;
 import kr.nexg.esm.util.Validation;
+import kr.nexg.esm.util.config;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -36,8 +43,17 @@ public class AdministratorService {
 	@Autowired
 	User.UserGroup userGroup;
 	
-	public List<Map<String, Object>> getUserInfo(AdministratorVo vo) {
-		List<Map<String, Object>> list = administratorMapper.getUserInfo(vo);
+	public List<Map<String, Object>> getUserInfo(Map<String, String> paramMap) throws Exception {
+		
+		String datas = paramMap.get("datas");
+		
+		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
+		String rs_adminID = (String)config.setValue(rsDatas, "adminID", "1");
+		
+		AdministratorVo administratorVo = new AdministratorVo();
+		administratorVo.setAdminID(rs_adminID);
+		
+		List<Map<String, Object>> list = administratorMapper.getUserInfo(administratorVo);
 		
 		String recent_fail_device = EnumUtil.blank(String.valueOf(list.get(0).get("recent_fail_device")));
 		String resource_top5 = EnumUtil.blank(String.valueOf(list.get(0).get("resource_top5")));
@@ -77,9 +93,24 @@ public class AdministratorService {
 		return result;
 	}
 	
-	public List<Map<String, Object>> getUser(AdministratorVo vo) {
+	public List<Map<String, Object>> getUser(Map<String, Object> paramMap) throws Exception{
 		
-		List<Map<String, Object>> list = administratorMapper.getUser(vo);
+		
+		String sessionId = (String) paramMap.get("sessionId");
+		String limit = (String) paramMap.get("limit");
+		String page = (String) paramMap.get("page");
+		String datas = (String) paramMap.get("datas");
+		
+		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
+		String rs_search = (String)config.setValue(rsDatas, "search", "");
+		
+		AdministratorVo administratorVo = new AdministratorVo();
+		administratorVo.setSessionId(sessionId);
+		administratorVo.setSearch(rs_search);
+		administratorVo.setLimit(Integer.parseInt(limit));
+		administratorVo.setPage(Integer.parseInt(page));
+		
+		List<Map<String, Object>> list = administratorMapper.getUser(administratorVo);
 		List<Map<String, Object>> result = new ArrayList<>();
 		
 		for(int i=0; i<list.size(); i++) {
@@ -138,34 +169,66 @@ public class AdministratorService {
 		return result;
 	}
 	
-	public List<String> delUser(AdministratorVo vo) {
+	public List<String> delUser(Map<String, Object> paramMap) throws Exception{
+		
+		String datas = (String) paramMap.get("datas");
+		
+		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
+		List<Integer> rs_adminIDs = (List<Integer>)config.setValue(rsDatas, "adminIDs", new ArrayList<>());
+		
+		List<String> rs_adminID_list = rs_adminIDs.stream()
+                .map(Object::toString)
+                .collect(Collectors.toList());
+		
 		List<String> admin_names = new ArrayList<>();
-		if(vo.getAdminIDs().size() > 0) {
-			for(String id : vo.getAdminIDs()) {
+		if(rs_adminIDs.size() > 0) {
+			for(String id : rs_adminID_list) {
 				List<Map<String, Object>> list = user.get_user_info(id);
 				admin_names.add((String) list.get(0).get("login"));
 			}
 			
-			String adminIds = String.join(",", vo.getAdminIDs());
+			String adminIds = String.join(",", rs_adminID_list);
 			administratorMapper.delUser(adminIds);
 		}
 		
 		return admin_names;
 	}
 	
-	public List<Map<String, Object>> selectUserGroup(AdministratorVo vo) {
-		return administratorMapper.selectUserGroup(vo);
+	public List<Map<String, Object>> selectUserGroup(Map<String, Object> paramMap) throws Exception {
+		
+		String datas = (String) paramMap.get("datas");
+		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
+		List<Integer> rs_adminGroupIDs = (List<Integer>)config.setValue(rsDatas, "adminGroupIDs", new ArrayList<>());
+		
+		List<String> rs_adminGroupID_list = rs_adminGroupIDs.stream()
+                .map(Object::toString)
+                .collect(Collectors.toList());
+		
+		AdministratorVo administratorVo = new AdministratorVo();
+		administratorVo.setAdminGroupIDs(rs_adminGroupID_list);
+		
+		return administratorMapper.selectUserGroup(administratorVo);
 	}
 	
-	public List<String> delUserGroup(AdministratorVo vo) {
+	public List<String> delUserGroup(Map<String, Object> paramMap) throws Exception {
+		
+		String datas = (String) paramMap.get("datas");
+		
+		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
+		List<Integer> rs_adminGroupIDs = (List<Integer>)config.setValue(rsDatas, "adminGroupIDs", new ArrayList<>());
+		
+		List<String> rs_adminGroupID_list = rs_adminGroupIDs.stream()
+                .map(Object::toString)
+                .collect(Collectors.toList());
+		
 		List<String> user_group_names = new ArrayList<>();
-		if(vo.getAdminGroupIDs().size() > 0) {
-			for(String id : vo.getAdminGroupIDs()) {
+		if(rs_adminGroupID_list.size() > 0) {
+			for(String id : rs_adminGroupID_list) {
 				List<Map<String, Object>> list = userGroup.get_user_group_info(id);
 				user_group_names.add((String) list.get(0).get("name"));
 			}
 			
-			String adminGroupIds = String.join(",", vo.getAdminGroupIDs());
+			String adminGroupIds = String.join(",", rs_adminGroupID_list);
 			administratorMapper.delUserGroup(adminGroupIds);
 		}
 		
