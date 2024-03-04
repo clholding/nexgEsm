@@ -42,5 +42,15 @@
 	        #{item}
 	    </foreach>
 	</select>
+	
+	<select id="selectDeviceList" parameterType="String" resultType="map">
+		/* AdministratorMapper.selectDeviceList */	
+		SELECT * FROM device WHERE id = #{deviceId}
+	</select>
+	
+	<select id="selectUserByID" parameterType="String" resultType="map">
+		/* AdministratorMapper.selectUserByID */	
+		CALL sesm.selectUserByID( #{adminId} );
+	</select>
 
 </mapper>

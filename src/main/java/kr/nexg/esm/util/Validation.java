@@ -1,7 +1,10 @@
 package kr.nexg.esm.util;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Validation {
@@ -71,8 +74,12 @@ public class Validation {
 	}
 	
 	//모니터링 장비
-	public static boolean userAdd_device_id(String rs_device_id) {
-		return false;
+	public static boolean userAdd_device_id(List<Map<String, Object>> list) throws Exception {
+		if(list.size() == 0) {
+			throw new Exception("모니터링 장비가 존재하지 않습니다.");
+		}
+		
+		return true;
 	}
 	
 	//ID
@@ -116,13 +123,49 @@ public class Validation {
 	}
 	
 	//이메일
-	public static boolean userAdd_email(String rs_email) {
-		return false;
+	public static boolean userAdd_email(String rs_email) throws Exception {
+		
+		if(rs_email.isBlank()) {
+			throw new Exception("이메일을 입력하십시오.");
+		}
+		if(rs_email.length() > 255) {
+			throw new Exception("이메일은 255자 이하여야 합니다.");
+		}
+		
+		String regex = "^[_a-z0-9-]+(.[_a-z0-9-]+)*@(?:\\w+\\.)+\\w+$";   
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(rs_email);
+		if(!matcher.matches()) {
+			throw new Exception("유효한 이메일 주소가 아닙니다.");
+		}
+		
+		return true;
 	}
 	
 	//관리자 유효 기간
-	public static boolean userAdd_expire_date(String rs_expire_date) {
-		return false;
+	public static boolean userAdd_expire_date(String rs_expire_date) throws Exception {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String max_date_str = "2038-01-19 12:14:07";
+		Date max_date;
+		Date expire_date;
+		if(rs_expire_date.isBlank()) {
+			throw new Exception("관리자 유효 기간을 입력하십시오.");
+		}
+		try {
+			max_date = sdf.parse(max_date_str);
+			expire_date = sdf.parse(rs_expire_date);
+		} catch (Exception e) {
+			throw new Exception("날짜 및 시간 형식이 올바르지 않습니다.");
+		}
+		
+		if(expire_date.after(max_date)) {
+			throw new Exception("입력값이 범위를 초과하였습니다.");
+		}
+		if(expire_date.before(new Date())) {
+			throw new Exception("유효 기간이 현재 시각보다 이전입니다.");
+		}
+		
+		return true;
 	}
 	
 	//비밀번호
@@ -174,8 +217,12 @@ public class Validation {
 	}
 	
 	//활성화
-	public static boolean userAdd_active(String rs_active) {
-		return false;
+	public static boolean userAdd_active(String rs_active) throws Exception {
+		if(!"0".equals(rs_active) && !"1".equals(rs_active)) {
+			throw new Exception("올바른 활성화 여부를 선택해주세요.");
+		}
+		
+		return true;
 	}
 	
 	//이름

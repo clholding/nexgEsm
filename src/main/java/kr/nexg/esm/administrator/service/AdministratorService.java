@@ -1,6 +1,7 @@
 package kr.nexg.esm.administrator.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.nexg.esm.administrator.dto.AdministratorEnum;
 import kr.nexg.esm.administrator.dto.AdministratorVo;
 import kr.nexg.esm.administrator.mapper.AdministratorMapper;
+import kr.nexg.esm.common.util.CustomMessageException;
 import kr.nexg.esm.common.util.EnumUtil;
 import kr.nexg.esm.nexgesm.mariadb.User;
 import kr.nexg.esm.util.Validation;
@@ -227,7 +229,11 @@ public class AdministratorService {
 	
 	public int setUserInfo(Map<String, Object> paramMap) throws Exception {
 		
+		int mode = AdministratorEnum.mode.valueOf("MODE_ADD").getVal();
+		String sessionId = (String) paramMap.get("sessionId");
 		String datas = (String) paramMap.get("datas");
+		
+		Map<String, Object> resultMap = new HashMap<>();
 		
 		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
 		String rs_adminID = (String) config.setValue(rsDatas, "adminID", "null");
@@ -290,6 +296,30 @@ public class AdministratorService {
 		Validation.userAdd_alarm(rs_alarm);
 		
 		Validation.userAdd_user_id(rs_login);
+		
+		Validation.userAdd_active(rs_active);
+		
+		Validation.userAdd_email(rs_email);
+		
+		Validation.userAdd_expire_date(rs_expire_date);
+		
+		List<Map<String, Object>> device_List = administratorMapper.selectDeviceList(rs_device_id);
+		
+		Validation.userAdd_device_id(device_List);
+		
+		if(rs_adminID != "null") {
+			mode = AdministratorEnum.mode.valueOf("MODE_EDIT").getVal();
+			
+			if(!sessionId.equals(rs_login) && !"1".equals(rs_adminID)) {	//로그인관리자가 다른계정의 정보를 변경시
+				rs_pwd = "null";
+			}else {
+				List<Map<String, Object>> user_List = administratorMapper.selectUserByID(rs_adminID);
+				if(user_List.get(0).get("pwd") != rs_pwd) {
+					throw new CustomMessageException("잘못된 비밀번호 입니다.");
+				}
+			}
+			
+		}
 		
 		return 0;
 		

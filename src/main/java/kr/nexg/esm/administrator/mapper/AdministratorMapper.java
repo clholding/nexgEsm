@@ -26,5 +26,9 @@ public interface AdministratorMapper {
 	
 	public List<Map<String, Object>> selectDeviceGroup(AdministratorVo vo);
 	
+	public List<Map<String, Object>> selectDeviceList(String deviceId);
+	
+	public List<Map<String, Object>> selectUserByID(String adminId);
+	
 	
 }

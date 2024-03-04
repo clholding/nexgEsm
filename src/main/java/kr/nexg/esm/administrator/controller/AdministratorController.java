@@ -24,6 +24,7 @@ import kr.nexg.esm.administrator.dto.AdministratorVo;
 import kr.nexg.esm.administrator.service.AdministratorService;
 import kr.nexg.esm.common.dto.MessageVo;
 import kr.nexg.esm.common.util.ClientIpUtil;
+import kr.nexg.esm.common.util.CustomMessageException;
 import kr.nexg.esm.nexgesm.mariadb.Log;
 import lombok.extern.slf4j.Slf4j;
 
@@ -248,6 +249,8 @@ public class AdministratorController {
         
         String sessionId = authentication.getName();
         String clientIp = ClientIpUtil.getClientIP(request);
+        
+        paramMap.put("sessionId", sessionId);
 		
     	HttpHeaders headers= new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -261,14 +264,21 @@ public class AdministratorController {
                 	.message("")
                 	.entitys("")
                 	.build();
+		} catch (CustomMessageException e) {
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message(e.getMessage())
+	            	.build();
 		} catch (Exception e) {
 			log.error("Error : ", e);
 			message = MessageVo.builder()
 	            	.success("false")
-	            	.message("")
+	            	.message(e.getMessage())
 	            	.errMsg(e.getMessage())
 	            	.errTitle("")
 	            	.build();
+			
+//			setAuditInfo("setUserInfo", results["success"])
 			
 		}
     	

@@ -4,6 +4,22 @@ import lombok.Getter;
 
 @Getter
 public class AdministratorEnum {
+	
+	public enum mode {
+		MODE_ADD(0),
+		MODE_EDIT(1);
+		
+	    private int val;
+	    
+	    mode(int val) {
+	        this.val = val;
+	    }
+	    
+	    public int getVal() {
+			return val;
+		} 
+	}
+	
 	public enum deviceState {
 		_0("0", "정상"),
 		_1("1", "장애"),
