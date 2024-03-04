@@ -61,5 +61,8 @@ public class CommonVo {
 
     /** 페이지사이즈 */
     private int limit = 10;
+    
+    /** 검색키워드 */
+    private String search = "";
 
 }
