@@ -55,6 +55,11 @@ public interface DevicesMapper {
 	 */
 	public List<Map<String, Object>> getDeviceFailInfo(DevicesVo devicesVo);
 	
+	/*
+	 * 제품실패 정보 리스트
+	 */	
+	public List<Map<String, Object>> getDeviceFailList(DevicesVo devicesVo);
+	
 	public String getGroupToDeviceListByLogin(DevicesVo devicesVo);
 	
 	/*
