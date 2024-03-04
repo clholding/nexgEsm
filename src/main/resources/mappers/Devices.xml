@@ -19,6 +19,16 @@
 		CALL sesm.getDeviceList(2);
 	</select>
 	
+	<select id="getAlarmDeviceGroupOfLogin" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
+		/* DevicesMapper.getAlarmDeviceGroupOfLogin */	
+		CALL sesm.getAlarmDeviceGroupOfLogin( #{sessionId} );
+	</select>
+	
+	<select id="getAlarmDeviceListOfLogin" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
+		/* DevicesMapper.getAlarmDeviceListOfLogin */	
+		CALL sesm.getAlarmDeviceListOfLogin( #{sessionId} , 2);
+	</select>
+	
 	
 	<select id="getDeviceInfoList" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.getDeviceInfoList */	

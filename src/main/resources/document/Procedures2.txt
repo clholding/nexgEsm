@@ -362,3 +362,186 @@ BEGIN
   DEALLOCATE PREPARE stmt;
 
 END
+
+
+***** getAlarmDeviceGroupOfLogin *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `getAlarmDeviceGroupOfLogin`(IN login VARCHAR(128))
+BEGIN
+  -- login 관리자가 관리하는 장비 그룹의 정보 조회
+  DECLARE current_lv int UNSIGNED;
+  DECLARE current_lv2 int UNSIGNED;
+  DECLARE parent_ids varchar(10000);
+  DECLARE child_ids varchar(10000);
+  DECLARE cnt int DEFAULT 0;
+  DECLARE before_cnt int DEFAULT 0;
+  DECLARE done INT DEFAULT 0;
+  DECLARE id_var INT DEFAULT 0;
+  DECLARE group_id_var INT DEFAULT 0;
+  DECLARE total_count INT DEFAULT 0;
+  DECLARE fail_count INT DEFAULT 0;
+  DECLARE top_id_var INT DEFAULT 0;
+  DECLARE my_cursor CURSOR FOR SELECT id, group_id  FROM _temp_buffer2 ORDER BY lv DESC;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+  SET SESSION sql_log_bin = OFF;
+  SET SESSION tx_isolation = 'READ-COMMITTED';
+  SET @_current_lv := 1;
+
+  -- login 관리자가 관리하는 장비 그룹 조회 - begin
+  drop table if exists _temp_buffer;
+  CREATE TEMPORARY TABLE IF NOT EXISTS _temp_buffer (
+    id int(11),
+    name varchar(255),
+    group_id int(11),
+    total int(11),
+    fail int(11),
+    lv int,
+    INDEX ix_lv (lv)
+    ) ENGINE = MEMORY;
+
+    INSERT INTO _temp_buffer SELECT dg.id, dg.name, dg.group_id, 0, 0, @_current_lv AS lv
+    FROM user_dgroup ud, device_group dg, user u WHERE u.id = ud.user_id AND ud.device_group_id = dg.id AND u.login = login GROUP BY dg.id;
+
+    recursion:
+    REPEAT
+    SET before_cnt = cnt;
+    SELECT GROUP_CONCAT(_temp_buffer.id), COUNT(*) INTO parent_ids, cnt FROM _temp_buffer WHERE lv = @_current_lv;
+
+    IF cnt = 0 THEN
+      LEAVE recursion;
+    END IF;
+
+    SET @query = CONCAT("INSERT INTO _temp_buffer
+      SELECT dg.id, dg.name, dg.group_id, 0, 0, (@_current_lv + 1) AS lv
+      FROM device_group dg WHERE (dg.id <> dg.group_id) AND dg.group_id IN (", parent_ids, ")");
+    PREPARE stmt3 FROM @query;
+    EXECUTE stmt3;
+
+    SET @_current_lv = @_current_lv + 1;
+  UNTIL 0 END REPEAT;
+  -- login 관리자가 관리하는 장비 그룹 조회 - end
+
+  drop table if exists _temp_buffer2;
+  -- 같은 table에서 select, update 동시에 처리 불가능하여 같은 데이터를 가진 _temp_buffer2 생성
+  create temporary table _temp_buffer2 engine=memory select * from _temp_buffer;
+
+  -- 장비 그룹의 하위 그룹에 포함된 장애 장비 개수와 전체 장비 개수를 구함.
+  OPEN my_cursor;
+  read_loop: LOOP
+    FETCH my_cursor INTO id_var, group_id_var;
+    IF done THEN
+      LEAVE read_loop;
+    END IF;
+
+    -- id_var 장비 그룹에 속한 FW, UTM 장비 중 장애 장비 개수와 전체 장비 개수 조회
+    SELECT count(*) INTO total_count FROM device d LEFT JOIN product p ON p.id = d.product_id WHERE FIND_IN_SET(d.group_id, id_var) AND d.candidate = 0 AND p.type IN (1,2);
+    SELECT count(*) INTO fail_count FROM device d LEFT JOIN product p ON p.id = d.product_id, device_status ds WHERE FIND_IN_SET(d.group_id, id_var) AND d.id = ds.device_id AND ds.status <= 0 AND d.candidate = 0 AND p.type IN (1,2);
+
+    -- id_var 장비 그룹에 속한 FW, UTM 장비 중 장애 장비 개수와 전체 장비 개수 _temp_buffer 테이블에 업데이트
+    UPDATE _temp_buffer SET total=total+total_count, fail=fail+fail_count WHERE id = id_var;
+
+    SELECT total INTO @child_total FROM _temp_buffer WHERE id = id_var;
+    SELECT fail INTO @child_fail FROM _temp_buffer WHERE id = id_var;
+
+    -- id_var 장비 그룹의 상위그룹에 FW, UTM 장비 중 장애 장비 개수와 전체 장비 개수를 업데이트
+    -- 장비 그룹의 하위 그룹에 포함된 장애 장비 개수와 전체 장비 개수를 구해야함.
+    UPDATE _temp_buffer SET total=total+@child_total, fail=fail+@child_fail WHERE id = group_id_var AND id_var <> group_id;
+
+  END LOOP;
+  CLOSE my_cursor;
+
+  SELECT device_group.id, device_group.name, device_group.group_id, case _temp_buffer.fail
+  when 0 then 1
+  else 0
+  end as state FROM device_group, _temp_buffer WHERE _temp_buffer.id = device_group.id;
+
+  TRUNCATE TABLE _temp_buffer2;
+  TRUNCATE TABLE _temp_buffer;
+  SET SESSION sql_log_bin = ON;
+  SET SESSION tx_isolation = 'REPEATABLE-READ';
+
+END
+
+
+***** getAlarmDeviceListOfLogin *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `getAlarmDeviceListOfLogin`(
+  IN login VARCHAR(128),
+  IN type INT)
+BEGIN
+  -- login 관리자가 관리하는 그룹에 포함된 설정 정보 조회
+  DECLARE current_lv int UNSIGNED;
+  DECLARE parent_ids varchar(10000);
+  DECLARE child_ids varchar(10000);
+  DECLARE cnt int DEFAULT 0;
+  DECLARE before_cnt int DEFAULT 0;
+
+  SET SESSION sql_log_bin = OFF;
+  SET SESSION tx_isolation = 'READ-COMMITTED';
+  SET @_current_lv := 1;
+
+  -- login 관리자가 관리하는 장비 그룹 조회 - begin
+  drop table if exists _temp_buffer;
+  CREATE TEMPORARY TABLE IF NOT EXISTS _temp_buffer (
+    id int(11),
+    name varchar(255),
+    group_id int(11),
+    lv int,
+    INDEX ix_lv (lv)
+    ) ENGINE = MEMORY;
+
+    INSERT INTO _temp_buffer SELECT dg.id, dg.name, dg.group_id, @_current_lv AS lv
+    FROM user_dgroup ud, device_group dg, user u WHERE u.id = ud.user_id AND ud.device_group_id = dg.id AND u.login = login GROUP BY dg.id;
+
+recursion:
+  REPEAT
+    SET before_cnt = cnt;
+    SELECT GROUP_CONCAT(_temp_buffer.id), COUNT(*) INTO parent_ids, cnt FROM _temp_buffer WHERE lv = @_current_lv;
+
+    IF cnt = 0 THEN
+      LEAVE recursion;
+    END IF;
+
+    SET @query = CONCAT("INSERT INTO _temp_buffer
+      SELECT dg.id, dg.name, dg.group_id, (@_current_lv + 1) AS lv
+      FROM device_group dg WHERE (dg.id <> dg.group_id) AND dg.group_id IN (", parent_ids, ")");
+    PREPARE stmt3 FROM @query;
+    EXECUTE stmt3;
+
+    SET @_current_lv = @_current_lv + 1;
+  UNTIL 0 END REPEAT;
+  -- login 관리자가 관리하는 장비 그룹 조회 - end
+
+  SELECT GROUP_CONCAT(DISTINCT _temp_buffer.id) INTO child_ids FROM _temp_buffer;
+
+  TRUNCATE TABLE _temp_buffer;
+  SET SESSION sql_log_bin = ON;
+  SET SESSION tx_isolation = 'REPEATABLE-READ';
+
+  IF child_ids IS NULL THEN
+    SELECT 0, 0;
+  ELSE
+    IF (type = 1) THEN
+      SET @query = CONCAT("SELECT d.id, d.name, d.group_id FROM device d, product p WHERE d.group_id IN (", child_ids, ") AND d.candidate = 0 AND d.product_id = p.id AND p.type IN (1,2)");
+      PREPARE stmt FROM @query;
+      EXECUTE stmt;
+      DEALLOCATE PREPARE stmt;
+    ELSE
+      SET @query = CONCAT("SELECT d.id, d.name as text, d.group_id, 'true' as leaf, d.ip, p.name, di.os, di.serial, d.active, d.cdate, ds.status, d.log, d.alarm, di.code1, di.code2,
+        MIN(ii.status) as intfs,
+        MIN(CASE WHEN eix.status = '' OR eix.status IS NULL THEN NULL ELSE CASE eix.status LIKE 'down%' WHEN 1 THEN 0 ELSE 1 END END) as eixs,
+        MIN(CASE vrrp.status WHEN 'master' THEN 1  WHEN 'backup' THEN 0 ELSE NULL END) as vrrps,
+        MIN(ts.status) as tracks,
+        GROUP_CONCAT(DISTINCT ii.name) as intlist
+        FROM device as d, device_info as di, product as p, device_status as ds
+        LEFT JOIN int_info ii ON (ii.device_id = ds.device_id AND ii.active = 1)
+        LEFT JOIN eix_status eix ON (ds.device_id = eix.device_id)
+        LEFT JOIN vrrp_status vrrp ON (ds.device_id = vrrp.device_id)
+        LEFT JOIN track_status ts ON (ds.device_id = ts.device_id)
+        WHERE d.candidate = 0 AND d.id = di.device_id AND d.id = ds.device_id AND d.product_id = p.id AND group_id IN (", child_ids, ") AND  p.type IN (1,2) GROUP BY d.id");
+      PREPARE stmt FROM @query;
+      EXECUTE stmt;
+      DEALLOCATE PREPARE stmt;
+    END IF;
+  END IF;
+
+END

@@ -95,8 +95,9 @@ public class DevicesService {
             
             List<Integer> hashList = new ArrayList<>();
             for (Map<String, Object> el : temp) {
-                hashList.add((Integer) el.get(0));
+                hashList.add((Integer) el.get("id"));
             }
+            log.info("hashList : "+hashList.toString());
 
             int pid = 0;
             for (Map<String, Object> el : temp) {
@@ -147,6 +148,101 @@ public class DevicesService {
         return result;
 	};
 	
+	public List<Map<String, Object>> getAlarmDeviceGroupListNDeviceListAll(Map<String,String> paramMap) throws IOException, ParseException{
+		
+		String datas = paramMap.get("datas");
+		
+		List<Map<String, Object>> group_list = null;
+		List<Map<String, Object>> dev_list = null;
+		
+		String schType = "all";
+		String rsAuth = "0";
+		
+		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
+		
+		schType = (String)config.setValue(rsDatas, "type", "all");  // all, group, detail
+		rsAuth = (String)config.setValue(rsDatas, "auth", "0");
+			
+		
+		if ("1".equals(rsAuth)) {
+			
+			group_list = new ArrayList<>();
+			
+			SecurityContext context = SecurityContextHolder.getContext();
+			Authentication authentication = context.getAuthentication();
+//            Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+			
+			DevicesVo devicesVo = new DevicesVo();
+			devicesVo.setSessionId(authentication.getName());
+			
+			List<Map<String, Object>> temp = devicesMapper.getAlarmDeviceGroupOfLogin(devicesVo);
+			
+			Map<String, Object> newElement = new HashMap<>();
+			newElement.put("id", 0);
+			newElement.put("name", "전체");
+			newElement.put("group_id", 0);
+			newElement.put("state", 0);
+			
+			// Adding the new Map to the list
+			group_list.add(newElement);
+			
+			log.info("group_list : "+group_list.toString());
+			
+			List<Integer> hashList = new ArrayList<>();
+			for (Map<String, Object> el : temp) {
+				hashList.add((Integer) el.get("id"));
+			}
+			
+			log.info("hashList : "+hashList);
+			
+			int pid = 0;
+			for (Map<String, Object> el : temp) {
+				pid = (Integer) el.get("group_id");
+				log.info("pid : "+pid);
+				if ((Integer) el.get("group_id") > 0 && !hashList.contains((Integer) el.get("group_id"))) {
+					pid = 0;
+				}
+				
+				List<Map<String, Object>> children = new ArrayList<>();
+				
+				Map<String, Object> element = new HashMap<>();
+				element.put("id", el.get("id"));
+				element.put("name", el.get("name"));
+				element.put("group_id", pid);
+				element.put("state", el.get("state"));
+//				element.put("children", children);
+				
+				// Adding the new Map to the list
+				group_list.add(element);
+				
+			}
+			
+			log.info("group_list2 : "+group_list.toString());
+			
+			dev_list = devicesMapper.getAlarmDeviceListOfLogin(devicesVo);
+			
+		} else {
+			group_list = devicesMapper.getDeviceGroup();
+			dev_list = devicesMapper.getDeviceList();
+		}
+		
+		log.info("group_list : "+group_list);
+		log.info("dev_list : "+dev_list);
+		
+		List<Map<String, Object>> result = new ArrayList<>();
+		
+		Map<String, Object> groupMap = new LinkedHashMap<>();
+		groupMap.put("text", group_list.get(0).get("name"));
+		groupMap.put("id", group_list.get(0).get("id"));
+		
+		List<Map<String, Object>> children = loadChildGroup(group_list, dev_list);
+		groupMap.put("children", children);
+		
+		result.add(groupMap);
+		
+		return result;
+	};
+	
     private static List<Map<String, Object>> loadChildGroup(List<Map<String, Object>> groupList, List<Map<String, Object>> devList) {
         List<Map<String, Object>> result = new ArrayList<>();
 
@@ -156,12 +252,8 @@ public class DevicesService {
         		
         		log.info(""+group.get("id"));
 	            Map<String, Object> groupMap = new LinkedHashMap<>();
-	            groupMap.put("code1", group.get("code1"));
-	            groupMap.put("state", group.get("state"));
-	            groupMap.put("fail", group.get("fail"));
 	            groupMap.put("text", group.get("name"));
-	            groupMap.put("code2", group.get("code2"));
-	            groupMap.put("total", group.get("total"));
+	            groupMap.put("state", group.get("state"));
 	            groupMap.put("id", group.get("id"));
 	
 	            List<Map<String, Object>> children = loadChildDevice(devList, (int) group.get("id"));
@@ -180,23 +272,20 @@ public class DevicesService {
         for (Map<String, Object> dev : devList) {
             if (dev.get("group_id").equals(groupId)) {
                 Map<String, Object> devMap = new LinkedHashMap<>();
-                devMap.put("id", dev.get("id"));
-                devMap.put("leaf", dev.get("leaf"));
-                devMap.put("text", dev.get("text"));
-                devMap.put("ip", dev.get("ip"));
-                devMap.put("state", dev.get("state"));
-                devMap.put("serial", dev.get("serial"));
-                devMap.put("registerDate", dev.get("cdate"));
+                devMap.put("eixs", dev.get("eixs"));
+                devMap.put("tracks", dev.get("tracks"));
+                devMap.put("vrrps", dev.get("vrrps"));
                 devMap.put("active", dev.get("active"));
-                devMap.put("log", dev.get("log"));
-                devMap.put("alarm", dev.get("alarm"));
+                devMap.put("serial", dev.get("serial"));
+                devMap.put("id", dev.get("id"));
                 devMap.put("code1", dev.get("code1"));
                 devMap.put("code2", dev.get("code2"));
-                devMap.put("os", dev.get("os"));
-                devMap.put("vrrps", dev.get("vrrps"));
                 devMap.put("intfs", dev.get("intfs"));
+                devMap.put("leaf", dev.get("leaf"));
+                devMap.put("state", dev.get("status"));
+                devMap.put("text", dev.get("text"));
+                devMap.put("ip", dev.get("ip"));
                 devMap.put("intlist", dev.get("intlist"));
-                devMap.put("eixs", dev.get("eixs"));
             	
 //                List<Map<String, Object>> emptyChildren = new ArrayList<>();
 //                devMap.put("children", emptyChildren);  // Dev nodes don't have further children

@@ -235,21 +235,38 @@ public class DevicesController {
 //    	
 //    } 
 //    
-//    @PostMapping("/getAlarmDeviceGroupListNDeviceListAll")
-//    public ResponseEntity<MessageVo> getAlarmDeviceGroupListNDeviceListAll() throws IOException  {
-//    	
-//    	HttpHeaders headers= new HttpHeaders();
-//    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
-//    	
-//    	MessageVo message = MessageVo.builder()
-//    			.status(StatusEnum.OK)
-//    			.message("")
-//    			.entitys("")
-//    			.build();
-//    	
-//    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
-//    	
-//    } 
+    @PostMapping("/getAlarmDeviceGroupListNDeviceListAll")
+    public ResponseEntity<MessageVo> getAlarmDeviceGroupListNDeviceListAll(@RequestParam Map<String,String> paramMap) throws IOException  {
+    	
+    	HttpHeaders headers= new HttpHeaders();
+    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+    	
+        MessageVo message;
+        
+        try {
+        	
+        	List<Map<String, Object>> list = devicesService.getAlarmDeviceGroupListNDeviceListAll(paramMap);
+            int totalCount = 0;
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("")
+                	.totalCount(totalCount)
+                	.entitys(list)
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}    	
+    	
+    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
+    	
+    } 
 //    
 //    @PostMapping("/getBwtDeviceGroupListNDeviceListAll")
 //    public ResponseEntity<MessageVo> getBwtDeviceGroupListNDeviceListAll() throws IOException  {
@@ -282,7 +299,10 @@ public class DevicesController {
 //    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
 //    	
 //    } 
-    
+
+	/*
+	 * 제품실패 정보
+	 */
     @PostMapping("/getDeviceFailInfo")
     public ResponseEntity<MessageVo> getDeviceFailInfo(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
     	
@@ -861,7 +881,10 @@ public class DevicesController {
 //    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
 //    	
 //    } 
-    
+
+	/*
+	 * 메모내용 수정
+	 */
     @PostMapping("/setFailMemo")
     public ResponseEntity<MessageVo> setFailMemo(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
     	
