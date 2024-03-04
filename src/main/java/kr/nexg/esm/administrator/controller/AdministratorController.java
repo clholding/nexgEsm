@@ -241,7 +241,7 @@ public class AdministratorController {
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/setUserInfo")
-    public ResponseEntity<MessageVo> setUserInfo(HttpServletRequest request, @RequestBody AdministratorVo vo) {
+    public ResponseEntity<MessageVo> setUserInfo(HttpServletRequest request, @RequestParam Map<String,Object> paramMap) {
 
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
@@ -255,7 +255,7 @@ public class AdministratorController {
         MessageVo message;
         
         try {
-        	int result = administratorService.setUserInfo(vo);
+        	int result = administratorService.setUserInfo(paramMap);
         	message = MessageVo.builder()
                 	.success("true")
                 	.message("")

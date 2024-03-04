@@ -17,7 +17,7 @@
 		CALL sesm.delUser( #{adminIds} );
 	</delete>
 	
-	<select id="selectAdminGroup" parameterType="kr.nexg.esm.administrator.dto.AdministratorVo" resultType="map">
+	<select id="selectAdminGroup" parameterType="String" resultType="map">
 		/* AdministratorMapper.selectAdminGroup */	
 		SELECT login, group_id FROM user WHERE group_id = #{adminGroupID}
 	</select>
@@ -34,5 +34,13 @@
 		/* AdministratorMapper.delUserGroup */	
 		CALL sesm.delUserGroup( #{adminGroupIds} );
 	</delete>
+	
+	<select id="selectDeviceGroup" parameterType="kr.nexg.esm.administrator.dto.AdministratorVo" resultType="map">
+		/* AdministratorMapper.selectDeviceGroup */	
+		SELECT * FROM device_group WHERE id in
+		<foreach collection="deviceGroupIDs" item="item" open="(" close=")" separator=",">
+	        #{item}
+	    </foreach>
+	</select>
 
 </mapper>

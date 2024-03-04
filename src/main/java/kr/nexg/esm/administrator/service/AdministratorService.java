@@ -225,24 +225,71 @@ public class AdministratorService {
 		return user_group_names;
 	}
 	
-	public int setUserInfo(AdministratorVo vo) throws Exception {
+	public int setUserInfo(Map<String, Object> paramMap) throws Exception {
 		
-		if(vo.getAdminID().isBlank()) {
-        	vo.setAdminID("null");
-        }
-		if(vo.getAdminName().isBlank()) {
-        	vo.setAdminName("");
-        }
-		Validation.userAdd_adminName(vo.getAdminName());
+		String datas = (String) paramMap.get("datas");
 		
-		if(vo.getDesc().isBlank()) {
-        	vo.setDesc("");
-        }
-		if(vo.getAdminGroupID().isBlank()) {
-			vo.setAdminGroupID("");
+		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
+		String rs_adminID = (String) config.setValue(rsDatas, "adminID", "null");
+		String rs_adminName = (String) config.setValue(rsDatas, "adminName", "");
+		String rs_desc = (String) config.setValue(rsDatas, "desc", "");
+		String rs_adminGroupID = (String) config.setValue(rsDatas, "adminGroupID", "");
+		List<Integer> rs_deviceGroupIDs = (List<Integer>) config.setValue(rsDatas, "deviceGroupIDs", new ArrayList<>());
+		String rs_defMode = (String) config.setValue(rsDatas, "defMode", "");
+		String rs_sessionTime = (String) config.setValue(rsDatas, "sessionTimeout", "");
+		String rs_alarm = (String) config.setValue(rsDatas, "alarm", "");
+		String rs_popupTime = (String) config.setValue(rsDatas, "popupTime", "7");
+		String rs_login = (String) config.setValue(rsDatas, "login", "");
+		String rs_pwd = (String) config.setValue(rsDatas, "pwd", "");
+		String rs_newPwd = (String) config.setValue(rsDatas, "newPwd", "");
+		String rs_active = (String) config.setValue(rsDatas, "active", "");
+		String rs_allow_ip1 = (String) config.setValue(rsDatas, "allow_ip1", "");
+		String rs_allow_ip2 = (String) config.setValue(rsDatas, "allow_ip2", "");
+		String rs_device_state = (String) config.setValue(rsDatas, "device_state", "");
+		String rs_recent_fail_device = (String) config.setValue(rsDatas, "recent_fail_device", "");
+		String rs_resource_top5 = (String) config.setValue(rsDatas, "resource_top5", "");
+		String rs_week_log_stats = (String) config.setValue(rsDatas, "week_log_stats", "");
+		String rs_week_fail_state = (String) config.setValue(rsDatas, "week_fail_state", "");
+		String rs_device_sort = (String) config.setValue(rsDatas, "device_sort", "0");
+		String rs_device_order = (String) config.setValue(rsDatas, "device_order", "0");
+		String rs_email = (String) config.setValue(rsDatas, "adminEmail", "");
+		String rs_expire_date = (String) config.setValue(rsDatas, "adminExpireDate", "");
+		String rs_lifetime = (String) config.setValue(rsDatas, "adminLifetime", "365");
+		String rs_password_expire_cycle = (String) config.setValue(rsDatas, "passwordExpireCycle", "90");
+		String rs_device_id = (String) config.setValue(rsDatas, "monitorDeviceID", "0");
+		String rs_pwdInit = (String) config.setValue(rsDatas, "pwdInit", "");
+		
+		AdministratorVo administratorVo = new AdministratorVo();
+		
+		Validation.userAdd_adminName(rs_adminName);
+		
+		List<Map<String, Object>> adminGroupList = administratorMapper.selectAdminGroup(rs_adminGroupID);
+		
+		if(rs_adminGroupID == "" && rs_adminID != "null") {
+			List<Map<String, Object>> rs_adminGroupID_list = administratorMapper.selectAdminGroup(rs_adminID);
+			rs_adminGroupID = Integer.toString((Integer) rs_adminGroupID_list.get(0).get("group_id"));
+			rs_adminGroupID = !rs_adminGroupID.isBlank() ? rs_adminGroupID : "";
+		}else {
+			Validation.userAdd_adminGroupID(adminGroupList);
 		}
-		List<Map<String, Object>> AdminGroupList = administratorMapper.selectAdminGroup(vo);
-		Validation.userAdd_adminGroupID(AdminGroupList);
+		
+		List<Map<String, Object>> deviceGroupList = new ArrayList<Map<String,Object>>();
+		if(rs_deviceGroupIDs.size() > 0) {
+			List<String> rs_deviceGroupID_list = rs_deviceGroupIDs.stream()
+	                .map(Object::toString)
+	                .collect(Collectors.toList());
+			administratorVo.setDeviceGroupIDs(rs_deviceGroupID_list);
+			deviceGroupList = administratorMapper.selectDeviceGroup(administratorVo);
+		}
+		Validation.userAdd_deviceGroupIDs(deviceGroupList);
+		
+		Validation.userAdd_defMode(rs_defMode);
+		
+		Validation.userAdd_sessionTime(rs_sessionTime);
+		
+		Validation.userAdd_alarm(rs_alarm);
+		
+		Validation.userAdd_user_id(rs_login);
 		
 		return 0;
 		

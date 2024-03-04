@@ -62,8 +62,12 @@ public class Validation {
 	}
 	
 	//관리 장비 그룹
-	public static boolean userAdd_deviceGroupIDs(String rs_deviceGroupIDs) {
-		return false;
+	public static boolean userAdd_deviceGroupIDs(List<Map<String, Object>> list) throws Exception {
+		if(list.size() == 0) {
+			throw new Exception("관리 장비 그룹이 존재하지 않습니다.");
+		}
+		
+		return true;
 	}
 	
 	//모니터링 장비
@@ -72,8 +76,26 @@ public class Validation {
 	}
 	
 	//ID
-	public static boolean userAdd_user_id(String rs_login) {
-		return false;
+	public static boolean userAdd_user_id(String rs_login) throws Exception {
+		
+		if(rs_login.isBlank()) {
+			throw new Exception("id를 입력하십시오.");
+		}
+		if(rs_login.length() < 3 || rs_login.length() > 31) {
+			throw new Exception("id는 3자 이상 31자 이하여야 합니다.");
+		}
+		String regex = "^[a-zA-Z0-9]*$";
+		if(!rs_login.matches(regex)) {
+			throw new Exception("id는 영문자와 숫자만 포함해야 합니다.");
+		}
+		Pattern pattern = Pattern.compile("[ !@#$%^&*(),.?\":;{}|<=>\\-\\+`'~]");
+		for(char c : rs_login.toCharArray()) {
+			if(pattern.matcher(Character.toString(c)).find()) {
+				throw new Exception("id에 특수문자가 포함되어 있습니다.");
+			}
+		}
+		
+		return true;
 	}
 
 	//이름
@@ -112,25 +134,43 @@ public class Validation {
 	public static boolean userAdd_adminGroupID(List<Map<String, Object>> list) throws Exception {
 		if(list.size() == 0) {
 			throw new Exception("관리자 그룹이 존재하지 않습니다.");
-		}else {
-			return true;
 		}
+		
+		return true;
 		
 	}
 	
 	//기본 관리모드
-	public static boolean userAdd_defMode(String rs_defMode) {
-		return false;
+	public static boolean userAdd_defMode(String rs_defMode) throws Exception {
+		if(rs_defMode.isBlank()) {
+			throw new Exception("기본 관리모드를 선택하십시오.");
+		}
+		
+		return true;
 	}
 	
 	//세션 타임아웃(min)
-	public static boolean userAdd_sessionTime(String rs_sessionTime) {
-		return false;
+	public static boolean userAdd_sessionTime(String rs_sessionTime) throws Exception {
+		
+		if(rs_sessionTime.isBlank()) {
+			throw new Exception("세션 타임아웃(min)을 입력하십시오.");
+		}
+		int session_time = Integer.parseInt(rs_sessionTime);
+		if(session_time < 5 || session_time > 60) {
+			throw new Exception("세션 타임아웃 값은 5에서 60 사이여야 합니다.");
+		}
+		
+		return true;
 	}
 	
 	//알람 소리 사용
-	public static boolean userAdd_alarm(String rs_alarm) {
-		return false;
+	public static boolean userAdd_alarm(String rs_alarm) throws Exception {
+		
+		if(!"0".equals(rs_alarm) && !"1".equals(rs_alarm)) {
+			throw new Exception("올바른 알람 소리 사용 여부를 선택해주세요.");
+		}
+		
+		return true;
 	}
 	
 	//활성화
