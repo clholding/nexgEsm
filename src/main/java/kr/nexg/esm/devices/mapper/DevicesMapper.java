@@ -24,6 +24,10 @@ public interface DevicesMapper {
 	
 	public List<Map<String, Object>> getDeviceList();
 	
+	public List<Map<String, Object>> getAlarmDeviceGroupOfLogin(DevicesVo devicesVo);
+	
+	public List<Map<String, Object>> getAlarmDeviceListOfLogin(DevicesVo devicesVo);
+	
     /*
      * 장비 리스트 정보 조회
      */
