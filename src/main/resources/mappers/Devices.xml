@@ -56,6 +56,11 @@
 		Call sesm.getDeviceInterface( #{id}, #{isActive} );
 	</select>
 	
+	<select id="getDeviceStatus" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
+		/* DevicesMapper.getDeviceStatus */	
+		CALL sesm.getDeviceStatus( #{deviceIDs} );
+	</select>
+	
 	<select id="getProductList" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.getProductList */	
 		CALL sesm.getProductList( #{type} );
@@ -79,6 +84,11 @@
 	<select id="searchDeviceInfoList" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.searchDeviceInfoList */	
 		Call sesm.searchDeviceInfoList( #{deviceIDs}, #{productId}, #{dname}, #{gname}, #{ip}, #{serial}, #{os}, #{agent}, #{desc}, #{company}, #{phone1}, #{fax}, #{zip}, #{address}, #{customer}, #{phone2}, #{email}, #{page}, #{viewCount} );
+	</select>
+	
+	<select id="checkManagedCode" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="int">
+		/* DevicesMapper.checkManagedCode */	
+		Call sesm.checkManagedCode( #{type}, #{code1}, #{code2})
 	</select>
 	
 	<select id="deviceGroupCnt" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="int">

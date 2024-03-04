@@ -149,6 +149,40 @@ public class DevicesService {
 	};
 	
     /*
+     * 제품 상태
+     */
+	public List<Map<String, Object>> getDeviceStatus(Map<String,String> paramMap) throws IOException, ParseException{
+		
+		String datas = paramMap.get("datas");
+		String rsDeviceIDs = "";
+		
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonNode = objectMapper.readTree(datas);
+        JsonNode deviceIDsNode = jsonNode.get("deviceIDs");
+        
+        StringBuilder deviceIDs = new StringBuilder();
+        if (deviceIDsNode != null && deviceIDsNode.isArray()) {
+            for (JsonNode idNode : deviceIDsNode) {
+                if (deviceIDs.length() > 0) {
+                    deviceIDs.append(',');
+                }
+                deviceIDs.append(idNode.asText());
+            }
+        }
+        
+        rsDeviceIDs = deviceIDsNode.toString().replace("\"", "");
+        rsDeviceIDs = rsDeviceIDs.replace("[", "").replace("]", "");
+        log.info("deviceIDsNode : "+deviceIDsNode.toString());
+		
+
+        DevicesVo devicesVo = new DevicesVo();
+        devicesVo.setDeviceIDs(rsDeviceIDs);
+        
+		return devicesMapper.getDeviceStatus(devicesVo);
+	}
+	
+	
+    /*
      * 장비관리 > 장비추가리스트
      */
 	public List<Map<String, Object>> deviceCandidate(Map<String,String> paramMap) throws IOException, ParseException{
@@ -574,6 +608,53 @@ public class DevicesService {
 	}
 	
 	/*
+	 * 정보 > 기본정보 > 관리번호 중복 체크
+	 */
+	public Map<String, Object> checkManagedCode(Map<String,String> paramMap) throws IOException, ParseException{
+		
+		String datas = paramMap.get("datas");
+		
+		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
+		
+	    String rsType 			= (String)config.setValue(rsDatas, "type", "0");
+	    String rsCode1			= (String)config.setValue(rsDatas, "code1", "");
+	    String rsCode2			= (String)config.setValue(rsDatas, "code2", "");
+	    	    
+        DevicesVo devicesVo = new DevicesVo();
+        devicesVo.setType(rsType);
+        devicesVo.setCode1(rsCode1);
+        devicesVo.setCode2(rsCode2);
+        
+	    int cnt = devicesMapper.checkManagedCode(devicesVo);
+	    log.info("cnt : "+cnt);
+	    
+	    String message = "";
+	    String success = "";
+	    
+	    if(cnt == 0) {
+	    	success = "false";
+	    	if("0".equals(rsType)) {
+	    		message = "동일한 관리번호 및 일련번호가 존재합니다.";
+	    	}else {
+	    		message = "동일한 관리번호 및 등급이 존재합니다.";
+	    	}
+	    }else {
+	    	success = "true";
+	    	if("0".equals(rsType)) {
+	    		message = "관리번호 및 일련번호가 확인되었습니다.";
+	    	}else {
+	    		message = "관리번호 및 등급이 확인되었습니다.";
+	    	}	    	
+	    }
+	    
+        Map<String, Object> map = new HashMap<String,Object>(); 
+        map.put("message", message);
+        map.put("success", success);
+        
+		return map;
+	}
+	
+	/*
 	 * 그룹 추가/수정
 	 */
 	public Map<String, Object> setDeviceGroupInfo(Map<String,String> paramMap) throws IOException, ParseException{
@@ -784,26 +865,26 @@ public class DevicesService {
 	/*
 	 * 메모내용 수정
 	 */
-	public int setFailMemo(Map<String,String> paramMap) throws IOException, ParseException{
-		
-		String datas = paramMap.get("datas");
-		
-		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
-		String failID = (String)config.setValue(rsDatas, "failID", "");
-		String type = (String)config.setValue(rsDatas, "type", "3");
-		String memo = (String)config.setValue(rsDatas, "memo", "");
-		
-		log.info("failID : "+failID);
-		log.info("type : "+type);
-		log.info("memo : "+memo);
-		
-		DevicesVo devicesVo = new DevicesVo();
-		devicesVo.setFailID(failID);		
-		devicesVo.setType(type);		
-		devicesVo.setMemo(memo);		
-		
-		return devicesMapper.setFailMemo(devicesVo);
-	}
+//	public int setFailMemo(Map<String,String> paramMap) throws IOException, ParseException{
+//		
+//		String datas = paramMap.get("datas");
+//		
+//		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
+//		String failID = (String)config.setValue(rsDatas, "failID", "");
+//		String type = (String)config.setValue(rsDatas, "type", "3");
+//		String memo = (String)config.setValue(rsDatas, "memo", "");
+//		
+//		log.info("failID : "+failID);
+//		log.info("type : "+type);
+//		log.info("memo : "+memo);
+//		
+//		DevicesVo devicesVo = new DevicesVo();
+//		devicesVo.setFailID(failID);		
+//		devicesVo.setType(type);		
+//		devicesVo.setMemo(memo);		
+//		
+//		return devicesMapper.setFailMemo(devicesVo);
+//	}
 
 }
 

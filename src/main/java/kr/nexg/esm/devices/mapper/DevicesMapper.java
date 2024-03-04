@@ -51,8 +51,13 @@ public interface DevicesMapper {
 	public List<Map<String, Object>> getDeviceInterface(DevicesVo devicesVo);
 	
     /*
-     * 제품정보 리스트
+     * 제품 상태
      */
+	public List<Map<String, Object>> getDeviceStatus(DevicesVo devicesVo);
+	
+	/*
+	 * 제품정보 리스트
+	 */
 	public List<Map<String, Object>> getProductList(DevicesVo devicesVo);
 	
 	/*
@@ -72,6 +77,11 @@ public interface DevicesMapper {
 	 */
 	public List<Map<String, Object>> searchDeviceInfoList(DevicesVo devicesVo);
 	
+	/*
+	 * 정보 > 기본정보 > 관리번호 중복 체크
+	 */	
+	public int checkManagedCode(DevicesVo devicesVo);
+	
 	public int deviceGroupCnt(DevicesVo devicesVo);
 	
 	/*
@@ -79,6 +89,6 @@ public interface DevicesMapper {
 	 */
 	public Map<String, Object> setDeviceGroupInfo(DevicesVo devicesVo);
 	
-	public int setFailMemo(DevicesVo devicesVo);
+//	public int setFailMemo(DevicesVo devicesVo);
 	
 }
