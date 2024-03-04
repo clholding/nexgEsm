@@ -10,6 +10,12 @@
 		/* DevicesMapper.getDeviceListByLogin */	
 		CALL sesm.getDeviceListByLogin( #{sessionId}, '2', #{mode} );
 	</select>
+	
+	<select id="deviceCandidate" resultType="map">
+		/* DevicesMapper.deviceCandidate */	
+		CALL sesm.getCandidateList( #{mode} );
+	</select>
+	
 	<select id="getDeviceGroup" resultType="map">
 		/* DevicesMapper.getDeviceGroup */	
 		CALL sesm.getDeviceGroup();
@@ -58,6 +64,11 @@
 	<select id="getDeviceFailInfo" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.getDeviceFailInfo */	
 		Call sesm.getDeviceFailInfo( #{failID} );
+	</select>
+	
+	<select id="getDeviceFailList" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
+		/* DevicesMapper.getDeviceFailList */	
+		Call sesm.getDeviceFailList( #{deviceID}, #{page}, #{limit} );
 	</select>
 	
 	<select id="getGroupToDeviceListByLogin" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="String">

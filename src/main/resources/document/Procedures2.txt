@@ -545,3 +545,19 @@ recursion:
   END IF;
 
 END
+
+
+***** getCandidateList *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `getCandidateList`(IN type INT)
+BEGIN
+  -- 등록 대기 장비 리스트 조회 (100개 제한)
+  IF type IS NULL THEN
+    SELECT d.id, d.ip, di.hostname, di.os, di.serial, d.product_id as model, di.license, d.name, p.name as productname FROM device as d, device_info as di, product as p
+      WHERE d.id = di.device_id AND d.product_id = p.id AND d.candidate = 1
+      LIMIT 100;
+  ELSE
+    SELECT d.id, d.ip, di.hostname, di.os, di.serial, d.product_id as model, di.license, d.name, p.name as productname FROM device as d, device_info as di, product as p
+      WHERE d.id = di.device_id AND d.product_id = p.id AND d.candidate = 1 AND p.type = type
+      LIMIT 100;
+  END IF;
+END

@@ -17,6 +17,7 @@ public class DevicesVo
     private String memo2;
     private String auth;
     private String deviceIDs;
+    private String deviceID;
     private String memo;
     private String failID;
     private int groupID;
@@ -38,6 +39,7 @@ public class DevicesVo
     private String phone2;
     private String email;
     private String page;
+    private String limit;
     private String viewCount;
     private int mode;
 }
