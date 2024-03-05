@@ -95,5 +95,23 @@
 		/* AdministratorMapper.setUserInfo */	
 		UPDATE user SET pwd_expire_date = NOW() WHERE id = #{adminId}
 	</update>
+	
+	<update id="setUserGroup" parameterType="String">
+		/* AdministratorMapper.setUserGroup */	
+		CALL sesm.setUserGroup( #{rs_adminIDs_str}, #{rs_adminGroupID} );
+	</update>
+	
+	<select id="getUserGroupInfo" parameterType="String" resultType="map">
+		/* AdministratorMapper.getUserGroupInfo */	
+		<choose>
+			<when test='groupId == "1"'>
+				CALL sesm.getUserGroupInfo(1);
+			</when>
+			<otherwise>
+				SELECT id, name, role1, role2, role3, role4, role5, role6, role7, role8, role9, role10, domain_id FROM user_group WHERE id != 1 AND role1 != 1
+			</otherwise>
+		</choose>
+		
+	</select>
 
 </mapper>

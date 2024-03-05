@@ -428,5 +428,70 @@ public class AdministratorService {
 		
 	}
 	
+	public int setUserGroup(Map<String, Object> paramMap) throws Exception {
+		
+		String datas = (String) paramMap.get("datas");
+		
+		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
+		List<String> rs_adminIDs = (List<String>)config.setValue(rsDatas, "adminIDs", new ArrayList<>());
+		String rs_adminIDs_str = String.join(",", rs_adminIDs);
+		String rs_adminGroupID = (String) config.setValue(rsDatas, "adminGroupID", "");
+		
+		int result = 0;
+		if(rs_adminIDs.size() > 0 && !rs_adminGroupID.isBlank()) {
+			result = administratorMapper.setUserGroup(rs_adminIDs_str, rs_adminGroupID);
+			
+			if(result == 0) {
+				throw new CustomMessageException("db transaction error");
+			}
+		}
+		
+		
+		return result;
+	}
+	
+	public List<Map<String, Object>> getUserGroupInfo(Map<String, Object> paramMap) throws Exception {
+		
+		String groupId = (String) paramMap.get("groupId");
+		
+		List<Map<String, Object>> list = administratorMapper.getUserGroupInfo(groupId);
+		List<Map<String, Object>> result = new ArrayList<>();
+		
+		for(int i=0; i<list.size(); i++) {
+			Map<String, Object> map = new LinkedHashMap<>();
+			
+			String setting = EnumUtil.blank(String.valueOf(list.get(i).get("role1")));
+			String device = EnumUtil.blank(String.valueOf(list.get(i).get("role2")));
+			String monitoring = EnumUtil.blank(String.valueOf(list.get(i).get("role3")));
+			String statistic = EnumUtil.blank(String.valueOf(list.get(i).get("role4")));
+			String report = EnumUtil.blank(String.valueOf(list.get(i).get("role5")));
+			String analysis = EnumUtil.blank(String.valueOf(list.get(i).get("role6")));
+			String log = EnumUtil.blank(String.valueOf(list.get(i).get("role7")));
+			String policy = EnumUtil.blank(String.valueOf(list.get(i).get("role8")));
+			String topology = EnumUtil.blank(String.valueOf(list.get(i).get("role2")));
+			String productManager = EnumUtil.blank(String.valueOf(list.get(i).get("role9")));
+			String deviceSetting = EnumUtil.blank(String.valueOf(list.get(i).get("role10")));
+			
+			map.put("adminGroupID", String.valueOf(list.get(i).get("id")));
+			map.put("adminGroupName", String.valueOf(list.get(i).get("name")));
+			map.put("setting", AdministratorEnum.activeState.valueOf("_"+setting).getVal());
+			map.put("device", AdministratorEnum.activeState.valueOf("_"+device).getVal());
+			map.put("monitoring", AdministratorEnum.activeState.valueOf("_"+monitoring).getVal());
+			map.put("statistic", AdministratorEnum.activeState.valueOf("_"+statistic).getVal());
+			map.put("report", AdministratorEnum.activeState.valueOf("_"+report).getVal());
+			map.put("analysis", AdministratorEnum.activeState.valueOf("_"+analysis).getVal());
+			map.put("log", AdministratorEnum.activeState.valueOf("_"+log).getVal());
+			map.put("policy", AdministratorEnum.activeState.valueOf("_"+policy).getVal());
+			map.put("topology", AdministratorEnum.activeState.valueOf("_"+topology).getVal());
+			map.put("productManager", AdministratorEnum.activeState.valueOf("_"+productManager).getVal());
+			map.put("deviceSetting", AdministratorEnum.activeState.valueOf("_"+deviceSetting).getVal());
+			map.put("domainID", String.valueOf(list.get(i).get("domain_id")));
+			
+			result.add(map);
+		}
+		
+		return result;
+	}
+	
 	
 }

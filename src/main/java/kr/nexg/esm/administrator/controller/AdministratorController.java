@@ -1,6 +1,7 @@
 package kr.nexg.esm.administrator.controller;
 
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +48,7 @@ public class AdministratorController {
 	Log.EsmAuditLog esmAuditLog;
 
 	/**
+	* 시스템 설정 > 계정관리 > 관리자 생성/수정
 	* 관리자정보 조회
 	* 
 	* @ param AdministratorVo
@@ -85,6 +87,7 @@ public class AdministratorController {
     }
 	
 	/**
+	* 시스템 설정 > 계정관리 > 관리자 생성/수정
 	* 관리자정보 리스트
 	* 
 	* @ param AdministratorVo
@@ -137,6 +140,7 @@ public class AdministratorController {
     }
 	
 	/**
+	* 시스템 설정 > 계정관리 > 관리자 생성/수정
 	* 관리자정보 삭제
 	* 
 	* @ param AdministratorVo
@@ -183,6 +187,7 @@ public class AdministratorController {
     }
 	
 	/**
+	* 시스템 설정 > 계정관리 > 관리자 그룹
 	* 관리자정보 그룹 삭제
 	* 
 	* @ param AdministratorVo
@@ -237,6 +242,7 @@ public class AdministratorController {
     }
 	
 	/**
+	* 시스템 설정 > 계정관리 > 관리자 생성/수정 > 관리자 추가/수정(modal)
 	* 관리자정보 추가/수정
 	* 
 	* @ param AdministratorVo
@@ -295,6 +301,108 @@ public class AdministratorController {
 //			setAuditInfo("setUserInfo", results["success"])
 			
 		}
+    	
+        return new ResponseEntity<>(message, headers, HttpStatus.OK);
+    }
+	
+	/**
+	* 시스템 설정 > 계정관리 > 관리자 생성/수정
+	* 관리자정보 권한 수정
+	* 
+	* @ param AdministratorVo
+	* @ return ResponseEntity
+	*/
+	@PostMapping("/setUserGroup")
+    public ResponseEntity<MessageVo> setUserGroup(HttpServletRequest request, @RequestParam Map<String,Object> paramMap) {
+        
+    	HttpHeaders headers= new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+        
+        MessageVo message;
+        
+        try {
+        	int result = administratorService.setUserGroup(paramMap);
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("관리자 권한 그룹정보가 수정되었습니다.")
+                	.entitys("")
+                	.build();
+        	
+		} catch (CustomMessageException e) {
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message(e.getMessage())
+	            	.errMsg("")
+	            	.errTitle("")
+	            	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+			
+		}
+        //### TO-DO ###
+//        setAuditInfo("setUserGroup", results["success"])
+    	
+        return new ResponseEntity<>(message, headers, HttpStatus.OK);
+    }
+	
+	/**
+	* 시스템 설정 > 계정관리 > 관리자 그룹
+	* 관리자 권한그룹 조회
+	* 
+	* @ param AdministratorVo
+	* @ return ResponseEntity
+	*/
+	@PostMapping("/getUserGroupInfo")
+    public ResponseEntity<MessageVo> getUserGroupInfo(HttpServletRequest request, @RequestParam Map<String,Object> paramMap) {
+		
+		SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        
+        String sessionId = authentication.getName();
+        String clientIp = ClientIpUtil.getClientIP(request);
+        String groupId = "1";
+        paramMap.put("groupId", groupId);
+
+    	HttpHeaders headers= new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+        
+        MessageVo message;
+        
+        try {
+        	List<Map<String, Object>> list = administratorService.getUserGroupInfo(paramMap);
+        	int totalCount = list.size();
+        	message = MessageVo.builder()
+                	.success("true")
+                	.totalCount(totalCount)
+                	.message("")
+                	.entitys(list)
+                	.build();
+        	
+		} catch (CustomMessageException e) {
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message(e.getMessage())
+	            	.errMsg("")
+	            	.errTitle("")
+	            	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+			
+		}
+        //### TO-DO ###
+//        setAuditInfo("setUserGroup", results["success"])
     	
         return new ResponseEntity<>(message, headers, HttpStatus.OK);
     }
