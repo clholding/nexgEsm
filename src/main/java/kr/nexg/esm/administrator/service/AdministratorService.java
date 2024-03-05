@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,6 +28,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class AdministratorService {
+	
+	@Autowired
+	PasswordEncoder passwordEncoder;
 	
 	@Autowired
 	AdministratorMapper administratorMapper;
@@ -355,7 +359,7 @@ public class AdministratorService {
 	    	SHA256 sha256 = new SHA256();
 	    	String uid = UUID.randomUUID().toString();
 	    	tmp_pwd = uid.replaceAll("-", "");
-			rs_pwd = sha256.encrypt(tmp_pwd);
+			rs_pwd = passwordEncoder.encode(sha256.encrypt(tmp_pwd));
 	    }
 	    
 	    administratorVo.setAdminID(rs_adminID != "null" ? rs_adminID : null);
@@ -429,6 +433,7 @@ public class AdministratorService {
 	    }
 	    
 	    resultMap.put("audit_msg", audit_msg);
+	    resultMap.put("mode", mode);
 		
 		return resultMap;
 		
