@@ -83,7 +83,8 @@
 	
 	<select id="searchDeviceInfoList" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.searchDeviceInfoList */	
-		Call sesm.searchDeviceInfoList( #{deviceIDs}, #{productId}, #{dname}, #{gname}, #{ip}, #{serial}, #{os}, #{agent}, #{desc}, #{company}, #{phone1}, #{fax}, #{zip}, #{address}, #{customer}, #{phone2}, #{email}, #{page}, #{viewCount} );
+		Call sesm.searchDeviceInfoList( #{deviceIDs}, #{productId}, #{dname}, #{gname}, #{ip}, #{serial}, #{os}, #{agent}, #{desc}, #{company}, 
+		#{phone1}, #{fax}, #{zip}, #{address}, #{customer}, #{phone2}, #{email}, #{page}, #{viewCount} );
 	</select>
 	
 	<select id="checkManagedCode" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="int">
@@ -98,7 +99,8 @@
 	
 	<select id="setDeviceGroupInfo" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.setDeviceGroupInfo */	
-		Call sesm.setDeviceGroupInfo( #{groupID}, #{name}, #{desc}, #{gp}, #{sessionId}, #{code1}, #{code2}, #{company}, #{customer}, #{email}, #{zip}, #{address}, #{phone1}, #{phone2}, #{fax}, #{memo1}, #{memo2} );
+		Call sesm.setDeviceGroupInfo( #{groupID}, #{name}, #{desc}, #{gp}, #{sessionId}, #{code1}, #{code2}, #{company}, #{customer}, #{email}, 
+		#{zip}, #{address}, #{phone1}, #{phone2}, #{fax}, #{memo1}, #{memo2} );
 	</select>
 	
 	<update id="setFailMemo" parameterType="kr.nexg.esm.devices.dto.DevicesVo">
@@ -106,4 +108,59 @@
 		Call sesm.setFailMemo( #{failID}, #{type}, #{sessionId}, #{memo} );
 	</update>
 
+	<select id="overwriteDevice" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
+		/* DevicesMapper.overwriteDevice */	
+		SELECT id, name, group_id, active 
+		  FROM device 
+		 WHERE 1 = 1
+		 <if test="name neq '' and name != null">
+		   AND name = #{name}
+		 </if>
+		 <if test="overwriteid neq '' and overwriteid != null">
+		   AND id = #{overwriteid}
+		 </if>
+	</select>
+	
+	<select id="totalDeviceCount" resultType="int">
+		/* DevicesMapper.totalDeviceCount */	
+		SELECT COUNT(*) cnt FROM device WHERE active = 1
+	</select>
+	
+	<select id="groupMaximumChkecker" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="int">
+		/* DevicesMapper.groupMaximumChkecker */	
+		SELECT COUNT(*) cnt FROM device WHERE group_id = #{id}
+	</select>
+	
+	<select id="groupMaximumChkecker2" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="int">
+		/* DevicesMapper.groupMaximumChkecker2 */	
+		SELECT COUNT(*) cnt 
+		  FROM device, product p 
+		 WHERE p.id = device.product_id 
+		   AND p.type = #{type}
+		   AND group_id = #{id}
+	</select>
+	
+	<select id="overwriteDeviceInfo" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
+		/* DevicesMapper.overwriteDeviceInfo */	
+		Call sesm.overwriteDeviceInfo( #{id}, #{overDId}, #{name}, #{desc}, #{ip}, #{active}, #{log}, #{alarm}, #{serial}, #{company}, 
+		#{customer}, #{email}, #{zip}, #{address}, #{phone1}, #{phone2}, #{fax}, #{mid}, #{mpass}, #{gid}, 
+		#{productId}, #{snmpUseInherit}, #{snmpVersion}, #{snmpCommunity}, #{snmpLevel}, #{snmpUser}, #{snmpAuthprot}, #{snmpAuthpass}, #{snmpPrivprot}, #{snmpPrivpass}, 
+		#{memo1}, #{memo2}, #{code1}, #{code2} );
+	</select>
+
+	<select id="setDeviceInfo" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
+		/* DevicesMapper.setDeviceInfo */	
+		Call sesm.setDeviceInfo( #{id}, #{name}, #{desc}, #{ip}, #{active}, #{log}, #{alarm}, #{serial}, #{company}, #{customer}, 
+		#{email}, #{zip}, #{address}, #{phone1}, #{phone2}, #{fax}, #{mid}, #{mpass}, #{gid}, #{productId}, 
+		#{snmpUseInherit}, #{snmpVersion}, #{snmpCommunity}, #{snmpLevel}, #{snmpUser}, #{snmpAuthprot}, #{snmpAuthpass}, #{snmpPrivprot}, #{snmpPrivpass}, #{memo1}, 
+		#{memo2}, #{code1}, #{code2} );
+	</select>
+	
+	<update id="updateDeviceInfo" parameterType="kr.nexg.esm.devices.dto.DevicesVo" >
+		/* DevicesMapper.updateDeviceInfo */	
+		UPDATE device_info 
+		   SET serial = #{serial}
+	     WHERE device_id = #{deviceId}
+	</update>
+			
 </mapper>

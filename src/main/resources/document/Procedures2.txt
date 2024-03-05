@@ -561,3 +561,219 @@ BEGIN
       LIMIT 100;
   END IF;
 END
+
+
+***** overwriteDeviceInfo *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `overwriteDeviceInfo`(
+  IN id INT, IN overwrited_id INT, IN name VARCHAR(128),
+  IN `desc` VARCHAR(255), IN ip VARCHAR(32),
+  IN active INT, IN log INT, IN alarm INT,
+  IN serial VARCHAR(255), IN company VARCHAR(255), IN customer VARCHAR(255),
+  IN email VARCHAR(255), IN zip VARCHAR(255),
+  IN address VARCHAR(255), IN phone1 VARCHAR(255),
+  IN phone2 VARCHAR(255), IN fax VARCHAR(255),
+  IN `mid` VARCHAR(255), IN mpass VARCHAR(255),
+  IN gid INT, IN product_id INT,
+  IN use_inherit INT,
+  IN version VARCHAR(32), IN community VARCHAR(128),
+  IN `level` VARCHAR(32), IN `user` VARCHAR(128),
+  IN authprot VARCHAR(128), IN authpass VARCHAR(128),
+  IN privprot VARCHAR(32), IN privpass VARCHAR(128),
+  IN memo1 VARCHAR(255), IN memo2 VARCHAR(255),
+  IN code1 VARCHAR(32), IN code2 VARCHAR(32)
+)
+BEGIN
+  -- 장비 교체 (overwrite_id 장비의 설정 정보와 id 를 그대로 사용하고 신규 장비(id)의 라이센스, ip를 사용한다.)
+  DECLARE cur_state INT DEFAULT '0';
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET cur_state = 1;
+  DECLARE CONTINUE HANDLER FOR SQLWARNING  SET cur_state = 1;
+  DECLARE CONTINUE HANDLER FOR SQLEXCEPTION SET cur_state = 1;
+
+  START TRANSACTION;
+
+  SET_DEVICEINFO:
+  BEGIN
+    -- overwrited id : 교체대상 장비
+    -- id : 새로운 장비
+
+    -- 교체대상 장비의 serial 이나 새로운 장비의 serial 이 현재 입력된 serial 과는 동일할 수 있지만, 다른 장비의 serial 과는 동일할 수 없다.
+    -- 교체대상 장비의 name 이나 새로운 장비의 name 이 현재 입력된 name 과는 동일할 수 있지만, 다른 장비의 name 과는 동일할 수 없다.
+
+    DELETE FROM device WHERE device.id = id;
+    SET cur_state = 0;
+
+    SELECT di.device_id INTO @id_var FROM device_info di WHERE di.serial = serial;
+
+    SET cur_state = 0;
+    -- 동일한 serial 이 있는 경우
+    IF @id_var IS NOT NULL THEN
+      #교체하려는 장비 serial 이 아닌 경우
+      IF @id_var != overwrited_id AND @id_var != id THEN
+        SELECT 0 as col, 0 as col2;
+        ROLLBACK;
+        LEAVE SET_DEVICEINFO;
+      END IF;
+    END IF;
+
+    SET cur_state = 0;
+    -- 동일한 장비 이름이 있는지 확인
+    SELECT d.id INTO @id_var FROM device d WHERE d.name = name;
+
+    -- 동일한 장비 이름이 있는 경우
+    IF @id_var != overwrited_id THEN
+      SELECT 0 as col, id as col2;
+      ROLLBACK;
+      LEAVE SET_DEVICEINFO;
+    END IF;
+
+    SET cur_state = 0;
+    UPDATE device SET device.name = name, device.desc=`desc`, device.ip = ip, device.active = active, device.log = log,
+    device.alarm = alarm, device.product_id = product_id, device.group_id = gid WHERE device.id = overwrited_id;
+
+    IF cur_state THEN
+      ROLLBACK;
+      SELECT 0 as col, overwrited_id as col2;
+    ELSE
+      UPDATE device_info SET
+      device_info.serial = serial, device_info.company = company, device_info.customer = customer, device_info.email = email, device_info.zip = zip, device_info.address = address,
+      device_info.phone1 = phone1, device_info.phone2 = phone2, device_info.fax = fax, device_info.`mid` = `mid`, device_info.mpass = mpass,
+      device_info.memo1 = memo1, device_info.memo2 = memo2, device_info.code1 = code1, device_info.code2 = code2
+      WHERE device_info.device_id = overwrited_id;
+
+      IF cur_state THEN
+        ROLLBACK;
+        SELECT 0 as col, id as col2;
+      ELSE
+        UPDATE snmp_info SET snmp_info.version = version, snmp_info.community = community, snmp_info.use_inherit = use_inherit, snmp_info.`level` = `level`,
+        snmp_info.`user` = `user`, snmp_info.authprot = authprot, snmp_info.authpass = authpass, snmp_info.privprot = privprot, snmp_info.privpass = privpass
+        WHERE snmp_info.device_id = overwrited_id;
+
+        IF cur_state THEN
+          ROLLBACK;
+          SELECT 0 as col, id as col2;
+        ELSE
+          COMMIT;
+          SELECT 1 as col, overwrited_id as col2;
+        END IF;
+      END IF;
+    END IF;
+  END;
+END
+
+
+***** setDeviceInfo *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `setDeviceInfo`(
+  IN id INT, IN name VARCHAR(128),
+  IN `desc` VARCHAR(255), IN ip VARCHAR(32),
+  IN active INT, IN log INT, IN alarm INT,
+  IN serial VARCHAR(255), IN company VARCHAR(255), IN customer VARCHAR(255),
+  IN email VARCHAR(255), IN zip VARCHAR(255),
+  IN address VARCHAR(255), IN phone1 VARCHAR(255),
+  IN phone2 VARCHAR(255), IN fax VARCHAR(255),
+  IN `mid` VARCHAR(255), IN mpass VARCHAR(255),
+  IN gid INT, IN product_id INT,
+  IN use_inherit INT,
+  IN version VARCHAR(32), IN community VARCHAR(128),
+  IN `level` VARCHAR(32), IN `user` VARCHAR(128),
+  IN authprot VARCHAR(128), IN authpass VARCHAR(128),
+  IN privprot VARCHAR(32), IN privpass VARCHAR(128),
+  IN memo1 VARCHAR(255), IN memo2 VARCHAR(255),
+  IN code1 VARCHAR(32), IN code2 VARCHAR(32)
+)
+BEGIN
+  -- 장비 정보 업데이트
+  DECLARE cur_state INT DEFAULT '0';
+  DECLARE select_id INT DEFAULT '0';
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET cur_state = 1;
+  DECLARE CONTINUE HANDLER FOR SQLWARNING  SET cur_state = 1;
+  DECLARE CONTINUE HANDLER FOR SQLEXCEPTION SET cur_state = 1;
+
+  START TRANSACTION;
+
+  -- 0, 0 을 리턴할 경우 장비 추가 및 수정 실패하고 원인은 중복 시리얼이 있는 경우입니다.
+  -- 0, device_id 를 리턴할 경우 장비 추가 및 수정 실패하고 원인은 중복 장비명이 있는 경우입니다.
+  -- 1, device_id 를 리턴할 경우 장비 추가 및 수정 성공하고 device_id 는 추가 또는 수정된 장비의 id 입니다.
+  SET_DEVICEINFO:
+  BEGIN
+    -- 동일한 시리얼을 가진 장비가 있는지 조회
+    SELECT di.device_id, d.candidate INTO @id_var, @candi_var FROM device_info di, device d WHERE di.device_id = d.id AND di.serial = serial;
+
+    IF id IS NULL THEN
+      -- 신규 추가 인데 동일한 시리얼 장비가 이미 리스트에 있다면 미등록 상태인지 확인.
+      IF @candi_var = 0 THEN
+        SELECT 0 as col, 0 as col2;
+        # 프로시저 종료
+        LEAVE SET_DEVICEINFO;
+      END IF;
+    ELSE
+      -- 수정인데 동일한 시리얼 장비가 다른 id를 가지고 있으면 안됨.
+      IF @id_var != id THEN
+        SELECT 0 as col, 0 as col2;
+        # 프로시저 종료
+        LEAVE SET_DEVICEINFO;
+      END IF;
+      SET @id_var = id;
+    END IF;
+
+    SET cur_state = 0;
+
+    IF @id_var IS NULL THEN
+      SET select_id = NULL;
+    ELSE
+      SET select_id = @id_var;
+    END IF;
+
+    -- 장비 기본 정보 설정
+    INSERT INTO device (id, name, `desc`, ip, active, log, alarm, product_id, group_id)
+    VALUES (select_id, name, `desc`, ip, active, log, alarm, product_id, gid)
+    ON DUPLICATE KEY UPDATE device.name = name, device.desc=`desc`, device.ip = ip, device.active = active, device.log = log,
+    device.alarm = alarm, device.product_id = product_id, device.group_id = gid;
+
+    IF cur_state THEN
+      ROLLBACK;
+      SELECT 0 as col, select_id as col2;
+    ELSE
+      IF select_id IS NULL THEN
+        SELECT LAST_INSERT_ID() INTO select_id;
+      END IF;
+
+      UPDATE device SET candidate = 0 WHERE device.id = select_id;
+
+      IF select_id = gid THEN
+        SET cur_state = 2;
+      END IF;
+
+      IF cur_state THEN
+        ROLLBACK;
+        SELECT 0 as col, select_id  as col2;
+      ELSE
+        -- 장비 세부 정보 설정
+        INSERT INTO device_info (device_id, serial, company, customer, email, zip, address, phone1, phone2, fax, `mid`, mpass, memo1, memo2, code1, code2)
+        VALUES (select_id, serial, company, customer, email, zip, address, phone1, phone2, fax, `mid`, mpass, memo1, memo2, code1, code2)
+        ON DUPLICATE KEY UPDATE
+        device_info.serial = serial, device_info.company = company, device_info.customer = customer, device_info.email = email, device_info.zip = zip, device_info.address = address,
+        device_info.phone1 = phone1, device_info.phone2 = phone2, device_info.fax = fax, device_info.`mid` = `mid`, device_info.mpass = mpass,
+        device_info.memo1 = memo1, device_info.memo2 = memo2, device_info.code1 = code1, device_info.code2 = code2;
+
+        IF cur_state THEN
+          ROLLBACK;
+          SELECT 0 as col, select_id  as col2;
+        ELSE
+          -- 개별 장비 snmp 정보 설정
+         INSERT INTO snmp_info (device_id, use_inherit, version, community, `level`, `user`, authprot, authpass, privprot, privpass)
+          VALUES (select_id, use_inherit, version, community, `level`, `user`, authprot, authpass, privprot, privpass)
+          ON DUPLICATE KEY UPDATE snmp_info.version = version, snmp_info.community = community, snmp_info.use_inherit = use_inherit, snmp_info.`level` = `level`,
+          snmp_info.`user` = `user`, snmp_info.authprot = authprot, snmp_info.authpass = authpass, snmp_info.privprot = privprot, snmp_info.privpass = privpass;
+
+          IF cur_state THEN
+            ROLLBACK;
+            SELECT 0 as col, select_id as col2;
+          ELSE
+            COMMIT;
+            SELECT 1 as col, select_id as col2;
+          END IF;
+        END IF;
+      END IF;
+    END IF;
+  END;
+END
