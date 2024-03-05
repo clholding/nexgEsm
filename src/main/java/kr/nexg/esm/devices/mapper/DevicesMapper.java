@@ -40,14 +40,15 @@ public interface DevicesMapper {
 	
 	public Map<String, Object> getDeviceGroupInfo(DevicesVo devicesVo);
 	
-	/*
-	 * 장비 정보 조회
-	 */
+    /*
+     * DeviceFinder > 개별정보 > 정보 > 기본정보
+     * 메인 > SideBar > 토플로지 > 타사 장비 추가 > 기본정보 
+     */
 	public Map<String, Object> getDeviceInfo(DevicesVo devicesVo);
 	
-	/*
-	 * 제품 인터페이스 리스트 조회
-	 */
+    /*
+     * DeviceFinder > 개별정보 > 정보 > 인터페이스
+     */
 	public List<Map<String, Object>> getDeviceInterface(DevicesVo devicesVo);
 	
     /*
@@ -73,20 +74,20 @@ public interface DevicesMapper {
 	public String getGroupToDeviceListByLogin(DevicesVo devicesVo);
 	
 	/*
-	 * 장비 리스트 조건 검색
+	 * 메인화면 > SideBar > 자산이력
 	 */
 	public List<Map<String, Object>> searchDeviceInfoList(DevicesVo devicesVo);
 	
 	/*
-	 * 정보 > 기본정보 > 관리번호 중복 체크
-	 */	
+	 * DeviceFinder > 개별정보 > 정보 > 기본정보 > 관리번호 중복체크
+	 */
 	public int checkManagedCode(DevicesVo devicesVo);
 	
 	public int deviceGroupCnt(DevicesVo devicesVo);
 	
-	/*
-	 * 그룹 추가/수정
-	 */
+    /*
+     * DeviceFinder > 그룹정보 > 정보 > 기본정보 > 저장
+     */
 	public Map<String, Object> setDeviceGroupInfo(DevicesVo devicesVo);
 	
 //	public int setFailMemo(DevicesVo devicesVo);
