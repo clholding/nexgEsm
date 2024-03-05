@@ -31,6 +31,42 @@ public class DevicesService {
 	@Autowired
 	DevicesMapper devicesMapper;
 	
+    public static Map<String, String> convertStatusInfo(String type, String totalVal, String val, String alarmVal) {
+        Map<String, String> result = new HashMap<>();
+
+        log.info("type : "+type+", totalVal : "+totalVal+", val : "+val+", alarmVal : "+alarmVal);
+        float m_val = (val == "null") ? 0 : Float.parseFloat(val);
+        float m_alarmVal = (alarmVal == "null") ? 0 : Float.parseFloat(alarmVal);
+        float m_totalVal = (totalVal == "null") ? 0 : Float.parseFloat(totalVal);
+
+        String m_status = "1";
+
+        if ("cpu".equals(type)) {
+            if (m_val > m_alarmVal && m_alarmVal > 0) {
+                m_status = "0";
+            }
+            m_val = Math.round(m_val * 100) / 100.0f;
+        } else if (type.equals("traffic") || type.equals("session") || type.equals("tunnel")) {
+            if (m_val > m_alarmVal && m_alarmVal > 0) {
+                m_status = "0";
+            }
+            m_val = Math.round(m_val);
+        } else {
+            if (m_val > 0) {
+                m_val = (m_totalVal - m_val) / m_totalVal * 100;
+            }
+            m_val = Math.round(m_val * 100) / 100.0f;
+            if (m_val > m_alarmVal && m_alarmVal > 0) {
+                m_status = "0";
+            }
+        }
+
+        result.put("num", (m_val >= 0) ? Float.toString(m_val) : "0");
+        result.put("state", (m_val < 0) ? "2" : m_status);
+
+        return result;
+    }
+    
     /*
      * DeviceFinder
      */
@@ -152,8 +188,8 @@ public class DevicesService {
 	};
 	
     /*
-     * 제품 상태
-     */
+     * DeviceFinder > 개별정보 > 장비미리보기
+     */  
 	public List<Map<String, Object>> getDeviceStatus(Map<String,String> paramMap) throws IOException, ParseException{
 		
 		String datas = paramMap.get("datas");
@@ -181,7 +217,41 @@ public class DevicesService {
         DevicesVo devicesVo = new DevicesVo();
         devicesVo.setDeviceIDs(rsDeviceIDs);
         
-		return devicesMapper.getDeviceStatus(devicesVo);
+		List<Map<String, Object>> result = new ArrayList<>();
+		List<Map<String, Object>> list = devicesMapper.getDeviceStatus(devicesVo);
+		for (Map<String, Object> vo : list) {
+			
+			
+	        Map<String, String> statusCpu = convertStatusInfo("cpu", "0", String.valueOf(vo.get("cpu")), String.valueOf(vo.get("cpu_alarm")));
+	        Map<String, String> statusMem = convertStatusInfo("mem", String.valueOf(vo.get("mem_total")), String.valueOf(vo.get("mem_avail")), String.valueOf(vo.get("mem_alarm")));
+	        Map<String, String> statusDisk = convertStatusInfo("disk", String.valueOf(vo.get("disk0_total")), Integer.toString((Integer.parseInt(String.valueOf(vo.get("disk0_total"))) - Integer.parseInt(String.valueOf(vo.get("disk0_used"))))), String.valueOf(vo.get("disk0_alarm")));
+	        Map<String, String> statusTraffic = convertStatusInfo("traffic", "0", String.valueOf(vo.get("rx_bytes")), String.valueOf(vo.get("rbytes_alarm")));
+	        Map<String, String> statusSession = convertStatusInfo("session", "0", String.valueOf(vo.get("session")), String.valueOf(vo.get("session_alarm")));
+	        Map<String, String> statusTunnel = convertStatusInfo("tunnel", "0", String.valueOf(vo.get("tunnel")), String.valueOf(vo.get("tunnel_alarm")));
+	        
+			Map<String, Object> map = new LinkedHashMap<>();
+			map.put("id", vo.get("device_id"));
+			map.put("name", vo.get("name1"));
+			map.put("imgPath", "/static/images/productType_2.png");
+			map.put("deviceState", vo.get("status1"));
+			map.put("active", vo.get("active"));
+			map.put("rsrp", vo.get("rsrp"));
+			map.put("location", vo.get("location"));
+			map.put("tunnel_info", vo.get("tunnel_info"));
+			map.put("status", Map.of(
+	                "cpu", statusCpu,
+	                "mem", statusMem,
+	                "disk", statusDisk,
+	                "traffic", statusTraffic,
+	                "session", statusSession,
+	                "tunnel", statusTunnel
+	        ));
+			
+			result.add(map);
+		}
+
+		return result;
+		
 	}
 	
 	

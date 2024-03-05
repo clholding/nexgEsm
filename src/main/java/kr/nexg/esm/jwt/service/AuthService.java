@@ -1,9 +1,12 @@
 package kr.nexg.esm.jwt.service;
 
+import java.security.NoSuchAlgorithmException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 //import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,14 +15,18 @@ import kr.nexg.esm.jwt.JwtTokenProvider;
 import kr.nexg.esm.jwt.dto.AuthVo;
 import kr.nexg.esm.jwt.dto.TokenVo;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import kr.nexg.esm.common.util.SHA256;
+import kr.nexg.esm.devices.controller.DevicesController;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AuthService {
 	
-//	@Autowired
-//	PasswordEncoder passwordEncoder;
+	@Autowired
+	PasswordEncoder passwordEncoder;
 	
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtTokenProvider jwtTokenProvider;
@@ -33,6 +40,18 @@ public class AuthService {
 //    	System.out.println("pwd : "+authVo.getPwd());
 //    	String encodedPassword = passwordEncoder.encode(authVo.getPwd());
 //    	System.out.println("encodedPassword : "+encodedPassword);
+    	
+//    	SHA256 sha256 = new SHA256();
+//    	String pwd = "";
+//    	
+//		try {
+//			pwd = sha256.encrypt(authVo.getPwd());
+//		} catch (NoSuchAlgorithmException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//    	log.info("pwd : "+pwd);
+//    	log.info("encodedPassword : "+passwordEncoder.encode(pwd));
     	
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(authVo.getLogin(), authVo.getPwd());
  

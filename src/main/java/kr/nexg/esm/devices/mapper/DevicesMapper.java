@@ -52,8 +52,8 @@ public interface DevicesMapper {
 	public List<Map<String, Object>> getDeviceInterface(DevicesVo devicesVo);
 	
     /*
-     * 제품 상태
-     */
+     * DeviceFinder > 개별정보 > 장비미리보기
+     */  
 	public List<Map<String, Object>> getDeviceStatus(DevicesVo devicesVo);
 	
 	/*

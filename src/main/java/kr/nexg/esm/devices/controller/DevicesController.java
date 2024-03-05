@@ -680,7 +680,7 @@ public class DevicesController {
 //    
     
     /*
-     * 제품 상태
+     * DeviceFinder > 개별정보 > 장비미리보기
      */    
     @PostMapping("/getDeviceStatus")
     public ResponseEntity<MessageVo> getDeviceStatus(@RequestParam Map<String,String> paramMap) throws IOException  {
