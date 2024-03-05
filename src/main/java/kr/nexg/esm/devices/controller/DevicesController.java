@@ -74,6 +74,9 @@ public class DevicesController {
 //    	
 //    } 
     
+	/*
+	 * TopNav > 적용
+	 */
     @PostMapping("/applyDevice")
     public ResponseEntity<MessageVo> applyDevice(HttpServletRequest request) throws IOException  {
     	
@@ -144,7 +147,7 @@ public class DevicesController {
 //    } 
 
 	/*
-	 * 정보 > 기본정보 > 관리번호 중복 체크
+	 * DeviceFinder > 개별정보 > 정보 > 기본정보 > 관리번호 중복체크
 	 */
     @PostMapping("/checkManagedCode")
     public ResponseEntity<MessageVo> checkManagedCode(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
@@ -228,6 +231,9 @@ public class DevicesController {
 //    	
 //    } 
     
+    /*
+     * DeviceFinder
+     */
     @PostMapping("/deviceAll")
     public ResponseEntity<MessageVo> deviceAll(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
     	
@@ -297,6 +303,9 @@ public class DevicesController {
     	
     } 
     
+    /*
+     * 메인 화면 > 탑메뉴 > 시스템 설정 > 알람 > 장비/그릅 임계치 설정
+     */
     @PostMapping("/getAlarmDeviceGroupListNDeviceListAll")
     public ResponseEntity<MessageVo> getAlarmDeviceGroupListNDeviceListAll(@RequestParam Map<String,String> paramMap) throws IOException  {
     	
@@ -362,46 +371,46 @@ public class DevicesController {
 //    	
 //    } 
 
-	/*
-	 * 제품실패 정보
-	 */
-    @PostMapping("/getDeviceFailInfo")
-    public ResponseEntity<MessageVo> getDeviceFailInfo(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
-    	
-    	HttpHeaders headers= new HttpHeaders();
-    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
-
-    	log.info("devicesVo : "+paramMap.get("datas"));
-    	
-        MessageVo message;
-        
-        try {
-        	
-        	List<Map<String, Object>> list = devicesService.getDeviceFailInfo(paramMap);
-            int totalCount = list.size();
-        	
-        	message = MessageVo.builder()
-                	.success("true")
-                	.message("")
-                	.totalCount(totalCount)
-                	.entitys(list)
-                	.build();
-		} catch (Exception e) {
-			log.error("Error : ", e);
-			message = MessageVo.builder()
-	            	.success("false")
-	            	.message("")
-	            	.errMsg(e.getMessage())
-	            	.errTitle("")
-	            	.build();
-		}    	
-    	
-    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
-    	
-    } 
+//	/*
+//	 * 제품실패 정보
+//	 */
+//    @PostMapping("/getDeviceFailInfo")
+//    public ResponseEntity<MessageVo> getDeviceFailInfo(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
+//    	
+//    	HttpHeaders headers= new HttpHeaders();
+//    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+//
+//    	log.info("devicesVo : "+paramMap.get("datas"));
+//    	
+//        MessageVo message;
+//        
+//        try {
+//        	
+//        	List<Map<String, Object>> list = devicesService.getDeviceFailInfo(paramMap);
+//            int totalCount = list.size();
+//        	
+//        	message = MessageVo.builder()
+//                	.success("true")
+//                	.message("")
+//                	.totalCount(totalCount)
+//                	.entitys(list)
+//                	.build();
+//		} catch (Exception e) {
+//			log.error("Error : ", e);
+//			message = MessageVo.builder()
+//	            	.success("false")
+//	            	.message("")
+//	            	.errMsg(e.getMessage())
+//	            	.errTitle("")
+//	            	.build();
+//		}    	
+//    	
+//    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
+//    	
+//    } 
     
 	/*
-	 * 제품실패 정보 리스트
+	 * DeviceFinder > 개별정보 > 정보 > 장애내역
 	 */    
     @PostMapping("/getDeviceFailList")
     public ResponseEntity<MessageVo> getDeviceFailList(@RequestParam Map<String,String> paramMap) throws IOException  {
@@ -438,6 +447,9 @@ public class DevicesController {
     	
     } 
     
+    /*
+     * DeviceFinder > 그룹정보 > 정보 > 기본정보
+     */
     @PostMapping("/getDeviceGroupInfo")
     public ResponseEntity<MessageVo> getDeviceGroupInfo(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
     	
@@ -473,6 +485,9 @@ public class DevicesController {
     	
     } 
     
+    /*
+     * 메인 > SideBar > 토플로지 > 타사 장비 추가 > 기본정보 > 그룹
+     */
     @PostMapping("/getDeviceGroupList")
     public ResponseEntity<MessageVo> getDeviceGroupList() throws IOException, ParseException  {
     	
@@ -507,7 +522,8 @@ public class DevicesController {
     } 
     
     /*
-     * 장비 정보 조회
+     * DeviceFinder > 개별정보 > 정보 > 기본정보
+     * 메인 > SideBar > 토플로지 > 타사 장비 추가 > 기본정보 
      */
     @PostMapping("/getDeviceInfo")
     public ResponseEntity<MessageVo> getDeviceInfo(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
@@ -544,9 +560,7 @@ public class DevicesController {
     	
     } 
     
-    /*
-     * 제품 인터페이스 리스트 조회
-     */
+
     @PostMapping("/getDeviceInfoList")
     public ResponseEntity<MessageVo> getDeviceInfoList(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
     	
@@ -580,6 +594,9 @@ public class DevicesController {
     	
     } 
     
+    /*
+     * DeviceFinder > 개별정보 > 정보 > 인터페이스
+     */
     @PostMapping("/getDeviceInterface")
     public ResponseEntity<MessageVo> getDeviceInterface(@RequestParam Map<String,String> paramMap) throws IOException  {
     	
@@ -747,7 +764,7 @@ public class DevicesController {
 //    } 
     
     /*
-     * 제품정보 리스트
+     * 메인 > SideBar > 토플로지 > 타사 장비 추가 > 제품명
      */
     @PostMapping("/getProductList")
     public ResponseEntity<MessageVo> getProductList(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
@@ -817,7 +834,7 @@ public class DevicesController {
 //    } 
     
 	/*
-	 * 장비 리스트 조건 검색
+	 * 메인화면 > SideBar > 자산이력
 	 */
     @PostMapping("/searchDeviceInfoList")
     public ResponseEntity<MessageVo> searchDeviceInfoList(@RequestParam Map<String,String> paramMap) throws IOException  {
@@ -870,6 +887,9 @@ public class DevicesController {
 //    	
 //    } 
     
+    /*
+     * DeviceFinder > 그룹정보 > 정보 > 기본정보 > 저장
+     */
     @PostMapping("/setDeviceGroupInfo")
     public ResponseEntity<MessageVo> setDeviceGroupInfo(HttpServletRequest request, @RequestParam Map<String,String> paramMap) throws IOException  {
     	
@@ -912,6 +932,9 @@ public class DevicesController {
     	
     } 
     
+    /*
+     * DeviceFinder -> 개별정보 -> 정보 -> 기본정보 -> 저장
+     */
     @PostMapping("/setDeviceInfo")
     public ResponseEntity<MessageVo> setDeviceInfo(HttpServletRequest request, @RequestParam Map<String,String> paramMap) throws IOException  {
     	

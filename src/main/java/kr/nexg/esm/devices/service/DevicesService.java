@@ -31,6 +31,9 @@ public class DevicesService {
 	@Autowired
 	DevicesMapper devicesMapper;
 	
+    /*
+     * DeviceFinder
+     */
 	public List<Map<String, Object>> deviceAll(Map<String,String> paramMap) throws IOException, ParseException{
 		
     	String datas = paramMap.get("datas");
@@ -197,6 +200,9 @@ public class DevicesService {
 		return devicesMapper.deviceCandidate(devicesVo);
 	}
 	
+    /*
+     * 메인 화면 > 탑메뉴 > 시스템 설정 > 알람 > 장비/그릅 임계치 설정
+     */	
 	public List<Map<String, Object>> getAlarmDeviceGroupListNDeviceListAll(Map<String,String> paramMap) throws IOException, ParseException{
 		
 		String datas = paramMap.get("datas");
@@ -347,7 +353,7 @@ public class DevicesService {
     }
 
     /*
-     * 제품정보 리스트
+     * 메인 > SideBar > 토플로지 > 타사 장비 추가 > 기본정보 > 그룹
      */
 	public List<Map<String, Object>> getDeviceGroupList() throws IOException, ParseException{
 		
@@ -355,6 +361,9 @@ public class DevicesService {
 	}
 	
 
+    /*
+     * DeviceFinder > 그룹정보 > 정보 > 기본정보
+     */
 	public Map<String, Object> getDeviceGroupInfo(Map<String,String> paramMap) throws IOException, ParseException{
 		
 		String datas = paramMap.get("datas");
@@ -370,9 +379,10 @@ public class DevicesService {
 		return devicesMapper.getDeviceGroupInfo(devicesVo);
 	}
 	
-	/*
-	 * 장비 정보 조회
-	 */
+    /*
+     * DeviceFinder > 개별정보 > 정보 > 기본정보
+     * 메인 > SideBar > 토플로지 > 타사 장비 추가 > 기본정보 
+     */
 	public Map<String, Object> getDeviceInfo(Map<String,String> paramMap) throws IOException, ParseException{
 		
 		String datas = paramMap.get("datas");
@@ -416,9 +426,9 @@ public class DevicesService {
 		return devicesMapper.getDeviceInfoList(devicesVo);
 	}
 	
-	/*
-	 * 제품 인터페이스 리스트 조회
-	 */
+    /*
+     * DeviceFinder > 개별정보 > 정보 > 인터페이스
+     */
 	public List<Map<String, Object>> getDeviceInterface(Map<String,String> paramMap) throws IOException, ParseException{
 		
 		String datas = paramMap.get("datas");
@@ -454,7 +464,7 @@ public class DevicesService {
 	}
 	
     /*
-     * 제품정보 리스트
+     * 메인 > SideBar > 토플로지 > 타사 장비 추가 > 제품명
      */
 	public List<Map<String, Object>> getProductList(Map<String,String> paramMap) throws IOException, ParseException{
 		
@@ -490,8 +500,8 @@ public class DevicesService {
 	}
 	
 	/*
-	 * 제품실패 정보 리스트
-	 */
+	 * DeviceFinder > 개별정보 > 정보 > 장애내역
+	 */  
 	public List<Map<String, Object>> getDeviceFailList(Map<String,String> paramMap) throws IOException, ParseException{
 		
 		String datas = paramMap.get("datas");
@@ -514,7 +524,7 @@ public class DevicesService {
 	}
 	
 	/*
-	 * 장비 리스트 조건 검색
+	 * 메인화면 > SideBar > 자산이력
 	 */
 	public List<Map<String, Object>> searchDeviceInfoList(Map<String,String> paramMap) throws IOException, ParseException{
 		
@@ -608,7 +618,7 @@ public class DevicesService {
 	}
 	
 	/*
-	 * 정보 > 기본정보 > 관리번호 중복 체크
+	 * DeviceFinder > 개별정보 > 정보 > 기본정보 > 관리번호 중복체크
 	 */
 	public Map<String, Object> checkManagedCode(Map<String,String> paramMap) throws IOException, ParseException{
 		
@@ -654,9 +664,9 @@ public class DevicesService {
 		return map;
 	}
 	
-	/*
-	 * 그룹 추가/수정
-	 */
+    /*
+     * DeviceFinder > 그룹정보 > 정보 > 기본정보 > 저장
+     */
 	public Map<String, Object> setDeviceGroupInfo(Map<String,String> paramMap) throws IOException, ParseException{
 		
 		String datas = paramMap.get("datas");
@@ -733,9 +743,9 @@ public class DevicesService {
 		return map;
 	}
 	
-	/*
-	 * 장비 추가/수정
-	 */
+    /*
+     * DeviceFinder -> 개별정보 -> 정보 -> 기본정보 -> 저장
+     */
 	public Map<String, Object> setDeviceInfo(Map<String,String> paramMap) throws IOException, ParseException{
 		
 		String datas = paramMap.get("datas");
