@@ -350,10 +350,11 @@ public class AdministratorService {
 		}
 		
 		// 비밀번호 초기화가 1 이면 임시 비밀번호 생성하여 rs_pwd에 설정
+		String tmp_pwd = "";
 	    if("1".equals(rs_pwdInit)) {
 	    	SHA256 sha256 = new SHA256();
 	    	String uid = UUID.randomUUID().toString();
-	    	String tmp_pwd = uid.replaceAll("-", "");
+	    	tmp_pwd = uid.replaceAll("-", "");
 			rs_pwd = sha256.encrypt(tmp_pwd);
 	    }
 	    
@@ -419,7 +420,7 @@ public class AdministratorService {
 //	    		
 //	    		String mail_title = "ESM 관리자를 통해 임시 비밀번호가 발급되었습니다.";
 //	    		String mail_msg = "발급된 임시 비밀번호는 다음과 같습니다.\n\n";
-//	    		mail_msg += rs_pwd;
+//	    		mail_msg += tmp_pwd;
 //				mail_msg += "\n\n임시 비밀번호를 이용하여 접속 후 비밀번호를 변경하여 주세요.\n";
 //				smtp_util = Smtp()
 //				smtp_util.send_mail(rs_email, None, mail_title, mail_msg, None, int(d_manager.select("SELECT domain_id FROM `user_group` WHERE id = " + rs_adminGroupID + ";")[0][0]))
