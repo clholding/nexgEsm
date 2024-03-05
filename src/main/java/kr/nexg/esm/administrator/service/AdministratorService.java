@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,6 +28,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class AdministratorService {
+	
+	@Autowired
+	PasswordEncoder passwordEncoder;
 	
 	@Autowired
 	AdministratorMapper administratorMapper;
@@ -168,20 +172,20 @@ public class AdministratorService {
 		String datas = (String) paramMap.get("datas");
 		
 		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
-		List<Integer> rs_adminIDs = (List<Integer>)config.setValue(rsDatas, "adminIDs", new ArrayList<>());
+		List<String> rs_adminIDs = (List<String>)config.setValue(rsDatas, "adminIDs", new ArrayList<>());
 		
-		List<String> rs_adminID_list = rs_adminIDs.stream()
-                .map(Object::toString)
-                .collect(Collectors.toList());
+//		List<String> rs_adminID_list = rs_adminIDs.stream()
+//                .map(Object::toString)
+//                .collect(Collectors.toList());
 		
 		List<String> admin_names = new ArrayList<>();
 		if(rs_adminIDs.size() > 0) {
-			for(String id : rs_adminID_list) {
+			for(String id : rs_adminIDs) {
 				List<Map<String, Object>> list = user.get_user_info(id);
 				admin_names.add((String) list.get(0).get("login"));
 			}
 			
-			String adminIds = String.join(",", rs_adminID_list);
+			String adminIds = String.join(",", rs_adminIDs);
 			administratorMapper.delUser(adminIds);
 		}
 		
@@ -192,14 +196,10 @@ public class AdministratorService {
 		
 		String datas = (String) paramMap.get("datas");
 		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
-		List<Integer> rs_adminGroupIDs = (List<Integer>)config.setValue(rsDatas, "adminGroupIDs", new ArrayList<>());
-		
-		List<String> rs_adminGroupID_list = rs_adminGroupIDs.stream()
-                .map(Object::toString)
-                .collect(Collectors.toList());
+		List<String> rs_adminGroupIDs = (List<String>)config.setValue(rsDatas, "adminGroupIDs", new ArrayList<>());
 		
 		AdministratorVo administratorVo = new AdministratorVo();
-		administratorVo.setAdminGroupIDs(rs_adminGroupID_list);
+		administratorVo.setAdminGroupIDs(rs_adminGroupIDs);
 		
 		return administratorMapper.selectUserGroup(administratorVo);
 	}
@@ -209,20 +209,16 @@ public class AdministratorService {
 		String datas = (String) paramMap.get("datas");
 		
 		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
-		List<Integer> rs_adminGroupIDs = (List<Integer>)config.setValue(rsDatas, "adminGroupIDs", new ArrayList<>());
-		
-		List<String> rs_adminGroupID_list = rs_adminGroupIDs.stream()
-                .map(Object::toString)
-                .collect(Collectors.toList());
+		List<String> rs_adminGroupIDs = (List<String>)config.setValue(rsDatas, "adminGroupIDs", new ArrayList<>());
 		
 		List<String> user_group_names = new ArrayList<>();
-		if(rs_adminGroupID_list.size() > 0) {
-			for(String id : rs_adminGroupID_list) {
+		if(rs_adminGroupIDs.size() > 0) {
+			for(String id : rs_adminGroupIDs) {
 				List<Map<String, Object>> list = userGroup.get_user_group_info(id);
 				user_group_names.add((String) list.get(0).get("name"));
 			}
 			
-			String adminGroupIds = String.join(",", rs_adminGroupID_list);
+			String adminGroupIds = String.join(",", rs_adminGroupIDs);
 			administratorMapper.delUserGroup(adminGroupIds);
 		}
 		
@@ -242,7 +238,7 @@ public class AdministratorService {
 		String rs_adminName = (String) config.setValue(rsDatas, "adminName", "");
 		String rs_desc = (String) config.setValue(rsDatas, "desc", "");
 		String rs_adminGroupID = (String) config.setValue(rsDatas, "adminGroupID", "");
-		List<Integer> rs_deviceGroupIDs = (List<Integer>) config.setValue(rsDatas, "deviceGroupIDs", new ArrayList<>());
+		List<String> rs_deviceGroupIDs = (List<String>) config.setValue(rsDatas, "deviceGroupIDs", new ArrayList<>());
 		String rs_defMode = (String) config.setValue(rsDatas, "defMode", "");
 		String rs_sessionTime = (String) config.setValue(rsDatas, "sessionTimeout", "");
 		String rs_alarm = (String) config.setValue(rsDatas, "alarm", "");
@@ -284,11 +280,8 @@ public class AdministratorService {
 		String setDeviceGroupIDStr = "";
 		List<Map<String, Object>> deviceGroupList = new ArrayList<Map<String,Object>>();
 		if(rs_deviceGroupIDs.size() > 0) {
-			List<String> rs_deviceGroupID_list = rs_deviceGroupIDs.stream()
-	                .map(Object::toString)
-	                .collect(Collectors.toList());
-			administratorVo.setDeviceGroupIDs(rs_deviceGroupID_list);
-			setDeviceGroupIDStr = String.join(",", rs_deviceGroupID_list);
+			administratorVo.setDeviceGroupIDs(rs_deviceGroupIDs);
+			setDeviceGroupIDStr = String.join(",", rs_deviceGroupIDs);
 			deviceGroupList = administratorMapper.selectDeviceGroup(administratorVo);
 		}
 		Validation.userAdd_deviceGroupIDs(deviceGroupList);
@@ -350,11 +343,12 @@ public class AdministratorService {
 		}
 		
 		// 비밀번호 초기화가 1 이면 임시 비밀번호 생성하여 rs_pwd에 설정
+		String tmp_pwd = "";
 	    if("1".equals(rs_pwdInit)) {
 	    	SHA256 sha256 = new SHA256();
 	    	String uid = UUID.randomUUID().toString();
-	    	String tmp_pwd = uid.replaceAll("-", "");
-			rs_pwd = sha256.encrypt(tmp_pwd);
+	    	tmp_pwd = uid.replaceAll("-", "");
+			rs_pwd = passwordEncoder.encode(sha256.encrypt(tmp_pwd));
 	    }
 	    
 	    administratorVo.setAdminID(rs_adminID != "null" ? rs_adminID : null);
@@ -419,7 +413,7 @@ public class AdministratorService {
 //	    		
 //	    		String mail_title = "ESM 관리자를 통해 임시 비밀번호가 발급되었습니다.";
 //	    		String mail_msg = "발급된 임시 비밀번호는 다음과 같습니다.\n\n";
-//	    		mail_msg += rs_pwd;
+//	    		mail_msg += tmp_pwd;
 //				mail_msg += "\n\n임시 비밀번호를 이용하여 접속 후 비밀번호를 변경하여 주세요.\n";
 //				smtp_util = Smtp()
 //				smtp_util.send_mail(rs_email, None, mail_title, mail_msg, None, int(d_manager.select("SELECT domain_id FROM `user_group` WHERE id = " + rs_adminGroupID + ";")[0][0]))
@@ -428,6 +422,7 @@ public class AdministratorService {
 	    }
 	    
 	    resultMap.put("audit_msg", audit_msg);
+	    resultMap.put("mode", mode);
 		
 		return resultMap;
 		

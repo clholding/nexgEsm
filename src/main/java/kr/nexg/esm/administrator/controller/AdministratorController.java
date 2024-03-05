@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import kr.nexg.esm.administrator.dto.AdministratorEnum;
 import kr.nexg.esm.administrator.dto.AdministratorVo;
 import kr.nexg.esm.administrator.service.AdministratorService;
 import kr.nexg.esm.common.dto.MessageVo;
@@ -260,9 +261,16 @@ public class AdministratorController {
         try {
         	Map<String, Object> result = administratorService.setUserInfo(paramMap);
         	String audit_msg = (String) result.get("audit_msg");
+        	int mode = (Integer) result.get("mode");
+        	String msg = "";
+        	if(mode == AdministratorEnum.mode.valueOf("MODE_ADD").getVal()) {
+        		msg = "관리자 정보가 추가되었습니다.";
+        	}else {
+        		msg = "관리자 정보가 수정되었습니다.";
+        	}
         	message = MessageVo.builder()
                 	.success("true")
-                	.message("")
+                	.message(msg)
                 	.entitys("")
                 	.build();
         	
