@@ -1028,19 +1028,28 @@ public class DevicesService {
             	devicesVo.setCode2(rsCode2);
         		
         		Map<String, Object> map = devicesMapper.setDeviceInfo(devicesVo);
-            	if(map.get("col").equals("0")) {
+        		
+        		log.info("map : "+map);
+        		
+        		String col = String.valueOf(map.get("col"));
+        		String col2 = String.valueOf(map.get("col2"));
+        		
+        		log.info("col : "+col);
+        		log.info("col2 : "+col2);
+            	if(col.equals("0")) {
             		success = "false";       
-            		if(map.get("col2").equals("0")) {
+            		if(col2.equals("0")) {
             			message = "동일한 라이센스 또는 시리얼을 가진 장비가 존재합니다.";
             		}else {
             			message = "동일한 장비 이름이 존재합니다.";
             		}
             	}else {
             		
-//            		
-            		if(rsSetType.equals("Manual")) {
+            		log.info("rsSetType : "+rsSetType);
+            		
+            		if(rsSetType != null && rsSetType.equals("Manual")) {
             			devicesVo.setSerial(rsSerial);
-            			devicesVo.setId(String.valueOf(map.get("col2")));
+            			devicesVo.setId(col2);
             			devicesMapper.updateDeviceInfo(devicesVo);
             		}
             	}
