@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import kr.nexg.esm.administrator.dto.AdministratorVo;
 import kr.nexg.esm.administrator.mapper.AdministratorMapper;
 import kr.nexg.esm.common.util.CustomMessageException;
 import kr.nexg.esm.common.util.EnumUtil;
+import kr.nexg.esm.common.util.SHA256;
 import kr.nexg.esm.nexgesm.mariadb.User;
 import kr.nexg.esm.util.Validation;
 import kr.nexg.esm.util.config;
@@ -227,7 +229,7 @@ public class AdministratorService {
 		return user_group_names;
 	}
 	
-	public int setUserInfo(Map<String, Object> paramMap) throws Exception {
+	public Map<String, Object> setUserInfo(Map<String, Object> paramMap) throws Exception {
 		
 		int mode = AdministratorEnum.mode.valueOf("MODE_ADD").getVal();
 		String sessionId = (String) paramMap.get("sessionId");
@@ -263,7 +265,7 @@ public class AdministratorService {
 		String rs_lifetime = (String) config.setValue(rsDatas, "adminLifetime", "365");
 		String rs_password_expire_cycle = (String) config.setValue(rsDatas, "passwordExpireCycle", "90");
 		String rs_device_id = (String) config.setValue(rsDatas, "monitorDeviceID", "0");
-		String rs_pwdInit = (String) config.setValue(rsDatas, "pwdInit", "");
+		String rs_pwdInit = (String) config.setValue(rsDatas, "pwdInit", "0");
 		
 		AdministratorVo administratorVo = new AdministratorVo();
 		
@@ -279,12 +281,14 @@ public class AdministratorService {
 			Validation.userAdd_adminGroupID(adminGroupList);
 		}
 		
+		String setDeviceGroupIDStr = "";
 		List<Map<String, Object>> deviceGroupList = new ArrayList<Map<String,Object>>();
 		if(rs_deviceGroupIDs.size() > 0) {
 			List<String> rs_deviceGroupID_list = rs_deviceGroupIDs.stream()
 	                .map(Object::toString)
 	                .collect(Collectors.toList());
 			administratorVo.setDeviceGroupIDs(rs_deviceGroupID_list);
+			setDeviceGroupIDStr = String.join(",", rs_deviceGroupID_list);
 			deviceGroupList = administratorMapper.selectDeviceGroup(administratorVo);
 		}
 		Validation.userAdd_deviceGroupIDs(deviceGroupList);
@@ -307,21 +311,125 @@ public class AdministratorService {
 		
 		Validation.userAdd_device_id(device_List);
 		
-		if(rs_adminID != "null") {
+		if(rs_adminID != "null") {	//adminId 가 있으면 수정
 			mode = AdministratorEnum.mode.valueOf("MODE_EDIT").getVal();
+			List<Map<String, Object>> user_List = administratorMapper.selectUserByID(rs_adminID);
 			
 			if(!sessionId.equals(rs_login) && !"1".equals(rs_adminID)) {	//로그인관리자가 다른계정의 정보를 변경시
 				rs_pwd = "null";
 			}else {
-				List<Map<String, Object>> user_List = administratorMapper.selectUserByID(rs_adminID);
 				if(user_List.get(0).get("pwd") != rs_pwd) {
 					throw new CustomMessageException("잘못된 비밀번호 입니다.");
 				}
 			}
 			
+			//변경할 pw를 입력하였으면 변경할 pw로 대체
+			if(!rs_newPwd.isBlank()) {
+				rs_pwd = rs_newPwd;
+				if(rs_newPwd.equals(user_List.get(0).get("pwd"))) {
+					throw new CustomMessageException("이전 비밀번호와 같은 비밀번호로 변경할 수 없습니다.");
+				}
+			}
+			
+			String old_groupID = Integer.toString((Integer) user_List.get(0).get("group_id"));
+			if(!old_groupID.equals(rs_adminGroupID)) {
+				int groupUserCount = adminGroupList.size();
+				if(groupUserCount >= 100) {
+					throw new CustomMessageException("그룹당 최대 등록가능 관리자 계정은 100개 입니다.");
+				}
+			}
+		} else {	//adminId 가 없으면 추가
+			int chk_usercount = administratorMapper.selectUserCount();
+			if(chk_usercount >= 300) {
+				throw new CustomMessageException("최대 등록가능 관리자 계정은 300개 입니다.");
+			}
+			int groupUserCount = adminGroupList.size();
+			if(groupUserCount >= 100) {
+				throw new CustomMessageException("그룹당 최대 등록가능 관리자 계정은 100개 입니다.");
+			}
 		}
 		
-		return 0;
+		// 비밀번호 초기화가 1 이면 임시 비밀번호 생성하여 rs_pwd에 설정
+	    if("1".equals(rs_pwdInit)) {
+	    	SHA256 sha256 = new SHA256();
+	    	String uid = UUID.randomUUID().toString();
+	    	String tmp_pwd = uid.replaceAll("-", "");
+			rs_pwd = sha256.encrypt(tmp_pwd);
+	    }
+	    
+	    administratorVo.setAdminID(rs_adminID != "null" ? rs_adminID : null);
+	    administratorVo.setAdminName(rs_adminName);
+	    administratorVo.setDesc(rs_desc);
+	    administratorVo.setDeviceGroupIDStr(setDeviceGroupIDStr);
+	    administratorVo.setLogin(rs_login);
+	    administratorVo.setPwd(rs_pwd);
+	    administratorVo.setAllow_ip1(rs_allow_ip1);
+	    administratorVo.setAllow_ip2(rs_allow_ip2);
+	    administratorVo.setAdminGroupID(rs_adminGroupID);
+	    administratorVo.setActive(rs_active);
+	    administratorVo.setAdminEmail(rs_email);
+	    administratorVo.setAdminExpireDate(rs_expire_date);
+	    administratorVo.setAdminLifetime(rs_lifetime);
+	    administratorVo.setPasswordExpireCycle(rs_password_expire_cycle);
+	    administratorVo.setPwdInit(rs_pwdInit);
+	    administratorVo.setMonitorDeviceID(rs_device_id);
+	    administratorVo.setDevice_state(rs_device_state);
+	    administratorVo.setRecent_fail_device(rs_recent_fail_device);
+	    administratorVo.setResource_top5(rs_resource_top5);
+	    administratorVo.setWeek_log_stats(rs_week_log_stats);
+	    administratorVo.setWeek_fail_state(rs_week_fail_state);
+	    administratorVo.setDevice_sort(rs_device_sort);
+	    administratorVo.setDevice_order(rs_device_order);
+	    administratorVo.setDefMode(rs_defMode);
+	    administratorVo.setSessionTimeout(rs_sessionTime);
+	    administratorVo.setAlarm(rs_alarm);
+	    administratorVo.setPopupTime(rs_popupTime);
+	    
+	    String audit_msg = "";
+	    int result = administratorMapper.setUserInfo(administratorVo);
+	    if(result == 0) {
+	    	throw new CustomMessageException("동일한 계정이 존재합니다.");
+	    } else {
+	    	String tmp_print_defMode = "";
+	    	if("1".equals(rs_defMode)) {
+	    		tmp_print_defMode = "FW";
+	    	}else if("2".equals(rs_defMode)) {
+	    		tmp_print_defMode = "UTM";
+	    	}else if("3".equals(rs_defMode)) {
+	    		tmp_print_defMode = "SW";
+	    	}else if("4".equals(rs_defMode)) {
+	    		tmp_print_defMode = "M2MG";
+	    	}
+	    	
+	    	String text = "";
+	    	if(mode == AdministratorEnum.mode.valueOf("MODE_ADD").getVal()) {
+	    		text = "추가";
+	    	}else {
+	    		text = "수정";
+	    	}
+	    	audit_msg = String.format("[설정/관리자] 관리자를 %s하였습니다. (id=%s, 이름=%s, 설명=%s, 접근허용주소1=%s, 접근허용주소2=%s, 기본관리모드=%s 세션 타임아웃=%s, 알람소리사용=%s, 알람창자동닫힘=%s, 장비현황=%s, 최근장애장비=%s, 리소스TOP5=%s, 장애로그현황=%s, 주간로그발생통계=%s)"
+	        		, text, rs_login, rs_adminName, rs_desc, rs_allow_ip1, rs_allow_ip2, tmp_print_defMode, rs_sessionTime, rs_alarm, rs_popupTime, rs_device_state, rs_recent_fail_device,
+                    rs_resource_top5, rs_week_fail_state, rs_week_log_stats);
+	    	
+	    	//### TO-DO ###
+//	    	if("1".equals(rs_pwdInit)) {
+//	    		if(mode == AdministratorEnum.mode.valueOf("MODE_EDIT").getVal()) {
+//	    			administratorMapper.updatePwdExpireDate(rs_adminID);
+//	    		}
+//	    		
+//	    		String mail_title = "ESM 관리자를 통해 임시 비밀번호가 발급되었습니다.";
+//	    		String mail_msg = "발급된 임시 비밀번호는 다음과 같습니다.\n\n";
+//	    		mail_msg += rs_pwd;
+//				mail_msg += "\n\n임시 비밀번호를 이용하여 접속 후 비밀번호를 변경하여 주세요.\n";
+//				smtp_util = Smtp()
+//				smtp_util.send_mail(rs_email, None, mail_title, mail_msg, None, int(d_manager.select("SELECT domain_id FROM `user_group` WHERE id = " + rs_adminGroupID + ";")[0][0]))
+//	    	}
+	    	
+	    }
+	    
+	    resultMap.put("audit_msg", audit_msg);
+		
+		return resultMap;
 		
 	}
 	

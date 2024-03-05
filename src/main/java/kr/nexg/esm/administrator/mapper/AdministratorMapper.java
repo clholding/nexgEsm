@@ -30,5 +30,11 @@ public interface AdministratorMapper {
 	
 	public List<Map<String, Object>> selectUserByID(String adminId);
 	
+	public int selectUserCount();
+	
+	public int setUserInfo(AdministratorVo vo);
+	
+	public int updatePwdExpireDate(String adminId);
+	
 	
 }

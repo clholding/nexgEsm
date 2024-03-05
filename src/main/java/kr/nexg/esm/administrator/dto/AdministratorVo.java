@@ -12,6 +12,7 @@ public class AdministratorVo extends CommonVo {
     private String adminName;		//관리자 이름
     private String desc;			//설명
     private String adminGroupID; 	//관리그룹ID
+    private String deviceGroupIDStr;	//관리장비 그룹 ID 리스트 문자열 ex) "1,2,3"
     private List<String> deviceGroupIDs;	//관리장비 그룹 ID리스트
     private String defMode; 	//기본관리모드
     private String sessionTimeout; 	//관리자 세션 타임아웃 값

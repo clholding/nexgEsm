@@ -52,5 +52,48 @@
 		/* AdministratorMapper.selectUserByID */	
 		CALL sesm.selectUserByID( #{adminId} );
 	</select>
+	
+	<select id="selectUserCount" resultType="int">
+		/* AdministratorMapper.selectUserCount */	
+		SELECT count(*) FROM user
+	</select>
+	
+	<update id="setUserInfo" parameterType="kr.nexg.esm.administrator.dto.AdministratorVo">
+		/* AdministratorMapper.setUserInfo */	
+		CALL sesm.setUserInfo( 
+			#{adminID},
+			#{adminName},
+			#{desc},
+			#{deviceGroupIDStr},
+			#{login},
+			#{pwd},
+			#{allow_ip1},
+			#{allow_ip2},
+			#{adminGroupID},
+			#{active},
+			#{adminEmail},
+			#{adminExpireDate},
+			#{adminLifetime},
+			#{passwordExpireCycle},
+			#{pwdInit},
+			#{monitorDeviceID},
+			#{device_state},
+			#{recent_fail_device},
+			#{resource_top5},
+			#{week_log_stats},
+			#{week_fail_state},
+			#{device_sort},
+			#{device_order},
+			#{defMode},
+			#{sessionTimeout},
+			#{alarm},
+			#{popupTime}
+		);
+	</update>
+	
+	<update id="updatePwdExpireDate" parameterType="String">
+		/* AdministratorMapper.setUserInfo */	
+		UPDATE user SET pwd_expire_date = NOW() WHERE id = #{adminId}
+	</update>
 
 </mapper>

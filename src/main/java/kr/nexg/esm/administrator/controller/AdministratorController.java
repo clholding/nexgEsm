@@ -258,26 +258,32 @@ public class AdministratorController {
         MessageVo message;
         
         try {
-        	int result = administratorService.setUserInfo(paramMap);
+        	Map<String, Object> result = administratorService.setUserInfo(paramMap);
+        	String audit_msg = (String) result.get("audit_msg");
         	message = MessageVo.builder()
                 	.success("true")
                 	.message("")
                 	.entitys("")
                 	.build();
+        	
+        	esmAuditLog.esmlog(6, sessionId, clientIp, audit_msg);
 		} catch (CustomMessageException e) {
 			message = MessageVo.builder()
 	            	.success("false")
 	            	.message(e.getMessage())
+	            	.errMsg("")
+	            	.errTitle("")
 	            	.build();
 		} catch (Exception e) {
 			log.error("Error : ", e);
 			message = MessageVo.builder()
 	            	.success("false")
-	            	.message(e.getMessage())
+	            	.message("")
 	            	.errMsg(e.getMessage())
 	            	.errTitle("")
 	            	.build();
 			
+			//### TO-DO ###
 //			setAuditInfo("setUserInfo", results["success"])
 			
 		}
