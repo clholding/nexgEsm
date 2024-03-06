@@ -70,8 +70,15 @@ public class GlobalController {
 //        return new ResponseEntity<>(message, headers, HttpStatus.OK);
 //    }
 	
-	@PostMapping("/devices")
-    public ResponseEntity<MessageVo> devices(@RequestParam Map<String,Object> paramMap) {
+	/**
+	* -
+	* 관리자 권한정보 조회 (로그인시 또는 F5키 누를시만 호출)
+	* 
+	* @ param AdministratorVo
+	* @ return ResponseEntity
+	*/
+	@PostMapping("/getUserInfoByLogin")
+    public ResponseEntity<MessageVo> getUserInfoByLogin(@RequestParam Map<String,Object> paramMap) {
     	
     	HttpHeaders headers= new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -80,14 +87,14 @@ public class GlobalController {
         
         try {
         	
-        	List<Map<String, Object>> list = globalService.devices(paramMap);
-            int totalCount = list.size();
+//        	List<Map<String, Object>> list = globalService.getUserInfoByLogin(paramMap);
+//            int totalCount = list.size();
         	
         	message = MessageVo.builder()
                 	.success("true")
                 	.message("")
-                	.totalCount(totalCount)
-                	.entitys(list)
+                	.totalCount(0)
+                	.entitys("")
                 	.build();
 		} catch (Exception e) {
 			log.error("Error : ", e);
