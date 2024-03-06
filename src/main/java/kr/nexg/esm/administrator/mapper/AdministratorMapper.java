@@ -36,5 +36,9 @@ public interface AdministratorMapper {
 	
 	public int updatePwdExpireDate(String adminId);
 	
+	public int setUserGroup(String rs_adminIDs_str, String rs_adminGroupID);
+	
+	public List<Map<String, Object>> getUserGroupInfo(String groupId);
+	
 	
 }
