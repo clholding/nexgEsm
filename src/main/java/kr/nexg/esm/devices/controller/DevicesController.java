@@ -233,6 +233,7 @@ public class DevicesController {
     
     /*
      * DeviceFinder
+     * 장비관리 > 장비 추가 > 대상장비 선택
      */
     @PostMapping("/deviceAll")
     public ResponseEntity<MessageVo> deviceAll(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
@@ -487,6 +488,7 @@ public class DevicesController {
     
     /*
      * 메인 > SideBar > 토플로지 > 타사 장비 추가 > 기본정보 > 그룹
+     * 장비관리 > 장비 추가 > 그룹
      */
     @PostMapping("/getDeviceGroupList")
     public ResponseEntity<MessageVo> getDeviceGroupList() throws IOException, ParseException  {
@@ -765,6 +767,8 @@ public class DevicesController {
     
     /*
      * 메인 > SideBar > 토플로지 > 타사 장비 추가 > 제품명
+     * DeviceFinder > 그룹 상세정보 > 자간관리 > 검색 > 추가검색조건 > 제품명
+     * 장비관리 > 장비 추가 > 제품명
      */
     @PostMapping("/getProductList")
     public ResponseEntity<MessageVo> getProductList(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
