@@ -7,4 +7,29 @@
 		CALL sesm.getTree( #{parentId} );
 	</select>
 	
+	<select id="getUserInfoByLogin" parameterType="String" resultType="map">
+		/* GlobalMapper.getUserInfoByLogin */	
+		CALL sesm.getUserInfoByLogin( #{sessionId} );
+	</select>
+	
+	<select id="getDeviceStatusByLogin" parameterType="String" resultType="map">
+		/* GlobalMapper.getDeviceStatusByLogin */	
+		CALL sesm.getDeviceStatusByLogin( #{sessionId}, #{mode} );
+	</select>
+	
+	<select id="getDeviceFaultStatus" parameterType="String" resultType="map">
+		/* GlobalMapper.getDeviceFaultStatus */	
+		CALL sesm.getDeviceFaultStatus( #{sessionId}, #{deviceIds} ,#{mode} );
+	</select>
+	
+	<select id="getAllDeviceFaultStatus" parameterType="String" resultType="map">
+		/* GlobalMapper.getAllDeviceFaultStatus */	
+		CALL sesm.getAllDeviceFaultStatus( #{sessionId}, #{deviceIds} );
+	</select>
+	
+	<select id="selectUserStatus" parameterType="String" resultType="String">
+		/* GlobalMapper.selectUserStatus */	
+		SELECT status FROM user where login = #{sessionId}
+	</select>
+	
 </mapper>

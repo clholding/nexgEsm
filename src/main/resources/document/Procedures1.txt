@@ -61,3 +61,193 @@ BEGIN
   DEALLOCATE PREPARE stmt;
 
 END
+
+
+***** getUserInfoByLogin *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `sesm`.`getUserInfoByLogin`(IN login varchar(128))
+BEGIN
+  -- login 관리자 정보 및 권한, 설정 조회
+  SELECT u.id, u.name, u.group_id, ug.name as group_name, ug.role1, ug.role2, ug.role3, ug.role4, ug.role5, ug.role6, ug.role7, ug.role8, ug.role9, ug.role10,
+    u.device_state, u.recent_fail_device, u.resource_top5, u.week_log_stats, u.week_fail_state, u.device_sort, u.device_order
+    FROM user AS u, user_group AS ug
+  WHERE u.group_id = ug.id
+  AND u.login = login;
+END
+
+
+***** getAllDeviceFaultStatus *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `sesm`.`getAllDeviceFaultStatus`(IN login VARCHAR(128), IN ids VARCHAR(2048))
+BEGIN
+  -- login 관리자가 관리하는 장비 그룹 리스트를 조회하고
+  -- ids 가 "0" 인 경우 login 관리자가 관리하는 전체 장비 그룹 리스트를 조회한다.
+  -- 각 그룹에 속한 장비의 fail, total count 및 type 별(FW, UTM, SW, M2MG) fail, total count 를 조회한다.
+
+  DECLARE current_lv int UNSIGNED;
+  DECLARE parent_ids varchar(10000);
+  DECLARE child_ids varchar(10000);
+  DECLARE cnt int DEFAULT 0;
+  DECLARE before_cnt int DEFAULT 0;
+
+  IF ids IS NULL OR ids = "" THEN
+    SET @query = CONCAT("SELECT 0 as fail_count, 0 as inspect_count, 0 as total_count, 0 as fwfail_count, 0 as fwinspect_count, 0 as fwtotal_count, 0 as utmfail_count, 0 as utminspect_count, 0 as utmtotal_count, 0 as swfail_count, 0 as swinspect_count, 0 as swtotal_count, 0 as m2mgfail_count, 0 as m2mginspect_count, 0 as m2mgtotal_count;");
+  ELSEIF ids = "0" THEN
+    SET SESSION sql_log_bin = OFF;
+    SET SESSION tx_isolation = 'READ-COMMITTED';
+    SET @_current_lv := 1;
+
+    -- login 관리자가 관리하는 장비 그룹 리스트 조회 - begin
+    drop table if exists _temp_buffer;
+    CREATE TEMPORARY TABLE IF NOT EXISTS _temp_buffer (
+      id int(11),
+      name varchar(255),
+      group_id int(11),
+      lv int,
+      INDEX ix_lv (lv)
+      ) ENGINE = MEMORY;
+
+      INSERT INTO _temp_buffer SELECT dg.id, dg.name, dg.group_id, @_current_lv AS lv
+      FROM user_dgroup ud, device_group dg, user u WHERE u.id = ud.user_id AND ud.device_group_id = dg.id AND u.login = login GROUP BY dg.id;
+
+recursion:
+    REPEAT
+      SET before_cnt = cnt;
+      SELECT GROUP_CONCAT(_temp_buffer.id), COUNT(*) INTO parent_ids, cnt FROM _temp_buffer WHERE lv = @_current_lv;
+
+      IF cnt = 0 THEN
+        LEAVE recursion;
+      END IF;
+
+      SET @query = CONCAT("INSERT INTO _temp_buffer
+        SELECT dg.id, dg.name, dg.group_id, (@_current_lv + 1) AS lv
+        FROM device_group dg WHERE (dg.id <> dg.group_id) AND dg.group_id IN (", parent_ids, ")");
+      PREPARE stmt3 FROM @query;
+      EXECUTE stmt3;
+
+      SET @_current_lv = @_current_lv + 1;
+    UNTIL 0 END REPEAT;
+    -- login 관리자가 관리하는 장비 그룹 리스트 조회 - end
+
+    -- login 관리자가 관리하는 장비 그룹 리스트 = child_ids
+    SELECT GROUP_CONCAT(DISTINCT _temp_buffer.id) INTO child_ids FROM _temp_buffer;
+
+    TRUNCATE TABLE _temp_buffer;
+    SET SESSION sql_log_bin = ON;
+    SET SESSION tx_isolation = 'REPEATABLE-READ';
+
+    IF child_ids IS NULL OR child_ids = "" THEN
+      SET @query = CONCAT("SELECT 0 as fail_count, 0 as inspect_count, 0 as total_count, 0 as fwfail_count, 0 as fwinspect_count, 0 as fwtotal_count, 0 as utmfail_count, 0 as utminspect_count, 0 as utmtotal_count, 0 as swfail_count, 0 as swinspect_count, 0 as swtotal_count, 0 as m2mgfail_count, 0 as m2mginspect_count, 0 as m2mgtotal_count;");
+    ELSE
+      SET @query = CONCAT(
+        "SELECT fail.cnt as fail_count, inspect.cnt as inspect_count, total.cnt as total_count, fwfail.cnt as fwfail_count, fwinspect.cnt as fwinspect_count, fwtotal.cnt as fwtotal_count, utmfail.cnt as utmfail_count, utminspect.cnt as utminspect_count, utmtotal.cnt as utmtotal_count, swfail.cnt as swfail_count, swinspect.cnt as swinspect_count, swtotal.cnt as swtotal_count, m2mgfail.cnt as m2mgfail_count, m2mginspect.cnt as m2mginspect_count, m2mgtotal.cnt as m2mgtotal_count FROM
+        (SELECT count(*) AS cnt FROM device d, device_status ds WHERE ds.device_id = d.id AND d.candidate = 0 AND d.group_id IN (", child_ids, ") AND status <= 0) as fail,
+        (SELECT count(CASE WHEN ii.status = 0 OR eix.status LIKE 'down%' THEN 1 ELSE NULL END) AS cnt FROM device d, device_status ds
+          LEFT JOIN int_info ii ON (ii.device_id = ds.device_id) LEFT JOIN eix_status eix ON (eix.device_id = ds.device_id)
+          WHERE ds.device_id = d.id AND d.candidate = 0 AND d.group_id IN (", child_ids, ") AND ds.status = 1) as inspect,
+        (SELECT count(*) AS cnt FROM device d, device_status ds WHERE ds.device_id = d.id AND d.candidate = 0 AND d.group_id IN (", child_ids, ")) as total,
+        (SELECT count(*) AS cnt FROM device d, device_status ds, product as p WHERE ds.device_id = d.id AND d.candidate = 0 AND d.group_id IN (", child_ids, ") AND status <= 0
+          AND d.product_id = p.id AND p.type = 1) as fwfail,
+        (SELECT count(CASE WHEN ii.status = 0 OR eix.status LIKE 'down%' THEN 1 ELSE NULL END) AS cnt FROM device d, product as p, device_status as ds
+          LEFT JOIN int_info ii ON (ii.device_id = ds.device_id) LEFT JOIN eix_status eix ON (eix.device_id = ds.device_id)
+          WHERE ds.device_id = d.id AND d.candidate = 0 AND d.group_id IN (", child_ids, ") AND ds.status = 1 AND d.product_id = p.id AND p.type = 1) as fwinspect,
+        (SELECT count(*) AS cnt FROM device d, device_status ds, product as p WHERE ds.device_id = d.id AND d.candidate = 0 AND d.group_id IN (", child_ids, ")
+          AND d.product_id = p.id AND p.type = 1) as fwtotal,
+        (SELECT count(*) AS cnt FROM device d, device_status ds, product as p WHERE ds.device_id = d.id AND d.candidate = 0 AND d.group_id IN (", child_ids, ") AND status <= 0
+          AND d.product_id = p.id AND p.type = 2) as utmfail,
+        (SELECT count(CASE WHEN ii.status = 0 OR eix.status LIKE 'down%' THEN 1 ELSE NULL END) AS cnt FROM device d, product as p, device_status as ds
+          LEFT JOIN int_info ii ON (ii.device_id = ds.device_id) LEFT JOIN eix_status eix ON (eix.device_id = ds.device_id)
+          WHERE ds.device_id = d.id AND d.candidate = 0 AND d.group_id IN (", child_ids, ") AND ds.status = 1 AND d.product_id = p.id AND p.type = 2) as utminspect,
+        (SELECT count(*) AS cnt FROM device d, device_status ds, product as p WHERE ds.device_id = d.id AND d.candidate = 0 AND d.group_id IN (", child_ids, ")
+          AND d.product_id = p.id AND p.type = 2) as utmtotal,
+        (SELECT count(*) AS cnt FROM device d, device_status ds, product as p WHERE ds.device_id = d.id AND d.candidate = 0 AND d.group_id IN (", child_ids, ") AND status <= 0
+          AND d.product_id = p.id AND p.type = 3) as swfail,
+        (SELECT count(CASE WHEN ii.status = 0 OR eix.status LIKE 'down%' THEN 1 ELSE NULL END) AS cnt FROM device d, product as p, device_status as ds
+          LEFT JOIN int_info ii ON (ii.device_id = ds.device_id) LEFT JOIN eix_status eix ON (eix.device_id = ds.device_id)
+          WHERE ds.device_id = d.id AND d.candidate = 0 AND d.group_id IN (", child_ids, ") AND ds.status = 1 AND d.product_id = p.id AND p.type = 3) as swinspect,
+        (SELECT count(*) AS cnt FROM device d, device_status ds, product as p WHERE ds.device_id = d.id AND d.candidate = 0 AND d.group_id IN (", child_ids, ")
+          AND d.product_id = p.id AND p.type = 3) as swtotal,
+        (SELECT count(*) AS cnt FROM device d, device_status ds, product as p WHERE ds.device_id = d.id AND d.candidate = 0 AND d.group_id IN (", child_ids, ") AND status = 0
+          AND d.product_id = p.id AND p.type = 4) as m2mgfail,
+        (SELECT count(CASE WHEN ii.status = 0 OR eix.status LIKE 'down%' THEN 1 ELSE NULL END) AS cnt FROM device d, product as p, device_status as ds
+          LEFT JOIN int_info ii ON (ii.device_id = ds.device_id) LEFT JOIN eix_status eix ON (eix.device_id = ds.device_id)
+          WHERE ds.device_id = d.id AND d.candidate = 0 AND d.group_id IN (", child_ids, ") AND ds.status = 1 AND d.product_id = p.id AND p.type = 4) as m2mginspect,
+        (SELECT count(*) AS cnt FROM device d, device_status ds, product as p WHERE ds.device_id = d.id AND d.candidate = 0 AND d.group_id IN (", child_ids, ")
+          AND d.product_id = p.id AND p.type = 4) as m2mgtotal");
+    END IF;
+  ELSE
+    -- 조회할 장비 그룹 리스트(ids)를 parameter로 전달 받은 경우
+    SET @query = CONCAT(
+      "SELECT fail.cnt as fail_count, inspect.cnt as inspect_count, total.cnt as total_count, fwfail.cnt as fwfail_count, fwinspect.cnt as fwinspect_count, fwtotal.cnt as fwtotal_count, utmfail.cnt as utmfail_count, utminspect.cnt as utminspect_count, utmtotal.cnt as utmtotal_count, swfail.cnt as swfail_count, swinspect.cnt as swinspect_count, swtotal.cnt as swtotal_count, m2mgfail.cnt as m2mgfail_count, m2mginspect.cnt as m2mginspect_count, m2mgtotal.cnt as m2mgtotal_count FROM
+      (SELECT count(*) AS cnt FROM device d, device_status ds WHERE ds.device_id = d.id AND d.candidate = 0 AND d.id IN (", ids, ") AND status <= 0) as fail,
+      (SELECT count(CASE WHEN ii.status = 0 OR eix.status LIKE 'down%' THEN 1 ELSE NULL END) AS cnt FROM device d, device_status ds
+        LEFT JOIN int_info ii ON (ii.device_id = ds.device_id) LEFT JOIN eix_status eix ON (eix.device_id = ds.device_id)
+        WHERE ds.device_id = d.id AND d.candidate = 0 AND d.id IN (", ids, ") AND ds.status = 1) as inspect,
+      (SELECT count(*) AS cnt FROM device d WHERE d.candidate = 0 AND d.id IN (", ids, ")) as total,
+      (SELECT count(*) AS cnt FROM device d, device_status ds, product as p WHERE ds.device_id = d.id AND d.candidate = 0 AND d.id IN (", ids, ") AND status <= 0
+        AND d.product_id = p.id AND p.type = 1) as fwfail,
+      (SELECT count(CASE WHEN ii.status = 0 OR eix.status LIKE 'down%' THEN 1 ELSE NULL END) AS cnt FROM device d, product as p, device_status as ds
+        LEFT JOIN int_info ii ON (ii.device_id = ds.device_id) LEFT JOIN eix_status eix ON (eix.device_id = ds.device_id)
+        WHERE ds.device_id = d.id AND d.candidate = 0 AND d.id IN (", ids, ") AND ds.status = 1 AND d.product_id = p.id AND p.type = 1) as fwinspect,
+      (SELECT count(*) AS cnt FROM device d, product as p WHERE d.candidate = 0 AND d.id IN (", ids, ") AND d.product_id = p.id AND p.type = 1) as fwtotal,
+      (SELECT count(*) AS cnt FROM device d, device_status ds, product as p WHERE ds.device_id = d.id AND d.candidate = 0 AND d.id IN (", ids, ") AND status <= 0
+        AND d.product_id = p.id AND p.type = 2) as utmfail,
+      (SELECT count(CASE WHEN ii.status = 0 OR eix.status LIKE 'down%' THEN 1 ELSE NULL END) AS cnt FROM device d, product as p, device_status as ds
+        LEFT JOIN int_info ii ON (ii.device_id = ds.device_id) LEFT JOIN eix_status eix ON (eix.device_id = ds.device_id)
+        WHERE ds.device_id = d.id AND d.candidate = 0 AND d.id IN (", ids, ") AND ds.status = 1 AND d.product_id = p.id AND p.type = 2) as utminspect,
+      (SELECT count(*) AS cnt FROM device d, product as p WHERE d.candidate = 0 AND d.id IN (", ids, ") AND d.product_id = p.id AND p.type = 2) as utmtotal,
+      (SELECT count(*) AS cnt FROM device d, device_status ds, product as p WHERE ds.device_id = d.id AND d.candidate = 0 AND d.id IN (", ids, ") AND status <= 0
+        AND d.product_id = p.id AND p.type = 3) as swfail,
+      (SELECT count(CASE WHEN ii.status = 0 OR eix.status LIKE 'down%' THEN 1 ELSE NULL END) AS cnt FROM device d, product as p, device_status as ds
+        LEFT JOIN int_info ii ON (ii.device_id = ds.device_id) LEFT JOIN eix_status eix ON (eix.device_id = ds.device_id)
+        WHERE ds.device_id = d.id AND d.candidate = 0 AND d.id IN (", ids, ") AND ds.status = 1 AND d.product_id = p.id AND p.type = 3) as swinspect,
+      (SELECT count(*) AS cnt FROM device d, product as p WHERE d.candidate = 0 AND d.id IN (", ids, ") AND d.product_id = p.id AND p.type = 3) as swtotal,
+      (SELECT count(*) AS cnt FROM device d, device_status ds, product as p WHERE ds.device_id = d.id AND d.candidate = 0 AND d.id IN (", ids, ") AND status = 0
+        AND d.product_id = p.id AND p.type = 4) as m2mgfail,
+      (SELECT count(CASE WHEN ii.status = 0 OR eix.status LIKE 'down%' THEN 1 ELSE NULL END) AS cnt FROM device d, product as p, device_status as ds
+        LEFT JOIN int_info ii ON (ii.device_id = ds.device_id) LEFT JOIN eix_status eix ON (eix.device_id = ds.device_id)
+        WHERE ds.device_id = d.id AND d.candidate = 0 AND d.id IN (", ids, ") AND ds.status = 1 AND d.product_id = p.id AND p.type = 4) as m2mginspect,
+      (SELECT count(*) AS cnt FROM device d, product as p WHERE d.candidate = 0 AND d.id IN (", ids, ") AND d.product_id = p.id AND p.type = 4) as m2mgtotal");
+  END IF;
+
+  PREPARE stmt FROM @query;
+  EXECUTE stmt;
+  DEALLOCATE PREPARE stmt;
+END
+
+
+***** getRealtimeEvent *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `sesm`.`getRealtimeEvent`(IN ids VARCHAR(10000), IN intervals INT)
+BEGIN
+  -- intervals 이전부터 지금까지 발생한 장애 로그, 경보 로그 조회
+	DROP TABLE IF EXISTS _tmp_event;
+	CREATE TEMPORARY TABLE IF NOT EXISTS _tmp_event (
+        did INT,
+        rdate TIMESTAMP,
+        info VARCHAR(255),
+        etype INT,
+        INDEX rdate_idx (rdate)
+	) ENGINE = MEMORY;
+
+
+  -- intervals 이전부터 지금까지 발생한 장애 로그 _tmp_event에 추가
+	SET @faillog = CONCAT("INSERT INTO _tmp_event SELECT device_id, rdate, info, 2
+					FROM fail_log
+					WHERE rdate >= DATE_SUB(NOW(), INTERVAL ", intervals, " SECOND) AND device_id IN (", ids, ")");
+	PREPARE stmt FROM @faillog;
+    EXECUTE stmt;
+	DEALLOCATE PREPARE stmt;
+
+  -- intervals 이전부터 지금까지 발생한 경보 로그 _tmp_event에 추가
+	SET @alarmlog = CONCAT("INSERT INTO _tmp_event SELECT device_id, cdate, info, 1
+					FROM alarm_log
+					WHERE cdate >= DATE_SUB(NOW(), INTERVAL ", intervals, " SECOND) AND device_id IN (", ids, ")");
+
+    PREPARE stmt FROM @alarmlog;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+
+   SELECT e.did, DATE_FORMAT(e.rdate, "%Y-%m-%d %T") as date, g.name as device_group_name, d.name as device_name, e.info, e.etype
+   FROM _tmp_event e, device d, device_group g
+   WHERE e.did = d.id AND d.group_id = g.id
+   ORDER BY rdate DESC;
+
+END
