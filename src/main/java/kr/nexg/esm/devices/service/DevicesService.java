@@ -857,7 +857,7 @@ public class DevicesService {
 		String rsFax			 = (String)config.setValue(rsDatas, "fax", "");  		  // fax
 		String rsMid 			 = (String)config.setValue(rsDatas, "mid", "");  		  // 관리계정 id
 		String rsMpass 			 = (String)config.setValue(rsDatas, "mpass", "");  		  // 관리계정 pw
-	    String rsProduct_id 	 = (String)config.setValue(rsDatas, "product_id", "2");   // 제품id
+	    String rsProductId 		 = (String)config.setValue(rsDatas, "product_id", "2");   // 제품id
 //	    ## 유효성 검사
 //	    validation.deviceAdd_product(rs_product_id)
 	    String rsSnmpVersion	 = (String)config.setValue(rsDatas, "snmp_version", "");   // snmp 버전
@@ -875,66 +875,190 @@ public class DevicesService {
 	    String rsCode2			 = (String)config.setValue(rsDatas, "code2", "0000");      // 장비 일련번호
     
 		String message = "장비가 추가되었습니다.";
+		String success = "true";
 		
-//		 try {
-//            int overDId = 0;
-//            String overDName = "";
-//            int overDGroupId = -1;
-//            int overDActive = 0;
-//
-//            if (!"".equals(rsOverwriteid)) {
-//                // Fetch overwrite device details
-//                Object[] overwriteDevice = dManager.select("SELECT id, name, group_id, active FROM device WHERE id = " + rsOverwriteId).get(0);
-//                overDId = Integer.parseInt(overwriteDevice[0].toString());
-//                overDName = overwriteDevice[1].toString();
-//                overDGroupId = Integer.parseInt(overwriteDevice[2].toString());
-//                overDActive = Integer.parseInt(overwriteDevice[3].toString());
-//            }
-//
-//            int totalDeviceCount = Integer.parseInt(dManager.select("SELECT COUNT(*) FROM device WHERE active=1").get(0).get(0).toString());
-//            if ((overDId == 0 && totalDeviceCount > 4096) || (overDId > 0 && overDActive == 0 && totalDeviceCount > 4096)) {
-//                results.put("success", "false");
-//                results.put("message", "최대 등록가능 장비 대수는 4096대 입니다.");
-//                return results.toString();
-//            }
-//
-//            List<Object[]> chkGroupMaximumChecker;
-//            if (modeValue == 0) {
-//                chkGroupMaximumChecker = dManager.select("SELECT COUNT(*) FROM device WHERE group_id=" + rsGid);
-//            } else {
-//                chkGroupMaximumChecker = dManager.select("SELECT COUNT(*) FROM device, product p WHERE p.id = device.product_id AND p.type = " + modeValue + " AND group_id=" + rsGid);
-//            }
-//
-//            results.put("totalCount", chkGroupMaximumChecker.get(0)[0].toString());
-//            if (Integer.parseInt(chkGroupMaximumChecker.get(0)[0].toString()) >= 150 && (overDGroupId != Integer.parseInt(rsGid))) {
-//                results.put("success", "false");
-//                results.put("message", "하나의 그룹에 150개 이상의 장비가 추가 될수 없습니다.");
-//                return results.toString();
-//            }
-//
-//            if (!rsId.equals("null")) {
-//                results.put("message", "장비가 수정되었습니다.");
-//            }
-//
-//            if (rsId.equals("null")) {
-//                // Check Duplicated device name
-//                List<Object[]> chkName = dManager.select("SELECT id, name FROM device WHERE name='" + rsName + "'");
-//                if (chkName.size() > 0) {
-//                    // Duplicated device name found
-//                    results.put("success", "false");
-//                    results.put("message", "동일한 장비 이름이 존재합니다.");
-//                    return results.toString();
-//                }
-//            }
-//
-//            // Rest of the code for updating or adding the device
-//            // ...
-//
-//        } catch (Exception e) {
-//            results.put("errMsg", "A failure has occurred.");
-//            results.put("success", "false");
-//            results.put("message", "db connection error");
-//        }
+		 try {
+            int overDId = 0;
+            String overDName = "";
+            int overDGroupId = -1;
+            int overDActive = 0;
+
+            if (!"".equals(rsOverwriteid)) {
+                // Fetch overwrite device details
+            	
+                DevicesVo devicesVo = new DevicesVo();
+                devicesVo.setOverwriteid(rsOverwriteid);
+                
+            	Map<String, Object> map = devicesMapper.overwriteDevice(devicesVo);
+                overDId = Integer.parseInt((String) map.get("id"));
+                overDName = (String) map.get("name");
+                overDGroupId = Integer.parseInt((String) map.get("group_id"));
+                overDActive = Integer.parseInt((String) map.get("active"));
+                
+                log.info("overDGroupId=="+overDGroupId);
+            }
+
+            int totalDeviceCount = devicesMapper.totalDeviceCount();
+            if ((overDId == 0 && totalDeviceCount > 4096) || (overDId > 0 && overDActive == 0 && totalDeviceCount > 4096)) {
+                message = "최대 등록가능 장비 대수는 4096대 입니다.";
+                success = "false";
+            }
+
+            int chkGroupMaximumChecker = 0;
+            
+            if (mode == 0) {
+            	
+            	DevicesVo devicesVo = new DevicesVo();
+            	devicesVo.setId(rsGid);
+            	
+                chkGroupMaximumChecker = devicesMapper.groupMaximumChkecker(devicesVo); 
+            } else {
+            	
+            	DevicesVo devicesVo = new DevicesVo();
+            	devicesVo.setId(rsGid);
+            	devicesVo.setType(String.valueOf(mode));
+            	
+                chkGroupMaximumChecker = devicesMapper.groupMaximumChkecker2(devicesVo); 
+            }
+
+            if (chkGroupMaximumChecker >= 150 && (overDGroupId != Integer.parseInt(rsGid))) {
+                message = "하나의 그룹에 150개 이상의 장비가 추가 될수 없습니다.";
+                success = "false";
+            }
+
+            if (!rsId.equals("null")) {
+            	message = "장비가 수정되었습니다.";
+            }
+
+            if (rsId.equals("null")) {
+                // Check Duplicated device name
+            	
+                DevicesVo devicesVo = new DevicesVo();
+                devicesVo.setName(rsName);            	
+            	Map<String, Object> map = devicesMapper.overwriteDevice(devicesVo);
+                if (!map.isEmpty()) {
+                    // Duplicated device name found
+                    message = "동일한 장비 이름이 존재합니다.";
+                    success = "false";                    
+                }
+            }
+
+            if(rsId != null && overDId > 0) {
+            	DevicesVo devicesVo = new DevicesVo();
+            	devicesVo.setId(rsId);
+            	devicesVo.setOverDId(String.valueOf(overDId));
+            	devicesVo.setName(rsName);
+            	devicesVo.setDesc(rsDesc);
+            	devicesVo.setIp(rsIp);
+            	devicesVo.setActive(rsActive);
+            	devicesVo.setLog(rsLog);
+            	devicesVo.setAlarm(rsAlarm);
+            	devicesVo.setSerial(rsSerial);
+            	devicesVo.setCompany(rsCompany);
+            	devicesVo.setCustomer(rsCustomer);
+            	devicesVo.setEmail(rsEmail);
+            	devicesVo.setZip(rsZip);
+            	devicesVo.setAddress(rsAddress);
+            	devicesVo.setPhone1(rsPhone1);
+            	devicesVo.setPhone2(rsPhone2);
+            	devicesVo.setFax(rsFax);
+            	devicesVo.setMid(rsMid);
+            	devicesVo.setMpass(rsMpass);
+            	devicesVo.setGid(rsGid);
+            	devicesVo.setProductId(rsProductId);
+            	devicesVo.setSnmpUseInherit(rsSnmpUseInherit);
+            	devicesVo.setSnmpVersion(rsSnmpVersion);
+            	devicesVo.setSnmpCommunity(rsSnmpCommunity);
+            	devicesVo.setSnmpLevel(rsSnmpLevel);
+            	devicesVo.setSnmpUser(rsSnmpUser);
+            	devicesVo.setSnmpAuthprot(rsSnmpAuthprot);
+            	devicesVo.setSnmpAuthpass(rsSnmpAuthpass);
+            	devicesVo.setSnmpPrivprot(rsSnmpPrivprot);
+            	devicesVo.setSnmpPrivpass(rsSnmpPrivpass);
+            	devicesVo.setMemo1(rsMemo1);
+            	devicesVo.setMemo2(rsMemo2);
+            	devicesVo.setCode1(rsCode1);
+            	devicesVo.setCode2(rsCode2);
+            	
+            	Map<String, Object> map = devicesMapper.overwriteDeviceInfo(devicesVo);
+            	if(map.get("col").equals("0")) {
+            		success = "false";       
+            		if(map.get("col2").equals("0")) {
+            			message = "동일한 라이센스 또는 시리얼을 가진 장비가 존재합니다.";
+            		}else {
+            			message = "동일한 장비 이름이 존재합니다.";
+            		}
+            	}else {
+            		
+            	}
+            }else {
+        		DevicesVo devicesVo = new DevicesVo();
+            	devicesVo.setId(rsId);
+            	devicesVo.setName(rsName);
+            	devicesVo.setDesc(rsDesc);
+            	devicesVo.setIp(rsIp);
+            	devicesVo.setActive(rsActive);
+            	devicesVo.setLog(rsLog);
+            	devicesVo.setAlarm(rsAlarm);
+            	devicesVo.setSerial(rsSerial);
+            	devicesVo.setCompany(rsCompany);
+            	devicesVo.setCustomer(rsCustomer);
+            	devicesVo.setEmail(rsEmail);
+            	devicesVo.setZip(rsZip);
+            	devicesVo.setAddress(rsAddress);
+            	devicesVo.setPhone1(rsPhone1);
+            	devicesVo.setPhone2(rsPhone2);
+            	devicesVo.setFax(rsFax);
+            	devicesVo.setMid(rsMid);
+            	devicesVo.setMpass(rsMpass);
+            	devicesVo.setGid(rsGid);
+            	devicesVo.setProductId(rsProductId);
+            	devicesVo.setSnmpUseInherit(rsSnmpUseInherit);
+            	devicesVo.setSnmpVersion(rsSnmpVersion);
+            	devicesVo.setSnmpCommunity(rsSnmpCommunity);
+            	devicesVo.setSnmpLevel(rsSnmpLevel);
+            	devicesVo.setSnmpUser(rsSnmpUser);
+            	devicesVo.setSnmpAuthprot(rsSnmpAuthprot);
+            	devicesVo.setSnmpAuthpass(rsSnmpAuthpass);
+            	devicesVo.setSnmpPrivprot(rsSnmpPrivprot);
+            	devicesVo.setSnmpPrivpass(rsSnmpPrivpass);
+            	devicesVo.setMemo1(rsMemo1);
+            	devicesVo.setMemo2(rsMemo2);
+            	devicesVo.setCode1(rsCode1);
+            	devicesVo.setCode2(rsCode2);
+        		
+        		Map<String, Object> map = devicesMapper.setDeviceInfo(devicesVo);
+        		
+        		log.info("map : "+map);
+        		
+        		String col = String.valueOf(map.get("col"));
+        		String col2 = String.valueOf(map.get("col2"));
+        		
+        		log.info("col : "+col);
+        		log.info("col2 : "+col2);
+            	if(col.equals("0")) {
+            		success = "false";       
+            		if(col2.equals("0")) {
+            			message = "동일한 라이센스 또는 시리얼을 가진 장비가 존재합니다.";
+            		}else {
+            			message = "동일한 장비 이름이 존재합니다.";
+            		}
+            	}else {
+            		
+            		log.info("rsSetType : "+rsSetType);
+            		
+            		if(rsSetType != null && rsSetType.equals("Manual")) {
+            			devicesVo.setSerial(rsSerial);
+            			devicesVo.setId(col2);
+            			devicesMapper.updateDeviceInfo(devicesVo);
+            		}
+            	}
+            }
+            
+        } catch (Exception e) {
+            message = "db connection error";
+            success = "false";
+        }
 	
         Map<String, Object> map = new HashMap<String,Object>(); 
         map.put("message", message);

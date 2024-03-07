@@ -90,6 +90,20 @@ public interface DevicesMapper {
      */
 	public Map<String, Object> setDeviceGroupInfo(DevicesVo devicesVo);
 	
+	public Map<String, Object> overwriteDevice(DevicesVo devicesVo);
+	
+	public int totalDeviceCount();
+	
+	public int groupMaximumChkecker(DevicesVo devicesVo);
+	
+	public int groupMaximumChkecker2(DevicesVo devicesVo);
+	
+	public Map<String, Object> overwriteDeviceInfo(DevicesVo devicesVo);
+	
+	public Map<String, Object> setDeviceInfo(DevicesVo devicesVo);
+	
+	public int updateDeviceInfo(DevicesVo devicesVo);
+	
 //	public int setFailMemo(DevicesVo devicesVo);
 	
 }

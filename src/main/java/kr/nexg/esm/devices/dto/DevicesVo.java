@@ -41,5 +41,22 @@ public class DevicesVo
     private String page;
     private String limit;
     private String viewCount;
+    private String overwriteid;
+    private String overDId;
+    private String active;
+    private String log;
+    private String alarm;
+    private String mid;
+    private String mpass;
+    private String gid;
+    private String snmpUseInherit;
+    private String snmpVersion;
+    private String snmpCommunity;
+    private String snmpLevel;
+    private String snmpUser;
+    private String snmpAuthprot;
+    private String snmpAuthpass;
+    private String snmpPrivprot;
+    private String snmpPrivpass;
     private int mode;
 }
