@@ -366,7 +366,7 @@ public class AdministratorController {
         
         String sessionId = authentication.getName();
         String clientIp = ClientIpUtil.getClientIP(request);
-        String groupId = "1";
+        String groupId = authentication.getAuthorities().toString().replace("[", "").replace("]", "").replace("ROLE_", "");;
         paramMap.put("groupId", groupId);
 
     	HttpHeaders headers= new HttpHeaders();
