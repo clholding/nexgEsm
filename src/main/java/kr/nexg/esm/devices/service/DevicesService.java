@@ -9,6 +9,8 @@ import java.util.Map;
 
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,6 +22,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.nexg.esm.administrator.dto.AdministratorEnum;
 import kr.nexg.esm.devices.dto.DevicesVo;
 import kr.nexg.esm.devices.mapper.DevicesMapper;
+import kr.nexg.esm.util.Validation;
 import kr.nexg.esm.util.config;
 import kr.nexg.esm.util.mode_convert;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +34,19 @@ public class DevicesService {
 	@Autowired
 	DevicesMapper devicesMapper;
 	
+	  private static final Map<String, String> auditType = new HashMap<>();
+
+	  static {
+	    auditType.put("delDeviceInterface", "장비 인터페이스 리스트 삭제");
+	    auditType.put("setDeviceInterface", "장비 인터페이스 리스트 추가");
+	    auditType.put("updateDeviceInterface", "장비 인터페이스 정보 수정");
+	    auditType.put("delDeviceNGroup", "장비/그룹 정보 삭제");
+	    auditType.put("setDeviceNGroupName", "장비/그룹 이름 수정");
+	    auditType.put("setDeviceInfo", "장비정보 ");
+	    auditType.put("setDeviceGroupInfo", "장비/그룹정보 ");
+	    auditType.put("setDeviceGroup", "장비/그룹 이동");
+	  }
+	  
     public static Map<String, String> convertStatusInfo(String type, String totalVal, String val, String alarmVal) {
         Map<String, String> result = new HashMap<>();
 
@@ -66,6 +82,186 @@ public class DevicesService {
 
         return result;
     }
+    
+    
+    public static String emsgToStr(Map<String, Object> emsg) {
+        List<String> tmpPrintArray = new ArrayList<>();
+        String rtnStr = "";
+
+        Map<String, String> keyDic = new HashMap<>();
+        keyDic.put("pGroupID", "부모그룹");
+        keyDic.put("deviceIDs", "장비ID");
+        keyDic.put("groupIDs", "그룹ID");
+        keyDic.put("desc", "설명");
+        keyDic.put("id", "ID");
+        keyDic.put("name", "이름");
+        keyDic.put("groupNames", "그룹");
+        keyDic.put("deviceNames", "장비");
+        keyDic.put("gn", "그룹");
+        keyDic.put("product_id", "제품명");
+        keyDic.put("dn", "장비명");
+        keyDic.put("active", "활성화");
+        keyDic.put("ip", "주소");
+        keyDic.put("licence", "라이선스");
+        keyDic.put("log", "원본 로그 저장");
+        keyDic.put("company", "고객사");
+        keyDic.put("phone2", "전화");
+        keyDic.put("fax", "FAX");
+        keyDic.put("zip", "우편번호");
+        keyDic.put("address", "주소");
+        keyDic.put("customer", "담당자");
+        keyDic.put("phone1", "핸드폰");
+        keyDic.put("email", "E-mail");
+        keyDic.put("alarm", "이벤트 이메일 전송");
+
+        for (String key : emsg.keySet()) {
+            String replaceKey = keyDic.containsKey(key) ? keyDic.get(key) : key;
+            String tmpPrint = "";
+            String tmpSearch;
+
+//            if ("pGroupID".equals(key)) {
+//                tmpSearch = d_manager.select("SELECT name FROM device_group WHERE id='" + emsg.get(key) + "'");
+//                tmpPrint = tmpSearch[0][0];
+//            } else if ("deviceIDs".equals(key)) {
+//                if (((List<String>) emsg.get(key)).size() > 0) {
+//                    String tmpWhere = String.join(",", (List<String>) emsg.get(key));
+//                    tmpSearch = d_manager.select("SELECT name FROM device WHERE id in (" + tmpWhere + ")");
+//                    List<String> tmpArray = new ArrayList<>();
+//                    for (String tmp : tmpSearch) {
+//                        tmpArray.add(tmp);
+//                    }
+//                    tmpPrint = String.join(",", tmpArray);
+//                }
+//            } else if ("groupIDs".equals(key)) {
+//                if (((List<String>) emsg.get(key)).size() > 0) {
+//                    String tmpWhere = String.join(",", (List<String>) emsg.get(key));
+//                    tmpSearch = d_manager.select("SELECT name FROM device_group WHERE id in (" + tmpWhere + ")");
+//                    List<String> tmpArray = new ArrayList<>();
+//                    for (String tmp : tmpSearch) {
+//                        tmpArray.add(tmp);
+//                    }
+//                    tmpPrint = String.join(",", tmpArray);
+//                }
+//            } else if ("alarm".equals(key) || "active".equals(key) || "log".equals(key)) {
+//                if (Integer.parseInt(emsg.get(key).toString()) == 1) {
+//                    emsg.put(key, "사용");
+//                } else {
+//                    emsg.put(key, "미사용");
+//                }
+//            } else if ("product_id".equals(key)) {
+//                String tmpDeviceNum = emsg.get("product_id").toString();
+//                tmpSearch = d_manager.select("SELECT name FROM product WHERE id = '" + tmpDeviceNum + "'");
+//                if ("".equals(tmpSearch[0][0])) {
+//                    tmpPrint = "Unknown Device";
+//                } else {
+//                    tmpPrint = tmpSearch[0][0];
+//                }
+//            }
+//
+//            if (tmpPrint.isEmpty()) {
+//                if (emsg.get(key) instanceof List) {
+//                    if (((List<?>) emsg.get(key)).size() > 0) {
+//                        tmpPrintArray.add(replaceKey + '=' + String.join(",", (List<?>) emsg.get(key)));
+//                    } else if (!("deviceNames".equals(key) || "groupNames".equals(key) || "deviceIDs".equals(key) || "groupIDs".equals(key))) {
+//                        tmpPrintArray.add(replaceKey + '=');
+//                    }
+//                } else {
+//                    if (!emsg.get(key).toString().isEmpty() && !"null".equals(emsg.get(key).toString())) {
+//                        tmpPrintArray.add(replaceKey + '=' + emsg.get(key).toString());
+//                    } else if (!("deviceNames".equals(key) || "groupNames".equals(key) || "deviceIDs".equals(key) || "groupIDs".equals(key))) {
+//                        tmpPrintArray.add(replaceKey + '=');
+//                    }
+//                }
+//            } else {
+//                tmpPrintArray.add(replaceKey + '=' + tmpPrint);
+//            }
+
+            rtnStr = String.join(", ", tmpPrintArray);
+        }
+        return rtnStr;
+    }
+    
+    public void setAuditInfo(String fn, String yn, String datasJson) throws JSONException {
+        String auditMenu = "[장비관리]";
+        String state = "성공";
+        int auditlevel = 6;
+
+        if ("false".equals(yn)) {
+          state = "실패";
+          auditlevel = 4;
+        }
+
+        if ("setDeviceNGroupName".equals(fn)) {
+          auditMenu = "[토폴로지]";
+        }
+
+        JSONObject datas = new JSONObject(datasJson);
+        String eMsg = auditMenu + auditType.get(fn); // Assuming auditType is a Map<String, String>
+
+        String dInfo = "";
+
+        if ("setDeviceInfo".equals(fn)) {
+          dInfo = "추가";
+          if (!"".equals(datas.getString("id"))) {
+            dInfo = "수정";
+          }
+        } else if ("setDeviceGroupInfo".equals(fn)) {
+          dInfo = "추가";
+          if (!"null".equals(datas.getString("id"))) {
+            dInfo = "수정";
+          }
+        }
+
+        if (datas.has("dn")) {
+//          eMsg = eMsg + dInfo + " " + state + " " + emsgToStr(datas); // Assuming emsgToStr is a method
+        } else {
+          if (!"setDeviceGroup".equals(fn)) {
+//            eMsg = eMsg + dInfo + " " + state + " " + emsgToStr(datas); // Assuming emsgToStr is a method
+          } else if ("setDeviceGroup".equals(fn)) {
+            String tmpPrint = "";
+            List<String> tmpArray = new ArrayList<>();
+            
+            DevicesVo devicesVo = new DevicesVo();
+            devicesVo.setPGroupID(String.valueOf(datas.getString("pGroupID")));
+            
+            List<Map<String, Object>> tmpParentSearch = devicesMapper.deviceGroupNames(devicesVo);
+            String tmpParent = String.valueOf(tmpParentSearch.get(0).get("name"));
+            eMsg = eMsg + dInfo + " " + state + " ";
+            
+            if (datas.has("groupIDs") && datas.getJSONArray("groupIDs").length() > 0) {
+              String tmpWhere = String.join(",", String.valueOf(datas.getJSONArray("groupIDs")));
+              
+              devicesVo = new DevicesVo();
+              devicesVo.setGroupIDs(tmpWhere);
+              
+              tmpParentSearch = devicesMapper.deviceGroupNames(devicesVo);
+              
+              for (Map<String, Object> tmp : tmpParentSearch) {
+                tmpArray.add(String.valueOf(tmp.get("name")));
+              }
+              eMsg = eMsg + "그룹 " + String.join(",", tmpArray) + " 를 그룹 " + tmpParent + " 로 이동하였습니다. ";
+            }
+            
+            if (datas.has("deviceIDs") && datas.getJSONArray("deviceIDs").length() > 0) {
+              tmpArray.clear();
+              String tmpWhere = String.join(",", String.valueOf(datas.getJSONArray("deviceIDs")));
+              
+              devicesVo = new DevicesVo();
+              devicesVo.setDeviceIDs(tmpWhere);
+              
+              tmpParentSearch = devicesMapper.deviceNames(devicesVo);
+              
+              for (Map<String, Object> tmp : tmpParentSearch) {
+            	 tmpArray.add(String.valueOf(tmp.get("name")));
+              }
+              eMsg = eMsg + "장비 " + String.join(",", tmpArray) + " 를 그룹 " + tmpParent + " 로 이동하였습니다.";
+            }
+          }
+        }
+
+//        EsmAuditLog e = new EsmAuditLog();
+//        e.esmlog(auditlevel, session.id, request.client, eMsg);
+      }    
     
     /*
      * DeviceFinder
@@ -737,7 +933,7 @@ public class DevicesService {
     /*
      * DeviceFinder > 그룹정보 > 정보 > 기본정보 > 저장
      */
-	public Map<String, Object> setDeviceGroupInfo(Map<String,String> paramMap) throws IOException, ParseException{
+	public Map<String, Object> setDeviceGroupInfo(Map<String,String> paramMap) throws Exception{
 		
 		String datas = paramMap.get("datas");
 		
@@ -746,7 +942,8 @@ public class DevicesService {
 	    String rsGroupID 		= (String)config.setValue(rsDatas, "id", null);
 	    String rsName			= (String)config.setValue(rsDatas, "name", "");
 	    	    
-//	    	    validation.groupAdd_name(rs_name);
+//	    # 유효성 검사
+   	    Validation.groupAdd_name(rsName);
 	    String rsDesc		    = (String)config.setValue(rsDatas, "desc", "");
 	    String rsParentsGroupID = (String)config.setValue(rsDatas, "pGroupID", "");
 	    String rsCode1 			= (String)config.setValue(rsDatas, "code1", "00000000");    // 그룹 관리번호
@@ -816,7 +1013,7 @@ public class DevicesService {
     /*
      * DeviceFinder -> 개별정보 -> 정보 -> 기본정보 -> 저장
      */
-	public Map<String, Object> setDeviceInfo(Map<String,String> paramMap) throws IOException, ParseException{
+	public Map<String, Object> setDeviceInfo(Map<String,String> paramMap) throws Exception{
 		
 		String datas = paramMap.get("datas");
 		String rsSetType = paramMap.get("setType");
@@ -829,22 +1026,27 @@ public class DevicesService {
 	    String rsOverwriteid 	 = (String)config.setValue(rsDatas, "overwriteid", "");   // 교체할 장비 id
 	    String rsGid			 = (String)config.setValue(rsDatas, "pGroupID", "0");  	  // 상위그룹id[필수]
 //	    # 유효성 검사
-//	    validation.deviceAdd_gid(rs_gid)
+	    
+        DevicesVo devicesVo = new DevicesVo();
+        devicesVo.setId(rsGid);
+	    int rsGidCnt = devicesMapper.deviceGroupCnt(devicesVo);
+	    Validation.deviceAdd_gid(rsGidCnt);
+	    
 	    String rsId 			 = (String)config.setValue(rsDatas, "id", null);  	  	  // 장비 id (신규추가인 경우 NULL)
 	    String rsName 			 = (String)config.setValue(rsDatas, "dn", "");  		  // 장비이름[필수]
 //	    # 유효성 검사
-//	    validation.deviceAdd_name(rs_name)
+	    Validation.deviceAdd_name(rsName);
 	    String rsDesc			 = (String)config.setValue(rsDatas, "desc", "");  		  // 장비설명
 	    String rsIp				 = (String)config.setValue(rsDatas, "ip", "");  		  // 장비ip[필수]
 //	    # 유효성 검사
-//	    validation.deviceAdd_ip(rs_ip)
+	    Validation.deviceAdd_ip(rsIp);
 	    String rsActive			 = (String)config.setValue(rsDatas, "active", "0");  	  // 활성화 여부(0:비활성화, 1:활성화)
 	    String rsLog 			 = (String)config.setValue(rsDatas, "log", "0");  		  // 원본로그저장 여부(0:비활성화, 1:활성화)
 	    String rsAlarm 			 = (String)config.setValue(rsDatas, "alarm", "0");  	  // 이벤트 이메일 전송 여부(0:비활성화, 1:활성화)
 	    String rsLicence		 = (String)config.setValue(rsDatas, "licence", "");  	  // 라이센스
 	    String rsSerial 		 = (String)config.setValue(rsDatas, "serial", "");  	  // 시리얼
 //	    ## 유효성 검사
-//	    validation.deviceAdd_serial(rs_serial)
+	    Validation.deviceAdd_serial(rsSerial);
 		String rsOs 			 = (String)config.setValue(rsDatas, "os", "");  		  // 장비os
 		String rsHostname 		 = (String)config.setValue(rsDatas, "hostname", "");  	  // 장비 호스트이름
 		String rsCompany 		 = (String)config.setValue(rsDatas, "company", "");  	  // 고객사[필수]
@@ -858,8 +1060,12 @@ public class DevicesService {
 		String rsMid 			 = (String)config.setValue(rsDatas, "mid", "");  		  // 관리계정 id
 		String rsMpass 			 = (String)config.setValue(rsDatas, "mpass", "");  		  // 관리계정 pw
 	    String rsProductId 		 = (String)config.setValue(rsDatas, "product_id", "2");   // 제품id
+	    
+	    devicesVo = new DevicesVo();
+        devicesVo.setId(rsProductId);
+	    int rsProductIdCnt = devicesMapper.productCnt(devicesVo);	    
 //	    ## 유효성 검사
-//	    validation.deviceAdd_product(rs_product_id)
+	    Validation.deviceAdd_product(rsProductIdCnt);
 	    String rsSnmpVersion	 = (String)config.setValue(rsDatas, "snmp_version", "");   // snmp 버전
 	    String rsSnmpCommunity   = (String)config.setValue(rsDatas, "snmp_community", ""); // snmp community
 	    String rsSnmpUseInherit  = (String)config.setValue(rsDatas, "snmp_use_inherit", "0");  // snmp use_inherit
@@ -886,7 +1092,7 @@ public class DevicesService {
             if (!"".equals(rsOverwriteid)) {
                 // Fetch overwrite device details
             	
-                DevicesVo devicesVo = new DevicesVo();
+                devicesVo = new DevicesVo();
                 devicesVo.setOverwriteid(rsOverwriteid);
                 
             	Map<String, Object> map = devicesMapper.overwriteDevice(devicesVo);
@@ -908,13 +1114,13 @@ public class DevicesService {
             
             if (mode == 0) {
             	
-            	DevicesVo devicesVo = new DevicesVo();
+            	devicesVo = new DevicesVo();
             	devicesVo.setId(rsGid);
             	
                 chkGroupMaximumChecker = devicesMapper.groupMaximumChkecker(devicesVo); 
             } else {
             	
-            	DevicesVo devicesVo = new DevicesVo();
+            	devicesVo = new DevicesVo();
             	devicesVo.setId(rsGid);
             	devicesVo.setType(String.valueOf(mode));
             	
@@ -933,7 +1139,7 @@ public class DevicesService {
             if (rsId.equals("null")) {
                 // Check Duplicated device name
             	
-                DevicesVo devicesVo = new DevicesVo();
+                devicesVo = new DevicesVo();
                 devicesVo.setName(rsName);            	
             	Map<String, Object> map = devicesMapper.overwriteDevice(devicesVo);
                 if (!map.isEmpty()) {
@@ -944,7 +1150,7 @@ public class DevicesService {
             }
 
             if(rsId != null && overDId > 0) {
-            	DevicesVo devicesVo = new DevicesVo();
+            	devicesVo = new DevicesVo();
             	devicesVo.setId(rsId);
             	devicesVo.setOverDId(String.valueOf(overDId));
             	devicesVo.setName(rsName);
@@ -992,7 +1198,7 @@ public class DevicesService {
             		
             	}
             }else {
-        		DevicesVo devicesVo = new DevicesVo();
+        		devicesVo = new DevicesVo();
             	devicesVo.setId(rsId);
             	devicesVo.setName(rsName);
             	devicesVo.setDesc(rsDesc);
@@ -1048,6 +1254,7 @@ public class DevicesService {
             		log.info("rsSetType : "+rsSetType);
             		
             		if(rsSetType != null && rsSetType.equals("Manual")) {
+            			devicesVo = new DevicesVo();
             			devicesVo.setSerial(rsSerial);
             			devicesVo.setId(col2);
             			devicesMapper.updateDeviceInfo(devicesVo);

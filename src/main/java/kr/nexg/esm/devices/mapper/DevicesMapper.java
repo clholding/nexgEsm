@@ -85,6 +85,11 @@ public interface DevicesMapper {
 	
 	public int deviceGroupCnt(DevicesVo devicesVo);
 	
+	public List<Map<String, Object>> deviceGroupNames(DevicesVo devicesVo);
+	public List<Map<String, Object>> deviceNames(DevicesVo devicesVo);
+	
+	public int productCnt(DevicesVo devicesVo);
+	
     /*
      * DeviceFinder > 그룹정보 > 정보 > 기본정보 > 저장
      */

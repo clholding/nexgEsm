@@ -17,6 +17,8 @@ public class DevicesVo
     private String memo2;
     private String auth;
     private String deviceIDs;
+    private String pGroupID;
+    private String groupIDs;
     private String deviceID;
     private String memo;
     private String failID;

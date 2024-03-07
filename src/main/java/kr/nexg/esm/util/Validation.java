@@ -10,33 +10,90 @@ import java.util.regex.Pattern;
 public class Validation {
 	
 	//그룹
-	public static boolean deviceAdd_gid(String rs_gid) {
-		return false;
+	public static boolean deviceAdd_gid(int rs_gid) throws Exception {
+		if(rs_gid == 0) {
+			throw new Exception("그룹명이 존재하지 않습니다.");
+		}
+		
+		return true;
 	}
 	
 	//그룹
-	public static boolean deviceAdd_product(String rs_product_id) {
-		return false;
+	public static boolean deviceAdd_product(int rs_product_id) throws Exception {
+		if(rs_product_id == 0) {
+			throw new Exception("제품명이 존재하지 않습니다.");
+		}
+		
+		return true;
 	}
 	
 	//장비 이름
-	public static boolean deviceAdd_name(String rs_name) {
-		return false;
+	public static boolean deviceAdd_name(String rs_name) throws Exception {
+        if (rs_name == null || rs_name.isEmpty()) {
+            throw new Exception("장비 이름을 입력하십시오.");
+        } else if (rs_name.length() < 3 || rs_name.length() > 128) {
+            throw new Exception("장비 이름은 최소 3자리 이상 255자리 이하여야 합니다.");
+        } else {
+            return true;
+        }
 	}
 	
 	//IP
-	public static boolean deviceAdd_ip(String rs_ip) {
-		return false;
+	public static boolean deviceAdd_ip(String rs_ip) throws Exception {
+        String pattern = "^(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
+        if (rs_ip == null || rs_ip.isEmpty()) {
+            throw new Exception("장비 IP를 입력하십시오.");
+        } else if (!Pattern.matches(pattern, rs_ip)) {
+            throw new Exception("유효한 IP 형식이 아닙니다.");
+        } else {
+            return true;
+        }
 	}
 	
+	
+    private static boolean containsSpecialCharacter(String input) {
+        String specialCharacters = "!@#$%^&*()_-+=<>?/[]{},.:;";
+        for (char ch : input.toCharArray()) {
+            if (specialCharacters.indexOf(ch) != -1) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static boolean containsLowerCase(String input) {
+        for (char ch : input.toCharArray()) {
+            if (Character.isLowerCase(ch)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
 	//Serial
-	public static boolean deviceAdd_serial(String rs_serial) {
-		return false;
+	public static boolean deviceAdd_serial(String rs_serial) throws Exception {
+       if (rs_serial == null || rs_serial.isEmpty()) {
+            throw new Exception("장비 serial을 입력하십시오.");
+        } else if (containsSpecialCharacter(rs_serial)) {
+            throw new Exception("Serial 값에 특수문자가 포함되어 있습니다.");
+        } else if (containsLowerCase(rs_serial)) {
+            throw new Exception("Serial 값에 소문자가 포함되어 있습니다.");
+        } else if (rs_serial.length() > 14) {
+            throw new Exception("Serial 값의 최대 길이는 14자 입니다.");
+        } else {
+            return true;
+        }
 	}
 	
 	//그룹 이름
-	public static boolean groupAdd_name(String rs_name) {
-		return false;
+	public static boolean groupAdd_name(String rs_name) throws Exception {
+        if (rs_name == null || rs_name.isEmpty()) {
+            throw new Exception("그룹 이름을 입력하십시오.");
+        } else if (rs_name.length() < 3 || rs_name.length() > 128) {
+            throw new Exception("그룹 이름은 최소 3자리 이상 128자리 이하여야 합니다.");
+        } else {
+            return true;
+        }
 	}
 	
 	//SID
