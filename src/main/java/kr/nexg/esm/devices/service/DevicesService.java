@@ -83,6 +83,104 @@ public class DevicesService {
         return result;
     }
     
+    
+    public static String emsgToStr(Map<String, Object> emsg) {
+        List<String> tmpPrintArray = new ArrayList<>();
+        String rtnStr = "";
+
+        Map<String, String> keyDic = new HashMap<>();
+        keyDic.put("pGroupID", "부모그룹");
+        keyDic.put("deviceIDs", "장비ID");
+        keyDic.put("groupIDs", "그룹ID");
+        keyDic.put("desc", "설명");
+        keyDic.put("id", "ID");
+        keyDic.put("name", "이름");
+        keyDic.put("groupNames", "그룹");
+        keyDic.put("deviceNames", "장비");
+        keyDic.put("gn", "그룹");
+        keyDic.put("product_id", "제품명");
+        keyDic.put("dn", "장비명");
+        keyDic.put("active", "활성화");
+        keyDic.put("ip", "주소");
+        keyDic.put("licence", "라이선스");
+        keyDic.put("log", "원본 로그 저장");
+        keyDic.put("company", "고객사");
+        keyDic.put("phone2", "전화");
+        keyDic.put("fax", "FAX");
+        keyDic.put("zip", "우편번호");
+        keyDic.put("address", "주소");
+        keyDic.put("customer", "담당자");
+        keyDic.put("phone1", "핸드폰");
+        keyDic.put("email", "E-mail");
+        keyDic.put("alarm", "이벤트 이메일 전송");
+
+        for (String key : emsg.keySet()) {
+            String replaceKey = keyDic.containsKey(key) ? keyDic.get(key) : key;
+            String tmpPrint = "";
+            String tmpSearch;
+
+//            if ("pGroupID".equals(key)) {
+//                tmpSearch = d_manager.select("SELECT name FROM device_group WHERE id='" + emsg.get(key) + "'");
+//                tmpPrint = tmpSearch[0][0];
+//            } else if ("deviceIDs".equals(key)) {
+//                if (((List<String>) emsg.get(key)).size() > 0) {
+//                    String tmpWhere = String.join(",", (List<String>) emsg.get(key));
+//                    tmpSearch = d_manager.select("SELECT name FROM device WHERE id in (" + tmpWhere + ")");
+//                    List<String> tmpArray = new ArrayList<>();
+//                    for (String tmp : tmpSearch) {
+//                        tmpArray.add(tmp);
+//                    }
+//                    tmpPrint = String.join(",", tmpArray);
+//                }
+//            } else if ("groupIDs".equals(key)) {
+//                if (((List<String>) emsg.get(key)).size() > 0) {
+//                    String tmpWhere = String.join(",", (List<String>) emsg.get(key));
+//                    tmpSearch = d_manager.select("SELECT name FROM device_group WHERE id in (" + tmpWhere + ")");
+//                    List<String> tmpArray = new ArrayList<>();
+//                    for (String tmp : tmpSearch) {
+//                        tmpArray.add(tmp);
+//                    }
+//                    tmpPrint = String.join(",", tmpArray);
+//                }
+//            } else if ("alarm".equals(key) || "active".equals(key) || "log".equals(key)) {
+//                if (Integer.parseInt(emsg.get(key).toString()) == 1) {
+//                    emsg.put(key, "사용");
+//                } else {
+//                    emsg.put(key, "미사용");
+//                }
+//            } else if ("product_id".equals(key)) {
+//                String tmpDeviceNum = emsg.get("product_id").toString();
+//                tmpSearch = d_manager.select("SELECT name FROM product WHERE id = '" + tmpDeviceNum + "'");
+//                if ("".equals(tmpSearch[0][0])) {
+//                    tmpPrint = "Unknown Device";
+//                } else {
+//                    tmpPrint = tmpSearch[0][0];
+//                }
+//            }
+//
+//            if (tmpPrint.isEmpty()) {
+//                if (emsg.get(key) instanceof List) {
+//                    if (((List<?>) emsg.get(key)).size() > 0) {
+//                        tmpPrintArray.add(replaceKey + '=' + String.join(",", (List<?>) emsg.get(key)));
+//                    } else if (!("deviceNames".equals(key) || "groupNames".equals(key) || "deviceIDs".equals(key) || "groupIDs".equals(key))) {
+//                        tmpPrintArray.add(replaceKey + '=');
+//                    }
+//                } else {
+//                    if (!emsg.get(key).toString().isEmpty() && !"null".equals(emsg.get(key).toString())) {
+//                        tmpPrintArray.add(replaceKey + '=' + emsg.get(key).toString());
+//                    } else if (!("deviceNames".equals(key) || "groupNames".equals(key) || "deviceIDs".equals(key) || "groupIDs".equals(key))) {
+//                        tmpPrintArray.add(replaceKey + '=');
+//                    }
+//                }
+//            } else {
+//                tmpPrintArray.add(replaceKey + '=' + tmpPrint);
+//            }
+
+            rtnStr = String.join(", ", tmpPrintArray);
+        }
+        return rtnStr;
+    }
+    
     public void setAuditInfo(String fn, String yn, String datasJson) throws JSONException {
         String auditMenu = "[장비관리]";
         String state = "성공";
