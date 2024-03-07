@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.nexg.esm.global.mapper.GlobalMapper">
+
+	<select id="devices" parameterType="String" resultType="map">
+		/* GlobalMapper.devices */	
+		CALL sesm.getTree( #{parentId} );
+	</select>
+	
+	<select id="getUserInfoByLogin" parameterType="String" resultType="map">
+		/* GlobalMapper.getUserInfoByLogin */	
+		CALL sesm.getUserInfoByLogin( #{sessionId} );
+	</select>
+	
+	<select id="getDeviceStatusByLogin" parameterType="String" resultType="map">
+		/* GlobalMapper.getDeviceStatusByLogin */	
+		CALL sesm.getDeviceStatusByLogin( #{sessionId}, #{mode} );
+	</select>
+	
+	<select id="getDeviceFaultStatus" parameterType="String" resultType="map">
+		/* GlobalMapper.getDeviceFaultStatus */	
+		CALL sesm.getDeviceFaultStatus( #{sessionId}, #{deviceIds} ,#{mode} );
+	</select>
+	
+	<select id="getAllDeviceFaultStatus" parameterType="String" resultType="map">
+		/* GlobalMapper.getAllDeviceFaultStatus */	
+		CALL sesm.getAllDeviceFaultStatus( #{sessionId}, #{deviceIds} );
+	</select>
+	
+	<select id="selectUserStatus" parameterType="String" resultType="String">
+		/* GlobalMapper.selectUserStatus */	
+		SELECT status FROM user where login = #{sessionId}
+	</select>
+	
+</mapper>

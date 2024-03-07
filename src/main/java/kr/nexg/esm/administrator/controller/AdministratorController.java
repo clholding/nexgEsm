@@ -51,7 +51,7 @@ public class AdministratorController {
 	* 시스템 설정 > 계정관리 > 관리자 생성/수정
 	* 관리자정보 조회
 	* 
-	* @ param AdministratorVo
+	* @ param Map
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/getUserInfo")
@@ -90,7 +90,7 @@ public class AdministratorController {
 	* 시스템 설정 > 계정관리 > 관리자 생성/수정
 	* 관리자정보 리스트
 	* 
-	* @ param AdministratorVo
+	* @ param Map
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/getUser")
@@ -143,7 +143,7 @@ public class AdministratorController {
 	* 시스템 설정 > 계정관리 > 관리자 생성/수정
 	* 관리자정보 삭제
 	* 
-	* @ param AdministratorVo
+	* @ param Map
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/delUser")
@@ -190,7 +190,7 @@ public class AdministratorController {
 	* 시스템 설정 > 계정관리 > 관리자 그룹
 	* 관리자정보 그룹 삭제
 	* 
-	* @ param AdministratorVo
+	* @ param Map
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/delUserGroup")
@@ -245,7 +245,7 @@ public class AdministratorController {
 	* 시스템 설정 > 계정관리 > 관리자 생성/수정 > 관리자 추가/수정(modal)
 	* 관리자정보 추가/수정
 	* 
-	* @ param AdministratorVo
+	* @ param Map
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/setUserInfo")
@@ -309,7 +309,7 @@ public class AdministratorController {
 	* 시스템 설정 > 계정관리 > 관리자 생성/수정
 	* 관리자정보 권한 수정
 	* 
-	* @ param AdministratorVo
+	* @ param Map
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/setUserGroup")
@@ -355,7 +355,7 @@ public class AdministratorController {
 	* 시스템 설정 > 계정관리 > 관리자 그룹
 	* 관리자 권한그룹 조회
 	* 
-	* @ param AdministratorVo
+	* @ param Map
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/getUserGroupInfo")
@@ -366,7 +366,7 @@ public class AdministratorController {
         
         String sessionId = authentication.getName();
         String clientIp = ClientIpUtil.getClientIP(request);
-        String groupId = "1";
+        String groupId = authentication.getAuthorities().toString().replace("[", "").replace("]", "").replace("ROLE_", "");;
         paramMap.put("groupId", groupId);
 
     	HttpHeaders headers= new HttpHeaders();

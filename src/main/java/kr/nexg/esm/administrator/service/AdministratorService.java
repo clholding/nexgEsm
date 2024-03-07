@@ -132,7 +132,7 @@ public class AdministratorService {
 			String report = EnumUtil.blank(String.valueOf(list.get(i).get("role5")));
 			String analysis = EnumUtil.blank(String.valueOf(list.get(i).get("role6")));
 			String log = EnumUtil.blank(String.valueOf(list.get(i).get("role7")));
-			String policy = EnumUtil.blank(String.valueOf(list.get(i).get("role2")));
+			String policy = EnumUtil.blank(String.valueOf(list.get(i).get("role8")));
 			String topology = EnumUtil.blank(String.valueOf(list.get(i).get("role2")));
 			String productManager = EnumUtil.blank(String.valueOf(list.get(i).get("role9")));
 			String deviceSetting = EnumUtil.blank(String.valueOf(list.get(i).get("role10")));
