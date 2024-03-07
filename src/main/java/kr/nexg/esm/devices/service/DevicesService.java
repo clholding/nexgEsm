@@ -9,6 +9,8 @@ import java.util.Map;
 
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,6 +34,19 @@ public class DevicesService {
 	@Autowired
 	DevicesMapper devicesMapper;
 	
+	  private static final Map<String, String> auditType = new HashMap<>();
+
+	  static {
+	    auditType.put("delDeviceInterface", "장비 인터페이스 리스트 삭제");
+	    auditType.put("setDeviceInterface", "장비 인터페이스 리스트 추가");
+	    auditType.put("updateDeviceInterface", "장비 인터페이스 정보 수정");
+	    auditType.put("delDeviceNGroup", "장비/그룹 정보 삭제");
+	    auditType.put("setDeviceNGroupName", "장비/그룹 이름 수정");
+	    auditType.put("setDeviceInfo", "장비정보 ");
+	    auditType.put("setDeviceGroupInfo", "장비/그룹정보 ");
+	    auditType.put("setDeviceGroup", "장비/그룹 이동");
+	  }
+	  
     public static Map<String, String> convertStatusInfo(String type, String totalVal, String val, String alarmVal) {
         Map<String, String> result = new HashMap<>();
 
@@ -67,6 +82,88 @@ public class DevicesService {
 
         return result;
     }
+    
+    public void setAuditInfo(String fn, String yn, String datasJson) throws JSONException {
+        String auditMenu = "[장비관리]";
+        String state = "성공";
+        int auditlevel = 6;
+
+        if ("false".equals(yn)) {
+          state = "실패";
+          auditlevel = 4;
+        }
+
+        if ("setDeviceNGroupName".equals(fn)) {
+          auditMenu = "[토폴로지]";
+        }
+
+        JSONObject datas = new JSONObject(datasJson);
+        String eMsg = auditMenu + auditType.get(fn); // Assuming auditType is a Map<String, String>
+
+        String dInfo = "";
+
+        if ("setDeviceInfo".equals(fn)) {
+          dInfo = "추가";
+          if (!"".equals(datas.getString("id"))) {
+            dInfo = "수정";
+          }
+        } else if ("setDeviceGroupInfo".equals(fn)) {
+          dInfo = "추가";
+          if (!"null".equals(datas.getString("id"))) {
+            dInfo = "수정";
+          }
+        }
+
+        if (datas.has("dn")) {
+//          eMsg = eMsg + dInfo + " " + state + " " + emsgToStr(datas); // Assuming emsgToStr is a method
+        } else {
+          if (!"setDeviceGroup".equals(fn)) {
+//            eMsg = eMsg + dInfo + " " + state + " " + emsgToStr(datas); // Assuming emsgToStr is a method
+          } else if ("setDeviceGroup".equals(fn)) {
+            String tmpPrint = "";
+            List<String> tmpArray = new ArrayList<>();
+            
+            DevicesVo devicesVo = new DevicesVo();
+            devicesVo.setPGroupID(String.valueOf(datas.getString("pGroupID")));
+            
+            List<Map<String, Object>> tmpParentSearch = devicesMapper.deviceGroupNames(devicesVo);
+            String tmpParent = String.valueOf(tmpParentSearch.get(0).get("name"));
+            eMsg = eMsg + dInfo + " " + state + " ";
+            
+            if (datas.has("groupIDs") && datas.getJSONArray("groupIDs").length() > 0) {
+              String tmpWhere = String.join(",", String.valueOf(datas.getJSONArray("groupIDs")));
+              
+              devicesVo = new DevicesVo();
+              devicesVo.setGroupIDs(tmpWhere);
+              
+              tmpParentSearch = devicesMapper.deviceGroupNames(devicesVo);
+              
+              for (Map<String, Object> tmp : tmpParentSearch) {
+                tmpArray.add(String.valueOf(tmp.get("name")));
+              }
+              eMsg = eMsg + "그룹 " + String.join(",", tmpArray) + " 를 그룹 " + tmpParent + " 로 이동하였습니다. ";
+            }
+            
+            if (datas.has("deviceIDs") && datas.getJSONArray("deviceIDs").length() > 0) {
+              tmpArray.clear();
+              String tmpWhere = String.join(",", String.valueOf(datas.getJSONArray("deviceIDs")));
+              
+              devicesVo = new DevicesVo();
+              devicesVo.setDeviceIDs(tmpWhere);
+              
+              tmpParentSearch = devicesMapper.deviceNames(devicesVo);
+              
+              for (Map<String, Object> tmp : tmpParentSearch) {
+            	 tmpArray.add(String.valueOf(tmp.get("name")));
+              }
+              eMsg = eMsg + "장비 " + String.join(",", tmpArray) + " 를 그룹 " + tmpParent + " 로 이동하였습니다.";
+            }
+          }
+        }
+
+//        EsmAuditLog e = new EsmAuditLog();
+//        e.esmlog(auditlevel, session.id, request.client, eMsg);
+      }    
     
     /*
      * DeviceFinder
