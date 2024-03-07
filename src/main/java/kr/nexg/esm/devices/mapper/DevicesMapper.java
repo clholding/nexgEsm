@@ -87,6 +87,7 @@ public interface DevicesMapper {
 	
 	public List<Map<String, Object>> deviceGroupNames(DevicesVo devicesVo);
 	public List<Map<String, Object>> deviceNames(DevicesVo devicesVo);
+	public String productName(DevicesVo devicesVo);
 	
 	public int productCnt(DevicesVo devicesVo);
 	
