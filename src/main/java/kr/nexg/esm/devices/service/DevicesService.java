@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.nexg.esm.administrator.dto.AdministratorEnum;
 import kr.nexg.esm.devices.dto.DevicesVo;
 import kr.nexg.esm.devices.mapper.DevicesMapper;
+import kr.nexg.esm.util.Validation;
 import kr.nexg.esm.util.config;
 import kr.nexg.esm.util.mode_convert;
 import lombok.extern.slf4j.Slf4j;
@@ -737,7 +738,7 @@ public class DevicesService {
     /*
      * DeviceFinder > 그룹정보 > 정보 > 기본정보 > 저장
      */
-	public Map<String, Object> setDeviceGroupInfo(Map<String,String> paramMap) throws IOException, ParseException{
+	public Map<String, Object> setDeviceGroupInfo(Map<String,String> paramMap) throws Exception{
 		
 		String datas = paramMap.get("datas");
 		
@@ -746,7 +747,8 @@ public class DevicesService {
 	    String rsGroupID 		= (String)config.setValue(rsDatas, "id", null);
 	    String rsName			= (String)config.setValue(rsDatas, "name", "");
 	    	    
-//	    	    validation.groupAdd_name(rs_name);
+//	    # 유효성 검사
+   	    Validation.groupAdd_name(rsName);
 	    String rsDesc		    = (String)config.setValue(rsDatas, "desc", "");
 	    String rsParentsGroupID = (String)config.setValue(rsDatas, "pGroupID", "");
 	    String rsCode1 			= (String)config.setValue(rsDatas, "code1", "00000000");    // 그룹 관리번호
@@ -816,7 +818,7 @@ public class DevicesService {
     /*
      * DeviceFinder -> 개별정보 -> 정보 -> 기본정보 -> 저장
      */
-	public Map<String, Object> setDeviceInfo(Map<String,String> paramMap) throws IOException, ParseException{
+	public Map<String, Object> setDeviceInfo(Map<String,String> paramMap) throws Exception{
 		
 		String datas = paramMap.get("datas");
 		String rsSetType = paramMap.get("setType");
@@ -829,22 +831,27 @@ public class DevicesService {
 	    String rsOverwriteid 	 = (String)config.setValue(rsDatas, "overwriteid", "");   // 교체할 장비 id
 	    String rsGid			 = (String)config.setValue(rsDatas, "pGroupID", "0");  	  // 상위그룹id[필수]
 //	    # 유효성 검사
-//	    validation.deviceAdd_gid(rs_gid)
+	    
+        DevicesVo devicesVo = new DevicesVo();
+        devicesVo.setId(rsGid);
+	    int rsGidCnt = devicesMapper.deviceGroupCnt(devicesVo);
+	    Validation.deviceAdd_gid(rsGidCnt);
+	    
 	    String rsId 			 = (String)config.setValue(rsDatas, "id", null);  	  	  // 장비 id (신규추가인 경우 NULL)
 	    String rsName 			 = (String)config.setValue(rsDatas, "dn", "");  		  // 장비이름[필수]
 //	    # 유효성 검사
-//	    validation.deviceAdd_name(rs_name)
+	    Validation.deviceAdd_name(rsName);
 	    String rsDesc			 = (String)config.setValue(rsDatas, "desc", "");  		  // 장비설명
 	    String rsIp				 = (String)config.setValue(rsDatas, "ip", "");  		  // 장비ip[필수]
 //	    # 유효성 검사
-//	    validation.deviceAdd_ip(rs_ip)
+	    Validation.deviceAdd_ip(rsIp);
 	    String rsActive			 = (String)config.setValue(rsDatas, "active", "0");  	  // 활성화 여부(0:비활성화, 1:활성화)
 	    String rsLog 			 = (String)config.setValue(rsDatas, "log", "0");  		  // 원본로그저장 여부(0:비활성화, 1:활성화)
 	    String rsAlarm 			 = (String)config.setValue(rsDatas, "alarm", "0");  	  // 이벤트 이메일 전송 여부(0:비활성화, 1:활성화)
 	    String rsLicence		 = (String)config.setValue(rsDatas, "licence", "");  	  // 라이센스
 	    String rsSerial 		 = (String)config.setValue(rsDatas, "serial", "");  	  // 시리얼
 //	    ## 유효성 검사
-//	    validation.deviceAdd_serial(rs_serial)
+	    Validation.deviceAdd_serial(rsSerial);
 		String rsOs 			 = (String)config.setValue(rsDatas, "os", "");  		  // 장비os
 		String rsHostname 		 = (String)config.setValue(rsDatas, "hostname", "");  	  // 장비 호스트이름
 		String rsCompany 		 = (String)config.setValue(rsDatas, "company", "");  	  // 고객사[필수]
@@ -858,8 +865,12 @@ public class DevicesService {
 		String rsMid 			 = (String)config.setValue(rsDatas, "mid", "");  		  // 관리계정 id
 		String rsMpass 			 = (String)config.setValue(rsDatas, "mpass", "");  		  // 관리계정 pw
 	    String rsProductId 		 = (String)config.setValue(rsDatas, "product_id", "2");   // 제품id
+	    
+	    devicesVo = new DevicesVo();
+        devicesVo.setId(rsProductId);
+	    int rsProductIdCnt = devicesMapper.productCnt(devicesVo);	    
 //	    ## 유효성 검사
-//	    validation.deviceAdd_product(rs_product_id)
+	    Validation.deviceAdd_product(rsProductIdCnt);
 	    String rsSnmpVersion	 = (String)config.setValue(rsDatas, "snmp_version", "");   // snmp 버전
 	    String rsSnmpCommunity   = (String)config.setValue(rsDatas, "snmp_community", ""); // snmp community
 	    String rsSnmpUseInherit  = (String)config.setValue(rsDatas, "snmp_use_inherit", "0");  // snmp use_inherit
@@ -886,7 +897,7 @@ public class DevicesService {
             if (!"".equals(rsOverwriteid)) {
                 // Fetch overwrite device details
             	
-                DevicesVo devicesVo = new DevicesVo();
+                devicesVo = new DevicesVo();
                 devicesVo.setOverwriteid(rsOverwriteid);
                 
             	Map<String, Object> map = devicesMapper.overwriteDevice(devicesVo);
@@ -908,13 +919,13 @@ public class DevicesService {
             
             if (mode == 0) {
             	
-            	DevicesVo devicesVo = new DevicesVo();
+            	devicesVo = new DevicesVo();
             	devicesVo.setId(rsGid);
             	
                 chkGroupMaximumChecker = devicesMapper.groupMaximumChkecker(devicesVo); 
             } else {
             	
-            	DevicesVo devicesVo = new DevicesVo();
+            	devicesVo = new DevicesVo();
             	devicesVo.setId(rsGid);
             	devicesVo.setType(String.valueOf(mode));
             	
@@ -933,7 +944,7 @@ public class DevicesService {
             if (rsId.equals("null")) {
                 // Check Duplicated device name
             	
-                DevicesVo devicesVo = new DevicesVo();
+                devicesVo = new DevicesVo();
                 devicesVo.setName(rsName);            	
             	Map<String, Object> map = devicesMapper.overwriteDevice(devicesVo);
                 if (!map.isEmpty()) {
@@ -944,7 +955,7 @@ public class DevicesService {
             }
 
             if(rsId != null && overDId > 0) {
-            	DevicesVo devicesVo = new DevicesVo();
+            	devicesVo = new DevicesVo();
             	devicesVo.setId(rsId);
             	devicesVo.setOverDId(String.valueOf(overDId));
             	devicesVo.setName(rsName);
@@ -992,7 +1003,7 @@ public class DevicesService {
             		
             	}
             }else {
-        		DevicesVo devicesVo = new DevicesVo();
+        		devicesVo = new DevicesVo();
             	devicesVo.setId(rsId);
             	devicesVo.setName(rsName);
             	devicesVo.setDesc(rsDesc);
@@ -1048,6 +1059,7 @@ public class DevicesService {
             		log.info("rsSetType : "+rsSetType);
             		
             		if(rsSetType != null && rsSetType.equals("Manual")) {
+            			devicesVo = new DevicesVo();
             			devicesVo.setSerial(rsSerial);
             			devicesVo.setId(col2);
             			devicesMapper.updateDeviceInfo(devicesVo);

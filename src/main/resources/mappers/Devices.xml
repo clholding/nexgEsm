@@ -94,7 +94,25 @@
 	
 	<select id="deviceGroupCnt" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="int">
 		/* DevicesMapper.deviceGroupCnt */	
-		SELECT count(1) cnt FROM device_group WHERE name = #{name}
+		SELECT count(1) cnt 
+		  FROM device_group 
+		 WHERE 1 = 1
+		<if test="name neq '' and name != null">		 
+		   AND name = #{name}
+		</if>
+		<if test="id neq '' and id != null">		   
+		   AND id = #{id}
+		</if>		   
+	</select>
+	
+	<select id="productCnt" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="int">
+		/* DevicesMapper.productCnt */	
+		SELECT count(1) cnt 
+		  FROM product 
+		 WHERE 1 = 1
+		<if test="id neq '' and id != null">		 
+		   AND id = #{id}
+		</if>
 	</select>
 	
 	<select id="setDeviceGroupInfo" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
