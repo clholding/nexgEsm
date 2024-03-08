@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.nexg.esm.nexgesm.mariadb.mapper.ConfigMapper">
+
+	<update id="set_apply_status" parameterType="boolean">
+		/* ConfigMapper.set_apply_status */	
+		UPDATE config SET val = #{val}  WHERE attr='is_apply'
+	</update>
+	
+
+</mapper>
