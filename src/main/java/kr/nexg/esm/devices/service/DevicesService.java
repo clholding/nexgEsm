@@ -1292,8 +1292,6 @@ public class DevicesService {
             		}
             	}else {
             		
-            		device.test();
-            		
             		device.add_device(col2);
             		config1.set_apply_status(true);
             		
