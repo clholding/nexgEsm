@@ -911,6 +911,9 @@ public class DevicesController {
         try {
         	
         	Map<String, Object> result = devicesService.setDeviceGroupInfo(paramMap);
+        	
+        	String eMsg = (String) result.get("eMsg");
+        	
             int totalCount = 0;
         	
         	message = MessageVo.builder()
@@ -919,6 +922,9 @@ public class DevicesController {
                 	.totalCount(totalCount)
                 	.entitys("")
                 	.build();
+        	
+			esmAuditLog.esmlog(6, sessionId, clientIp, eMsg);
+			
 		} catch (Exception e) {
 			log.error("Error : ", e);
 			message = MessageVo.builder()
@@ -928,8 +934,6 @@ public class DevicesController {
 	            	.errTitle("")
 	            	.build();
 			
-//			setAuditInfo("setDeviceGroupInfo", results["success"])
-//			esmAuditLog.esmlog(4, sessionId, clientIp, "장비/그룹정보");
 		} 
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
