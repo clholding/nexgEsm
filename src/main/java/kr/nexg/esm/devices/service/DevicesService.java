@@ -185,19 +185,20 @@ public class DevicesService {
             }
 
             if (tmpPrint.isEmpty()) {
-//                if (emsg.get(key) instanceof List) {
-//                    if (((List<?>) emsg.get(key)).size() > 0) {
-//                        tmpPrintArray.add(replaceKey + '=' + String.join(",", (List<?>) emsg.get(key)));
-//                    } else if (!("deviceNames".equals(key) || "groupNames".equals(key) || "deviceIDs".equals(key) || "groupIDs".equals(key))) {
-//                        tmpPrintArray.add(replaceKey + '=');
-//                    }
-//                } else {
-//                    if (!emsg.get(key).toString().isEmpty() && !"null".equals(emsg.get(key).toString())) {
-//                        tmpPrintArray.add(replaceKey + '=' + emsg.get(key).toString());
-//                    } else if (!("deviceNames".equals(key) || "groupNames".equals(key) || "deviceIDs".equals(key) || "groupIDs".equals(key))) {
-//                        tmpPrintArray.add(replaceKey + '=');
-//                    }
-//                }
+                if (datas.get(key) instanceof List) {
+                    List<String> keyList = (List<String>) datas.get(key);
+                    if (!keyList.isEmpty()) {
+                        tmpPrintArray.add(replaceKey + '=' + String.join(",", keyList));
+                    } else if (!key.equals("deviceNames") && !key.equals("groupNames") && !key.equals("deviceIDs") && !key.equals("groupIDs")) {
+                        tmpPrintArray.add(replaceKey + '=' + "");
+                    }
+                } else {
+                    if (!datas.getString(key).isEmpty() && !datas.getString(key).equals("null")) {
+                        tmpPrintArray.add(replaceKey + '=' + datas.getString(key));
+                    } else if (!key.equals("deviceNames") && !key.equals("groupNames") && !key.equals("deviceIDs") && !key.equals("groupIDs")) {
+                        tmpPrintArray.add(replaceKey + '=' + "");
+                    }
+                }
             } else {
                 tmpPrintArray.add(replaceKey + '=' + tmpPrint);
             }
@@ -1033,6 +1034,7 @@ public class DevicesService {
         }
         
         String eMsg = setAuditInfo("setDeviceGroupInfo", "success", datas);
+        log.info("eMsg : "+eMsg);
         
         Map<String, Object> map = new HashMap<String,Object>(); 
         map.put("message", message);
