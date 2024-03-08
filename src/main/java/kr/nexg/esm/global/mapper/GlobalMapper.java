@@ -24,5 +24,7 @@ public interface GlobalMapper {
 	
 	int updateHbtime(String sessionId);
 	
+	String getApplyStatus();
+	
 	
 }

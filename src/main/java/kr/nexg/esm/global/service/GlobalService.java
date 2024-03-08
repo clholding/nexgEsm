@@ -3,6 +3,7 @@ package kr.nexg.esm.global.service;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.nexg.esm.administrator.dto.AdministratorEnum;
 import kr.nexg.esm.common.util.EnumUtil;
 import kr.nexg.esm.global.mapper.GlobalMapper;
+import kr.nexg.esm.nexgesm.mariadb.Log;
 import kr.nexg.esm.util.config;
 import kr.nexg.esm.util.mode_convert;
 
@@ -23,6 +25,9 @@ public class GlobalService {
 	
 	@Autowired
 	GlobalMapper globalMapper;
+	
+	@Autowired
+	Log.EventLog eventLog;
 	
 	public List<Map<String, Object>> devices(Map<String, Object> paramMap) throws Exception{
 		
@@ -241,24 +246,56 @@ public class GlobalService {
 		return result;
 	}
 	
-	public List<Map<String, Object>> getAlarmMsg(Map<String, Object> paramMap) throws Exception{
+	public Map<String, Object> getAlarmMsg(Map<String, Object> paramMap) throws Exception{
 		
 		String sessionId = (String) paramMap.get("sessionId");
 		String rs_mode = (String) paramMap.get("mode");
 		int mode = mode_convert.convert_modedata(rs_mode);
 		
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String currentTime = format.format(new Date());
-		
         List<Map<String, Object>> list = new ArrayList<Map<String,Object>>();
+        List<Map<String, Object>> result = new ArrayList<>();
+        Map<String, Object> resultMap = new HashMap<String, Object>();
         String userStatus = globalMapper.selectUserStatus(sessionId);
         if(Integer.parseInt(userStatus) == 0) {
-        	
+        	resultMap.put("userStatus", "logout");
+        	resultMap.put("totalCount", 0);
+        	resultMap.put("result", result);
         }else {
+        	resultMap.put("userStatus", "login");
         	globalMapper.updateHbtime(sessionId);
+        	list = eventLog.get_event(sessionId, Integer.toString(mode), 10);	//기본 5초
+        	
+        	for(int i=0; i<list.size(); i++) {
+    			
+    			Map<String, Object> map = new LinkedHashMap<>();
+    			String deviceGroupName = String.valueOf(list.get(i).get("fail_count"));
+    			String deviceName = String.valueOf(list.get(i).get("device_group_name"));
+    			String info = String.valueOf(list.get(i).get("info"));
+    			String etype = String.valueOf(list.get(i).get("etype"));
+    			String msg = String.format("[그룹:%s][장비:%s]%s", deviceGroupName,deviceName, info);
+    			
+    			map.put("type", etype);
+    			map.put("msg", msg);
+    			
+    			result.add(map);
+    		}
+        	resultMap.put("totalCount", result.size());
+        	resultMap.put("result", result);
         }
 		
-		return null;
+		return resultMap;
+	}
+	
+	public List<Map<String, Object>> getApplyStatus(Map<String, Object> paramMap) throws Exception{
+		
+		String val = globalMapper.getApplyStatus();
+		
+		List<Map<String, Object>> result = new ArrayList<>();
+		Map<String, Object> map = new LinkedHashMap<>();
+		map.put("is_apply", val);
+		result.add(map);
+		
+		return result;
 	}
 	
 }

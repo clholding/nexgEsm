@@ -31,7 +31,7 @@ public class Log {
 	
 	@Component
 	public class EventLog {
-		public List<Map<String, Object>> get_event(int level, String user, String mode, int interval_seconds) {
+		public List<Map<String, Object>> get_event(String user, String mode, int interval_seconds) {
 			List<Map<String, Object>> list = logMapper.getDeviceListByLogin(user, 1, mode);
 			List<String> device_list_from_user = new ArrayList<String>();
 			for(int i=0; i<list.size(); i++) {

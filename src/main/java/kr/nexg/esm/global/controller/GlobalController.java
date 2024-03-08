@@ -282,8 +282,49 @@ public class GlobalController {
         
         try {
         	
-        	List<Map<String, Object>> list = globalService.getAlarmMsg(paramMap);
-            int totalCount = list.size();
+        	Map<String, Object> map = globalService.getAlarmMsg(paramMap);
+        	List<Map<String, Object>> list = (List<Map<String, Object>>) map.get("result");
+        	String userStatus = (String) map.get("userStatus");
+            int totalCount = (int) map.get("totalCount");
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message(userStatus)
+                	.totalCount(totalCount)
+                	.entitys(list)
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}
+    	
+        return new ResponseEntity<>(message, headers, HttpStatus.OK);
+    }
+	
+	/**
+	* -
+	* -
+	* 
+	* @ param Map
+	* @ return ResponseEntity
+	*/
+	@PostMapping("/getApplyStatus")
+    public ResponseEntity<MessageVo> getApplyStatus(@RequestParam Map<String,Object> paramMap) {
+		
+    	HttpHeaders headers= new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+        
+        MessageVo message;
+        
+        try {
+        	
+        	List<Map<String, Object>> list = globalService.getApplyStatus(paramMap);
+        	int totalCount = list.size();
         	
         	message = MessageVo.builder()
                 	.success("true")

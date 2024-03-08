@@ -22,14 +22,19 @@
 		CALL sesm.getDeviceFaultStatus( #{sessionId}, #{deviceIds} ,#{mode} );
 	</select>
 	
-	<select id="getAllDeviceFaultStatus" parameterType="String" resultType="map">
-		/* GlobalMapper.getAllDeviceFaultStatus */	
-		CALL sesm.getAllDeviceFaultStatus( #{sessionId}, #{deviceIds} );
-	</select>
-	
 	<select id="selectUserStatus" parameterType="String" resultType="String">
 		/* GlobalMapper.selectUserStatus */	
 		SELECT status FROM user where login = #{sessionId}
+	</select>
+	
+	<update id="updateHbtime" parameterType="String">
+		/* GlobalMapper.updateHbtime */	
+		UPDATE user SET hbtime = CURRENT_TIMESTAMP() WHERE login = #{sessionId}
+	</update>
+	
+	<select id="getApplyStatus" resultType="String">
+		/* GlobalMapper.getApplyStatus */	
+		SELECT val FROM config WHERE attr='is_apply';
 	</select>
 	
 </mapper>
