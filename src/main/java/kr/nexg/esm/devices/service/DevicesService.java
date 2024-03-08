@@ -23,6 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.nexg.esm.administrator.dto.AdministratorEnum;
 import kr.nexg.esm.devices.dto.DevicesVo;
 import kr.nexg.esm.devices.mapper.DevicesMapper;
+import kr.nexg.esm.nexgesm.command.Device;
+import kr.nexg.esm.nexgesm.mariadb.Config;
 import kr.nexg.esm.util.Validation;
 import kr.nexg.esm.util.config;
 import kr.nexg.esm.util.mode_convert;
@@ -34,6 +36,12 @@ public class DevicesService {
 	
 	@Autowired
 	DevicesMapper devicesMapper;
+	
+	@Autowired
+	Config.Config1 config1;
+	
+	@Autowired
+	Device device;
 	
 	  private static final Map<String, String> auditType = new HashMap<>();
 
@@ -1228,7 +1236,7 @@ public class DevicesService {
             			message = "동일한 장비 이름이 존재합니다.";
             		}
             	}else {
-            		
+            		config1.set_apply_status(true);
             	}
             }else {
         		devicesVo = new DevicesVo();
@@ -1284,8 +1292,12 @@ public class DevicesService {
             		}
             	}else {
             		
-            		log.info("rsSetType : "+rsSetType);
+            		device.test();
             		
+            		device.add_device(col2);
+            		config1.set_apply_status(true);
+            		
+            		log.info("rsSetType : "+rsSetType);
             		if(rsSetType != null && rsSetType.equals("Manual")) {
             			devicesVo = new DevicesVo();
             			devicesVo.setSerial(rsSerial);
@@ -1300,8 +1312,13 @@ public class DevicesService {
             success = "false";
         }
 	
+        String eMsg = setAuditInfo("setDeviceInfo", "success", datas);
+        log.info("eMsg : "+eMsg);
+        
         Map<String, Object> map = new HashMap<String,Object>(); 
         map.put("message", message);
+        map.put("eMsg", eMsg);
+        
         
 		return map;
 	}

@@ -946,11 +946,11 @@ public class DevicesController {
     @PostMapping("/setDeviceInfo")
     public ResponseEntity<MessageVo> setDeviceInfo(HttpServletRequest request, @RequestParam Map<String,String> paramMap) throws IOException  {
     	
-//		SecurityContext context = SecurityContextHolder.getContext();
-//        Authentication authentication = context.getAuthentication();
-//        
-//        String sessionId = authentication.getName();
-//        String clientIp = ClientIpUtil.getClientIP(request);
+		SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        
+        String sessionId = authentication.getName();
+        String clientIp = ClientIpUtil.getClientIP(request);
         
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -960,6 +960,9 @@ public class DevicesController {
         try {
         	
         	Map<String, Object> result = devicesService.setDeviceInfo(paramMap);
+        	
+        	String eMsg = (String) result.get("eMsg");
+        	
             int totalCount = 0;
         	
         	message = MessageVo.builder()
@@ -968,6 +971,9 @@ public class DevicesController {
                 	.totalCount(totalCount)
                 	.entitys("")
                 	.build();
+        	
+        	esmAuditLog.esmlog(6, sessionId, clientIp, eMsg);
+        	
 		} catch (Exception e) {
 			log.error("Error : ", e);
 			message = MessageVo.builder()
