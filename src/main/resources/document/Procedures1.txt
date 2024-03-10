@@ -251,3 +251,73 @@ BEGIN
    ORDER BY rdate DESC;
 
 END
+
+
+***** getLastFailDevice *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `sesm`.`getLastFailDevice`(IN login VARCHAR(128), IN mode INT, IN skip VARCHAR(8), IN limits VARCHAR(8))
+BEGIN
+  -- login 관리자가 관리하는 장비 중 가장 최근 장애 로그 10건 조회
+  DECLARE current_lv int UNSIGNED;
+  DECLARE parent_ids varchar(10000);
+  DECLARE child_ids varchar(10000);
+  DECLARE cnt int DEFAULT 0;
+  DECLARE before_cnt int DEFAULT 0;
+  DECLARE strLimit VARCHAR(32);
+
+  SET SESSION sql_log_bin = OFF;
+  SET SESSION tx_isolation = 'READ-COMMITTED';
+  SET @_current_lv := 1;
+  SET strLimit = '';
+
+  drop table if exists _temp_buffer;
+  CREATE TEMPORARY TABLE IF NOT EXISTS _temp_buffer (
+    id int(11),
+    name varchar(255),
+    group_id int(11),
+    lv int,
+    INDEX ix_lv (lv)
+    ) ENGINE = MEMORY;
+
+    INSERT INTO _temp_buffer SELECT dg.id, dg.name, dg.group_id, @_current_lv AS lv
+    FROM user_dgroup ud, device_group dg, user u WHERE u.id = ud.user_id AND ud.device_group_id = dg.id AND u.login = login GROUP BY dg.id;
+
+    recursion:
+    REPEAT
+    SET before_cnt = cnt;
+    SELECT GROUP_CONCAT(_temp_buffer.id), COUNT(*) INTO parent_ids, cnt FROM _temp_buffer WHERE lv = @_current_lv;
+
+    IF cnt = 0 THEN
+      LEAVE recursion;
+    END IF;
+
+    SET @query = CONCAT("INSERT INTO _temp_buffer
+      SELECT dg.id, dg.name, dg.group_id, (@_current_lv + 1) AS lv
+      FROM device_group dg WHERE (dg.id <> dg.group_id) AND dg.group_id IN (", parent_ids, ")");
+    PREPARE stmt3 FROM @query;
+    EXECUTE stmt3;
+
+    SET @_current_lv = @_current_lv + 1;
+  UNTIL 0 END REPEAT;
+
+  SELECT GROUP_CONCAT(DISTINCT _temp_buffer.id) INTO child_ids FROM _temp_buffer;
+
+  TRUNCATE TABLE _temp_buffer;
+  SET SESSION sql_log_bin = ON;
+  SET SESSION tx_isolation = 'REPEATABLE-READ';
+
+  IF (NULLIF(skip, '') IS NOT NULL) AND (NULLIF(limits, '') IS NOT NULL) THEN
+    SET strLimit = CONCAT(strLimit, ' LIMIT ', skip, ',', limits);
+  END IF;
+
+  SET @query = CONCAT("SELECT DATE_FORMAT(t1.rdate, '%Y-%m-%d %T') as date, g.name as device_group_name, d.name as device_name, d.ip, fail.name as fail_name, t1.info, d.id FROM fail_log t1
+    JOIN (SELECT device_id, MAX(seq) seq FROM fail_log GROUP BY device_id) t2
+    ON t1.device_id = t2.device_id AND t1.seq = t2.seq
+    JOIN device d ON t1.device_id = d.id
+    JOIN device_group g ON d.group_id = g.id
+    JOIN fail ON t1.type = fail.id, product p
+    WHERE d.candidate = 0 AND d.group_id IN (", child_ids,") AND d.product_id = p.id AND CASE ", mode, " WHEN 0 THEN 1 = 1 ELSE p.type =", mode, " END
+    ORDER BY t1.seq DESC", strLimit);
+  PREPARE stmt3 FROM @query;
+  EXECUTE stmt3;
+
+END

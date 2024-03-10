@@ -12,6 +12,8 @@ public interface LogMapper {
 	
 	public void addAuditLog(Map<String, Object> map);
 	
+	public List<Map<String, Object>> getLastFailDevice(Map<String, Object> map);
+	
 	public List<Map<String, Object>> getDeviceListByLogin(String user, int type, String mode);
 	
 	public List<Map<String, Object>> getRealtimeEvent(String ids, int interval);

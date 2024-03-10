@@ -6,5 +6,10 @@
 		/* LogMapper.addAuditLog */	
 		CALL sesm.addAuditLog( #{level}, #{user}, #{host}, #{action} );
 	</select>
+	
+	<select id="getLastFailDevice" parameterType="map" resultType="map">
+		/* LogMapper.getLastFailDevice */	
+		CALL sesm.getLastFailDevice( #{user}, #{mode}, #{skip}, #{limit} );
+	</select>
 
 </mapper>

@@ -30,6 +30,19 @@ public class Log {
 	}
 	
 	@Component
+	public class FailLog {
+		public List<Map<String, Object>> get_lastfaildevice(String user, int mode, String skip, String limit) {
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("user", user);
+			map.put("mode", mode);
+			map.put("skip", skip);
+			map.put("limit", limit);
+			List<Map<String, Object>> result = logMapper.getLastFailDevice(map);
+			return result;
+		}
+	}
+	
+	@Component
 	public class EventLog {
 		public List<Map<String, Object>> get_event(String user, String mode, int interval_seconds) {
 			List<Map<String, Object>> list = logMapper.getDeviceListByLogin(user, 1, mode);
