@@ -27,6 +27,7 @@ import kr.nexg.esm.common.StatusEnum;
 import kr.nexg.esm.common.dto.MessageVo;
 import kr.nexg.esm.common.util.ClientIpUtil;
 import kr.nexg.esm.devices.service.DevicesService;
+import kr.nexg.esm.nexgesm.command.Device;
 import kr.nexg.esm.nexgesm.mariadb.Log;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,6 +42,9 @@ public class DevicesController {
 	
 	@Autowired
 	Log.EsmAuditLog esmAuditLog;
+	
+	@Autowired
+	Device device;
 	
 //    @PostMapping("/addPrivateNetwork")
 //    public ResponseEntity<MessageVo> addPrivateNetwork() throws IOException  {
@@ -100,6 +104,9 @@ public class DevicesController {
                 	.totalCount(totalCount)
                 	.entitys("")
                 	.build();
+        	
+        	device.apply_device(sessionId, clientIp);
+        	
 		} catch (Exception e) {
 			log.error("Error : ", e);
 			message = MessageVo.builder()
@@ -983,8 +990,6 @@ public class DevicesController {
 	            	.errTitle("")
 	            	.build();
 			
-//			setAuditInfo("setDeviceGroupInfo", results["success"])
-//			esmAuditLog.esmlog(4, sessionId, clientIp, "장비/그룹정보");
 		} 
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);

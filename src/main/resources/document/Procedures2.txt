@@ -777,3 +777,76 @@ BEGIN
     END IF;
   END;
 END
+
+
+***** getIntegrityInfoList *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `getIntegrityInfoList`(IN skip VARCHAR(8), IN limits VARCHAR(8))
+BEGIN
+  -- 무결성 정보 조회 (ESM)
+  DECLARE strLimit VARCHAR(32);
+  SET strLimit = '';
+
+  IF (NULLIF(skip, '') IS NOT NULL) AND (NULLIF(limits, '') IS NOT NULL) THEN
+    SET strLimit = CONCAT(strLimit, ' LIMIT ', skip, ',', limits);
+  END IF;
+
+  SET @Total = (SELECT COUNT(*) FROM sesm.integrity);
+
+  SET @query = CONCAT("SELECT id, item, size, mdate, cdate, status, checksum, ", @Total, " as total FROM integrity ", strLimit);
+  PREPARE stmt FROM @query;
+  EXECUTE stmt;
+  DEALLOCATE PREPARE stmt;
+
+END
+
+
+***** setLogDiskInfo *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `setLogDiskInfo`(IN logdisk_delete VARCHAR(255), IN logdisk_warn VARCHAR(255))
+BEGIN
+  -- 로그 디스크 임계치 정보 설정 (경보, 삭제)
+  DECLARE cur_state INT DEFAULT '0';
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET cur_state = 1;
+  DECLARE CONTINUE HANDLER FOR SQLWARNING  SET cur_state = 2;
+  DECLARE CONTINUE HANDLER FOR SQLEXCEPTION SET cur_state = 3;
+
+  START TRANSACTION;
+
+  UPDATE config SET val=logdisk_delete WHERE attr='logdisk_delete';
+  UPDATE config SET val=logdisk_warn WHERE attr='logdisk_warn';
+
+  IF cur_state THEN
+    ROLLBACK;
+    SELECT 0 as col;
+  ELSE
+    COMMIT;
+    SELECT 1 as col;
+  END IF;
+END
+
+
+***** setInterfaceConfig *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `setInterfaceConfig`(
+  IN interface_downtime VARCHAR(255),
+  IN interface_updown_count VARCHAR(255),
+  IN interface_updown_hours VARCHAR(255))
+BEGIN
+  -- 회선 관리 정보 설정
+  DECLARE cur_state INT DEFAULT '0';
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET cur_state = 1;
+  DECLARE CONTINUE HANDLER FOR SQLWARNING  SET cur_state = 2;
+  DECLARE CONTINUE HANDLER FOR SQLEXCEPTION SET cur_state = 3;
+
+  START TRANSACTION;
+
+  UPDATE config SET val=interface_downtime WHERE attr='interface_downtime';
+  UPDATE config SET val=interface_updown_count WHERE attr='interface_updown_count';
+  UPDATE config SET val=interface_updown_hours WHERE attr='interface_updown_hours';
+
+  IF cur_state THEN
+    ROLLBACK;
+    SELECT 0 as col;
+  ELSE
+    COMMIT;
+    SELECT 1 as col;
+  END IF;
+END

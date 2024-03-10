@@ -1,22 +1,40 @@
 package kr.nexg.esm.nexgesm.command;
 
 import java.io.IOException;
+import java.nio.channels.Channel;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import kr.nexg.esm.nexgesm.mariadb.Config;
+import kr.nexg.esm.nexgesm.mariadb.Log;
+
+@Component
 public class Device {
+	
+	@Autowired
+	Log.EsmAuditLog esmAuditLog;
+	
+	@Autowired
+	Config.Config1 config1;
 	
     public Device() {
         // Constructor
     }
 
-    public void test() throws IOException {
-        Runtime.getRuntime().exec("/opt/esm/script/test.sh");
+    public void apply_device(String user_id, String host_ip) throws IOException {
+    	
+    	
+    	esmAuditLog.esmlog(1, user_id, host_ip, "전체 장비 설정 적용 하였습니다.");
+    	
+    	config1.set_apply_status(false);
     }
     
     public void add_device(String did) throws IOException {
-        Runtime.getRuntime().exec("/opt/esm/script/add_device.sh " + did);
+    	Runtime.getRuntime().exec("/opt/esm/script/add_device.sh " + did);
     }
 
     public void del_device(String did) throws IOException {
