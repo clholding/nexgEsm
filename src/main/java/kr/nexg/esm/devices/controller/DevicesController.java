@@ -445,7 +445,7 @@ public class DevicesController {
 			log.error("Error : ", e);
 			message = MessageVo.builder()
 	            	.success("false")
-	            	.message("")
+	            	.message("장애내역 조회중 오류가 발생하였습니다.")
 	            	.errMsg(e.getMessage())
 	            	.errTitle("")
 	            	.build();

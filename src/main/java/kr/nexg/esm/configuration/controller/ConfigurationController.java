@@ -16,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,6 +27,7 @@ import kr.nexg.esm.common.dto.MessageVo;
 import kr.nexg.esm.common.util.ClientIpUtil;
 import kr.nexg.esm.configuration.dto.ConfigurationVo;
 import kr.nexg.esm.configuration.service.ConfigurationService;
+import kr.nexg.esm.nexgesm.mariadb.Config;
 import kr.nexg.esm.nexgesm.mariadb.Log;
 import kr.nexg.esm.util.config;
 import lombok.extern.slf4j.Slf4j;
@@ -41,8 +43,11 @@ public class ConfigurationController {
 	@Autowired
 	Log.EsmAuditLog esmAuditLog;
 	
+	@Autowired
+	Config.Config1 config1;
+	
     /*
-     * 시스템 설정 > 시스템 > 제품정보
+     * TopNav > 시스템 설정 > 시스템 > 제품정보
      */
     @PostMapping("/getSystemInfo")
     public ResponseEntity<MessageVo> getSystemInfo() throws IOException  {
@@ -79,7 +84,7 @@ public class ConfigurationController {
     } 
 
     /*
-     * 시스템 설정 > 시스템 > 시간 동기화
+     * TopNav > 시스템 설정 > 시스템 > 시간 동기화
      */  
     @PostMapping("/getNtpInfo")
     public ResponseEntity<MessageVo> getNtpInfo() throws IOException  {
@@ -116,10 +121,10 @@ public class ConfigurationController {
     } 
   
     /*
-     * 시스템 설정 > 시스템 > 서버 무결성 상태
+     * TopNav > 시스템 설정 > 시스템 > 서버 무결성 상태
      */      
 	@PostMapping("/getIntegrityInfo")
-	public ResponseEntity<MessageVo> getIntegrityInfo(@RequestParam Map<String,String> paramMap) throws IOException  {
+	public ResponseEntity<MessageVo> getIntegrityInfo(@RequestBody ConfigurationVo configurationVo) throws IOException  {
 		
 		
 		HttpHeaders headers= new HttpHeaders();
@@ -129,7 +134,7 @@ public class ConfigurationController {
 	    
 	    try {
 	    	
-        	Map<String, Object> result = configurationService.getIntegrityInfo(paramMap);
+        	Map<String, Object> result = configurationService.getIntegrityInfo(configurationVo);
             int totalCount = (int) result.get("total");
             
 	    	message = MessageVo.builder()
@@ -154,7 +159,7 @@ public class ConfigurationController {
 	}   
   
     /*
-     * 시스템 설정 > 시스템 > 서버 무결성 상태 > 무결성 검사
+     * TopNav > 시스템 설정 > 시스템 > 서버 무결성 상태 > 무결성 검사
      */ 	
     @PostMapping("/updateIntegrity")
     public ResponseEntity<MessageVo> updateIntegrity() throws IOException  {
@@ -189,7 +194,7 @@ public class ConfigurationController {
     } 
    
     /*
-     * 시스템 설정 > 시스템 > 에이전트 무결성 상태
+     * TopNav > 시스템 설정 > 시스템 > 에이전트 무결성 상태
      */     
 	@PostMapping("/getDeviceIntegrityInfo")
 	public ResponseEntity<MessageVo> getDeviceIntegrityInfo() throws IOException  {
@@ -226,10 +231,10 @@ public class ConfigurationController {
 	}     
 	
     /*
-     * 시스템 설정 > 시스템 > 에이전트 무결성 상태 > 무결성 확인
+     * TopNav > 시스템 설정 > 시스템 > 에이전트 무결성 상태 > 무결성 확인
      */ 	
     @PostMapping("/checkAgentIntegrity")
-    public ResponseEntity<MessageVo> checkAgentIntegrity(@RequestParam Map<String,String> paramMap) throws IOException  {
+    public ResponseEntity<MessageVo> checkAgentIntegrity() throws IOException  {
   	
 		HttpHeaders headers= new HttpHeaders();
 		headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -260,7 +265,7 @@ public class ConfigurationController {
     } 	
     
     /*
-     * 시스템 설정 > 시스템 > 장비 설정파일 백업
+     * TopNav > 시스템 설정 > 시스템 > 장비 설정파일 백업
      */    
     @PostMapping("/getConfigBackupInfo")
     public ResponseEntity<MessageVo> getConfigBackupInfo() throws IOException  {
@@ -296,10 +301,10 @@ public class ConfigurationController {
     } 	   
     
     /*
-     * 시스템 설정 > 시스템 > 장비 설정파일 백업 내역
+     * TopNav > 시스템 설정 > 시스템 > 장비 설정파일 백업 내역
      */ 
     @PostMapping("/getConfigBackupList")
-    public ResponseEntity<MessageVo> getConfigBackupList(@RequestParam Map<String,String> paramMap) throws IOException  {
+    public ResponseEntity<MessageVo> getConfigBackupList(@RequestBody ConfigurationVo configurationVo) throws IOException  {
   	
 		HttpHeaders headers= new HttpHeaders();
 		headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -308,7 +313,7 @@ public class ConfigurationController {
 	    
 	    try {
 	    	
-	    	Map<String, Object> result = configurationService.getConfigBackupList(paramMap);
+	    	Map<String, Object> result = configurationService.getConfigBackupList(configurationVo);
 	    	int totalCount = (int) result.get("total");
 	        
 	    	message = MessageVo.builder()
@@ -332,7 +337,7 @@ public class ConfigurationController {
     } 
     
     /*
-     * 시스템 설정 > 시스템 > 시스템 설정파일 백업
+     * TopNav > 시스템 설정 > 시스템 > 시스템 설정파일 백업
      */ 
     @PostMapping("/getSystemConfigBackupInfo")
     public ResponseEntity<MessageVo> getSystemConfigBackupInfo() throws IOException  {
@@ -369,10 +374,10 @@ public class ConfigurationController {
     } 
     
     /*
-     * 시스템 설정 > 시스템 > 시스템 설정파일 백업 내역
+     * TopNav > 시스템 설정 > 시스템 > 시스템 설정파일 백업 내역
      */
     @PostMapping("/getSystemConfigBackupList")
-    public ResponseEntity<MessageVo> getSystemConfigBackupList(@RequestParam Map<String,String> paramMap) throws IOException  {
+    public ResponseEntity<MessageVo> getSystemConfigBackupList(@RequestBody ConfigurationVo configurationVo) throws IOException  {
   	
 		HttpHeaders headers= new HttpHeaders();
 		headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -381,7 +386,7 @@ public class ConfigurationController {
 	    
 	    try {
 	    	
-	    	Map<String, Object> result = configurationService.getSystemConfigBackupList(paramMap);
+	    	Map<String, Object> result = configurationService.getSystemConfigBackupList(configurationVo);
 	    	int totalCount = (int) result.get("total");
 	    	
 	    	message = MessageVo.builder()
@@ -405,7 +410,7 @@ public class ConfigurationController {
     } 
       
     /*
-     * 시스템 설정 > 알람 > 디스크 임계치 설정
+     * TopNav > 시스템 설정 > 알람 > 디스크 임계치 설정
      */
     @PostMapping("/getLogDiskInfo")
     public ResponseEntity<MessageVo> getLogDiskInfo() throws IOException  {
@@ -441,10 +446,10 @@ public class ConfigurationController {
     } 
     
     /*
-     * 시스템 설정 > 알람 > 디스크 임계치 설정 > 설정 
+     * TopNav > 시스템 설정 > 알람 > 디스크 임계치 설정 > 설정 
      */
     @PostMapping("/setLogDiskInfo")
-    public ResponseEntity<MessageVo> setLogDiskInfo(HttpServletRequest request, @RequestParam Map<String,String> paramMap) throws IOException  {
+    public ResponseEntity<MessageVo> setLogDiskInfo(HttpServletRequest request, @RequestBody ConfigurationVo configurationVo) throws IOException  {
   	
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
@@ -459,7 +464,7 @@ public class ConfigurationController {
 	    
 	    try {
 	    	
-	    	Map<String, Object> result = configurationService.setLogDiskInfo(paramMap);
+	    	Map<String, Object> result = configurationService.setLogDiskInfo(configurationVo);
 	    	
 	    	if("0".equals(result.get("col"))) {
 	    		
@@ -496,10 +501,10 @@ public class ConfigurationController {
     } 
     
     /*
-     * 시스템 설정 > 알람 > 장비/그룹 임계치 설정 > 장비/그룹 기본 설정
+     * TopNav > 시스템 설정 > 알람 > 장비/그룹 임계치 설정 > 장비/그룹 기본 설정
      */
     @PostMapping("/getAlarmInfo")
-    public ResponseEntity<MessageVo> getAlarmInfo(@RequestParam Map<String,String> paramMap) throws IOException  {
+    public ResponseEntity<MessageVo> getAlarmInfo(@RequestBody ConfigurationVo configurationVo) throws IOException  {
   	
 		HttpHeaders headers= new HttpHeaders();
 		headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -508,7 +513,7 @@ public class ConfigurationController {
 	    
 	    try {
 	    	
-	    	Map<String, Object> result = configurationService.getAlarmInfo(paramMap);
+	    	Map<String, Object> result = configurationService.getAlarmInfo(configurationVo);
 	        int totalCount = 1;
 	        
 	    	message = MessageVo.builder()
@@ -531,9 +536,69 @@ public class ConfigurationController {
   	  return new ResponseEntity<>(message, headers, HttpStatus.OK);
     }
     
+    /*
+     * TopNav > 시스템 설정 > 알람 > 장비/그릅 입계치 설정 > 장비/그룹 기본설정 / 기본 설정 
+     */
+    @PostMapping("/setAlarmInfo")
+    public ResponseEntity<MessageVo> setAlarmInfo(HttpServletRequest request, @RequestBody ConfigurationVo configurationVo) throws IOException  {
+    	
+		SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        
+        String sessionId = authentication.getName();
+        String clientIp = ClientIpUtil.getClientIP(request);
+        
+    	HttpHeaders headers= new HttpHeaders();
+    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+    	
+    	MessageVo message = null;
+    	
+    	try {
+    		
+    		Map<String, Object> result = configurationService.setAlarmInfo(configurationVo);
+    		
+	    	if(!result.isEmpty()) {
+	    		if("0".equals(result.get("col"))) {
+    				
+    				message = MessageVo.builder()
+    						.success("false")
+    						.message("장비 임계치 설정 실패되었습니다.")
+    						.entitys(result)
+    						.build();
+    				
+    				esmAuditLog.esmlog(3, sessionId, clientIp, "디스크 임계치 설정 실패되었습니다.");
+    			}else {
+    				
+    				message = MessageVo.builder()
+    						.success("true")
+    						.message("장비 임계치 설정 변경되었습니다.")
+    						.entitys(result)
+    						.build();
+    				
+    				esmAuditLog.esmlog(6, sessionId, clientIp, "장비 임계치 설정 변경되었습니다.");
+    				
+    				config1.set_apply_status(true);
+    			}
+    		}
+    		
+    		
+    	} catch (Exception e) {
+    		message = MessageVo.builder()
+    				.success("false")
+    				.message("장비 임계치 설정 실패되었습니다.")
+    				.errMsg(e.getMessage())
+    				.errTitle("")
+    				.build();
+    		
+    		esmAuditLog.esmlog(3, sessionId, clientIp, "디스크 임계치 설정 실패되었습니다.");
+    	} 
+    	
+    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
+    }
+    
   
     /*
-     * 시스템 설정 > 알람 > SMTP 설정
+     * TopNav > 시스템 설정 > 알람 > SMTP 설정
      */
     @PostMapping("/getSmtpInfo")
     public ResponseEntity<MessageVo> getSmtpInfo() throws IOException  {
@@ -569,10 +634,10 @@ public class ConfigurationController {
     }   
     
     /*
-     * 시스템 설정 > 알람 > SMTP 전송 이벤트 
+     * TopNav > 시스템 설정 > 알람 > SMTP 전송 이벤트 
      */
     @PostMapping("/getSmtpEventInfo")
-    public ResponseEntity<MessageVo> getSmtpEventInfo(@RequestParam Map<String,String> paramMap) throws IOException  {
+    public ResponseEntity<MessageVo> getSmtpEventInfo() throws IOException  {
   	
 		HttpHeaders headers= new HttpHeaders();
 		headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -605,10 +670,10 @@ public class ConfigurationController {
     }    
   
     /*
-     * 시스템 설정 > 기타 > SNMP > SNMP 설정  
+     * TopNav > 시스템 설정 > 기타 > SNMP > SNMP 설정  
      */
     @PostMapping("/getSnmpInfo")
-    public ResponseEntity<MessageVo> getSnmpInfo(@RequestParam Map<String,String> paramMap) throws IOException  {
+    public ResponseEntity<MessageVo> getSnmpInfo() throws IOException  {
   	
 		HttpHeaders headers= new HttpHeaders();
 		headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -641,10 +706,10 @@ public class ConfigurationController {
     }      
     
     /*
-     * 시스템 설정 > 기타 > SNMP > Trap 설정
+     * TopNav > 시스템 설정 > 기타 > SNMP > Trap 설정
      */
     @PostMapping("/getSnmpTrapInfo")
-    public ResponseEntity<MessageVo> getSnmpTrapInfo(@RequestParam Map<String,String> paramMap) throws IOException  {
+    public ResponseEntity<MessageVo> getSnmpTrapInfo() throws IOException  {
   	
 		HttpHeaders headers= new HttpHeaders();
 		headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -678,7 +743,7 @@ public class ConfigurationController {
     
   
     /*
-     * 시스템 설정 > 기타 > 장애 회선 관리
+     * TopNav > 시스템 설정 > 기타 > 장애 회선 관리
      */
     @PostMapping("/getInterfaceConfig")
     public ResponseEntity<MessageVo> getInterfaceConfig() throws IOException  {
@@ -715,10 +780,10 @@ public class ConfigurationController {
     
   
     /*
-     * 시스템 설정 > 기타 > 장애 회선 관리 > 장애 회선 임계치 설정
+     * TopNav > 시스템 설정 > 기타 > 장애 회선 관리 > 장애 회선 임계치 설정
      */
     @PostMapping("/setInterfaceConfig")
-    public ResponseEntity<MessageVo> setInterfaceConfig(HttpServletRequest request, @RequestParam Map<String,String> paramMap) throws IOException  {
+    public ResponseEntity<MessageVo> setInterfaceConfig(HttpServletRequest request, @RequestBody ConfigurationVo configurationVo) throws IOException  {
   	
     	SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
@@ -732,19 +797,16 @@ public class ConfigurationController {
 	    MessageVo message;
 	    
 	    try {
-	    	
-			String datas = (String)paramMap.get("datas");
 			
-			Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
-			
-			String interfaceDowntime = (String)config.setValue(rsDatas, "interfaceDowntime", "0");  
-			String interfaceUpdownCount = (String)config.setValue(rsDatas, "interfaceUpdownCount", "0");
-			String interfaceUpdownHours = (String)config.setValue(rsDatas, "interfaceUpdownHours", "0");
-	        
-			ConfigurationVo configurationVo = new ConfigurationVo();
-			configurationVo.setInterfaceDowntime(String.valueOf(interfaceDowntime));
-			configurationVo.setInterfaceUpdownCount(String.valueOf(interfaceUpdownCount));
-			configurationVo.setInterfaceUpdownHours(String.valueOf(interfaceUpdownHours));
+			if(configurationVo.getInterfaceDowntime() == null) {
+				configurationVo.setInterfaceDowntime("0");
+			}
+			if(configurationVo.getInterfaceUpdownCount() == null) {
+				configurationVo.setInterfaceUpdownCount("0");
+			}
+			if(configurationVo.getInterfaceUpdownHours() == null) {
+				configurationVo.setInterfaceUpdownHours("0");
+			}
 			
 	    	Map<String, Object> result = configurationService.setInterfaceConfig(configurationVo);
 	    	log.info("result : "+result);
@@ -798,7 +860,7 @@ public class ConfigurationController {
     } 
     
     /*
-     * 시스템 설정 > 기타 > 장비 자동 등록
+     * TopNav > 시스템 설정 > 기타 > 장비 자동 등록
      */
     @PostMapping("/getDeviceRegisterConfig")
     public ResponseEntity<MessageVo> getDeviceRegisterConfig() throws IOException  {
@@ -834,10 +896,10 @@ public class ConfigurationController {
     }     
 
     /*
-     * 시스템 설정 > 기타 > 장비 자동 등록 > 장비 자동 등록 설정
+     * TopNav > 시스템 설정 > 기타 > 장비 자동 등록 > 장비 자동 등록 설정
      */
     @PostMapping("/setDeviceRegisterConfig")
-    public ResponseEntity<MessageVo> setDeviceRegisterConfig(@RequestParam Map<String,String> paramMap) throws IOException  {
+    public ResponseEntity<MessageVo> setDeviceRegisterConfig(@RequestBody ConfigurationVo configurationVo) throws IOException  {
   	
 		HttpHeaders headers= new HttpHeaders();
 		headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -846,18 +908,13 @@ public class ConfigurationController {
 	    
 	    try {
 	    	
-			String enable = (String)paramMap.get("dr-e");
-			String groupid = (String)paramMap.get("dr-g");
-			String active = (String)paramMap.get("dr-a");
-			String log = (String)paramMap.get("dr-l");
-			
-	        if ("0".equals(enable)) {
-	            groupid = "0";
-	            active = "0";
-	            log = "0";
+	        if ("0".equals(configurationVo.getEnable())) {
+	        	configurationVo.setGroupid("0");
+	        	configurationVo.setActive("0");
+	        	configurationVo.setLog("0");
 	        }
 	        
-	        if ((groupid == null || active == null || log == null) && "1".equals(enable)) {
+	        if ((configurationVo.getGroupid() == null || configurationVo.getActive() == null || configurationVo.getLog() == null) && "1".equals(configurationVo.getEnable())) {
 	        	
 	        	message = MessageVo.builder()
 	        			.success("false")
@@ -866,12 +923,6 @@ public class ConfigurationController {
 	        			.build();
 	        }else {
 	        	
-	    		ConfigurationVo configurationVo = new ConfigurationVo();
-	    		configurationVo.setEnable(String.valueOf(enable));
-	    		configurationVo.setGroupid(String.valueOf(groupid));
-	    		configurationVo.setActive(String.valueOf(active));
-	    		configurationVo.setLog(String.valueOf(log));
-	    		
 	        	configurationService.setDeviceRegisterConfig(configurationVo);
 	        	
 	        	message = MessageVo.builder()
@@ -980,22 +1031,6 @@ public class ConfigurationController {
 //    
 //    @PostMapping("/restoreConfig")
 //    public ResponseEntity<MessageVo> restoreConfig() throws IOException  {
-//    	
-//    	HttpHeaders headers= new HttpHeaders();
-//    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
-//    	
-//    	MessageVo message = MessageVo.builder()
-//    			.status(StatusEnum.OK)
-//    			.message("성공 코드")
-//    			.data("")
-//    			.build();
-//    	
-//    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
-//    	
-//    } 
-//    
-//    @PostMapping("/setAlarmInfo")
-//    public ResponseEntity<MessageVo> setAlarmInfo() throws IOException  {
 //    	
 //    	HttpHeaders headers= new HttpHeaders();
 //    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));

@@ -7,6 +7,7 @@ public class ConfigurationVo {
 
     private String skip;
     private String limit;
+    private String page;
     private String devid;
     private String enable;
     private String groupid;

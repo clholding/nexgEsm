@@ -50,7 +50,7 @@ public class ConfigurationService {
     private String agentVersion;
 	
     /*
-     * 시스템 설정 > 시스템 > 제품정보
+     * TopNav > 시스템 설정 > 시스템 > 제품정보
      */
 	public Map<String, Object> getSystemInfo() throws IOException, ParseException{
 		
@@ -65,7 +65,7 @@ public class ConfigurationService {
 	}
 	
 	/*
-	 * 시스템 설정 > 시스템 > 시간 동기화
+	 * TopNav > 시스템 설정 > 시스템 > 시간 동기화
 	 */
 	public Map<String, Object> getNtpInfo() throws IOException, ParseException{
 		
@@ -100,18 +100,13 @@ public class ConfigurationService {
 	}
 	
 	/*
-	 * 시스템 설정 > 시스템 > 서버 무결성 상태
+	 * TopNav > 시스템 설정 > 시스템 > 서버 무결성 상태
 	 */
-	public Map<String, Object> getIntegrityInfo(Map<String,String> paramMap) throws IOException, ParseException{
+	public Map<String, Object> getIntegrityInfo(ConfigurationVo configurationVo) throws IOException, ParseException{
 		
-		String rsLimit = (String)paramMap.get("limit");
-		String rsPage = (String)paramMap.get("page");
+		int skip = (Integer.parseInt(configurationVo.getPage()) - 1) * Integer.parseInt(configurationVo.getLimit());
 		
-		int skip = (Integer.parseInt(rsPage) - 1) * Integer.parseInt(rsLimit);
-		
-		ConfigurationVo configurationVo = new ConfigurationVo();
 		configurationVo.setSkip(String.valueOf(skip));
-		configurationVo.setLimit(rsLimit);
 		
 		List<Map<String, Object>> result = new ArrayList<>();
 		List<Map<String, Object>> list = configurationMapper.getIntegrityInfoList(configurationVo);
@@ -137,7 +132,7 @@ public class ConfigurationService {
 	}
 	
 	/*
-	 * 시스템 설정 > 시스템 > 에이전트 무결성 상태
+	 * TopNav > 시스템 설정 > 시스템 > 에이전트 무결성 상태
 	 */
 	public List<Map<String, Object>> getDeviceIntegrityInfo() throws IOException, ParseException{
 		
@@ -145,7 +140,7 @@ public class ConfigurationService {
 	}	
 	
 	/*
-	 * 시스템 설정 > 시스템 > 장비 설정파일 백업
+	 * TopNav > 시스템 설정 > 시스템 > 장비 설정파일 백업
 	 */
 	public Map<String, Object> getConfigBackupInfo() throws IOException, ParseException{
 		
@@ -181,24 +176,21 @@ public class ConfigurationService {
 	}	
 	
 	/*
-	 * 시스템 설정 > 시스템 > 장비 설정파일 백업 내역
+	 * TopNav > 시스템 설정 > 시스템 > 장비 설정파일 백업 내역
 	 */
-	public Map<String, Object> getConfigBackupList(Map<String,String> paramMap) throws IOException, ParseException{
+	public Map<String, Object> getConfigBackupList(ConfigurationVo configurationVo) throws IOException, ParseException{
 		
-		String rsPage = (String)paramMap.get("page");
-		String rsLimit = (String)paramMap.get("limit");
-		
-		int skip = (Integer.parseInt(rsPage) - 1) * Integer.parseInt(rsLimit);
+		int skip = (Integer.parseInt(configurationVo.getPage()) - 1) * Integer.parseInt(configurationVo.getLimit());
 		
 		Map<String, Object> map = new LinkedHashMap<>();
-		map.put("result", configBackup.get_configbackup_list(skip, Integer.parseInt(rsLimit)));
+		map.put("result", configBackup.get_configbackup_list(skip, Integer.parseInt(configurationVo.getLimit())));
 		map.put("total", configBackup.get_configbackup_count());
 		
 		return map;
 	}		
 	
 	/*
-	 * 시스템 설정 > 시스템 > 시스템 설정파일 백업
+	 * TopNav > 시스템 설정 > 시스템 > 시스템 설정파일 백업
 	 */
 	public Map<String, Object> getSystemConfigBackupInfo() throws IOException, ParseException{
 		
@@ -232,24 +224,21 @@ public class ConfigurationService {
 	}	
 	
 	/*
-	 * 시스템 설정 > 시스템 > 시스템 설정파일 백업 내역
+	 * TopNav > 시스템 설정 > 시스템 > 시스템 설정파일 백업 내역
 	 */
-	public Map<String, Object> getSystemConfigBackupList(Map<String,String> paramMap) throws IOException, ParseException{
+	public Map<String, Object> getSystemConfigBackupList(ConfigurationVo configurationVo) throws IOException, ParseException{
 		
-		String rsPage = (String)paramMap.get("page");
-		String rsLimit = (String)paramMap.get("limit");
-		
-		int skip = (Integer.parseInt(rsPage) - 1) * Integer.parseInt(rsLimit);
+		int skip = (Integer.parseInt(configurationVo.getPage()) - 1) * Integer.parseInt(configurationVo.getLimit());
 		
 		Map<String, Object> map = new LinkedHashMap<>();
-		map.put("result", systemConfigBackup.get_systemconfigbackup_list(skip, Integer.parseInt(rsLimit)));
+		map.put("result", systemConfigBackup.get_systemconfigbackup_list(skip, Integer.parseInt(configurationVo.getLimit())));
 		map.put("total", systemConfigBackup.get_systemconfigbackup_count());
 		
 		return map;
 	}		
 	
 	/*
-	 * 시스템 설정 > 알람 > 디스크 임계치 설정
+	 * TopNav > 시스템 설정 > 알람 > 디스크 임계치 설정
 	 */
 	public Map<String, Object> getLogDiskInfo() throws IOException, ParseException{
 		
@@ -263,33 +252,21 @@ public class ConfigurationService {
 	}
 	
 	/*
-	 * 시스템 설정 > 알람 > 디스크 임계치 설정 > 설정 
+	 * TopNav > 시스템 설정 > 알람 > 디스크 임계치 설정 > 설정 
 	 */
-	public Map<String, Object> setLogDiskInfo(Map<String,String> paramMap) throws IOException, ParseException{
-		
-		String delLog = (String)paramMap.get("delLog");
-		String warning = (String)paramMap.get("warning");
-		
-		ConfigurationVo configurationVo = new ConfigurationVo();
-		configurationVo.setDelLog(String.valueOf(delLog));
-		configurationVo.setWarning(String.valueOf(warning));
+	public Map<String, Object> setLogDiskInfo(ConfigurationVo configurationVo) throws IOException, ParseException{
 		
 		return configurationMapper.setLogDiskInfo(configurationVo);
 	}
 	
 	/*
-	 * 시스템 설정 > 알람 > 디스크 임계치 설정
+	 * TopNav > 시스템 설정 > 알람 > 디스크 임계치 설정
 	 */
-	public Map<String, Object> getAlarmInfo(Map<String,String> paramMap) throws IOException, ParseException{
+	public Map<String, Object> getAlarmInfo(ConfigurationVo configurationVo) throws IOException, ParseException{
 		
-		String devid = (String)paramMap.get("deviceid");
-		String groupid = (String)paramMap.get("groupid");
-		if(groupid == null) {
-			groupid = "0";
+		if(configurationVo.getGroupid() == null) {
+			configurationVo.setGroupid("0");
 		}
-		
-		ConfigurationVo configurationVo = new ConfigurationVo();
-		configurationVo.setDevid(String.valueOf(devid));
 		
 		Map<String, Object> result = configurationMapper.getAlarmInfo(configurationVo);
 		
@@ -311,13 +288,47 @@ public class ConfigurationService {
 		map.put("rxp", 		result.get("rpkts"));
 		map.put("txp", 		result.get("tpkts"));
 		map.put("rtt", 		result.get("rtt"));
-		map.put("groupid", 	groupid);
+		map.put("groupid", 	configurationVo.getGroupid());
+		
+		return map;
+	}
+	
+	/*
+	 * TopNav > 시스템 설정 > 알람 > 장비/그릅 입계치 설정 > 장비/그룹 기본설정 / 기본 설정 
+	 */
+	public Map<String, Object> setAlarmInfo(ConfigurationVo configurationVo) throws IOException, ParseException{
+		
+		if(configurationVo.getGroupid() == null) {
+			configurationVo.setGroupid("0");
+		}
+		
+		Map<String, Object> result = configurationMapper.getAlarmInfo(configurationVo);
+		
+		Map<String, Object> map = new LinkedHashMap<>();
+		map.put("deviceid", result.get("id"));
+		map.put("useAlarm", result.get("use_alarm"));
+		map.put("email", 	result.get("email"));
+		map.put("action", 	result.get("use_inherit"));
+		map.put("cpu", 		result.get("cpu"));
+		map.put("memory", 	result.get("mem"));
+		map.put("disk0", 	result.get("disk0"));
+		map.put("disk1", 	result.get("disk1"));
+		map.put("session", 	result.get("session"));
+		map.put("host", 	result.get("host"));
+		map.put("tunnel",	result.get("tunnel"));
+		map.put("cps", 		result.get("cps"));
+		map.put("rxb", 		result.get("rbytes"));
+		map.put("txb", 		result.get("tbytes"));
+		map.put("rxp", 		result.get("rpkts"));
+		map.put("txp", 		result.get("tpkts"));
+		map.put("rtt", 		result.get("rtt"));
+		map.put("groupid", 	configurationVo.getGroupid());
 		
 		return map;
 	}
 	
     /*
-     * 시스템 설정 > 알람 > SMTP 설정
+     * TopNav > 시스템 설정 > 알람 > SMTP 설정
      */
 	public Map<String, Object> getSmtpInfo() throws IOException, ParseException{
 		
@@ -339,7 +350,7 @@ public class ConfigurationService {
 	}
 	
 	/*
-	 * 시스템 설정 > 알람 > SMTP 전송 이벤트 
+	 * TopNav > 시스템 설정 > 알람 > SMTP 전송 이벤트 
 	 */
 	public Map<String, Object> getSmtpEventInfo() throws IOException, ParseException{
 		
@@ -367,7 +378,7 @@ public class ConfigurationService {
 	}
 	
 	/*
-	 * 시스템 설정 > 기타 > SNMP > SNMP 설정  
+	 * TopNav > 시스템 설정 > 기타 > SNMP > SNMP 설정  
 	 */
 	public Map<String, Object> getSnmpInfo() throws IOException, ParseException{
 		
@@ -387,7 +398,7 @@ public class ConfigurationService {
 	}
 	
 	/*
-	 * 시스템 설정 > 기타 > SNMP > Trap 설정
+	 * TopNav > 시스템 설정 > 기타 > SNMP > Trap 설정
 	 */
 	public Map<String, Object> getSnmpTrapInfo() throws IOException, ParseException{
 		
@@ -407,7 +418,7 @@ public class ConfigurationService {
 	}
 	
 	/*
-	 * 시스템 설정 > 기타 > 장애 회선 관리
+	 * TopNav > 시스템 설정 > 기타 > 장애 회선 관리
 	 */
 	public Map<String, Object> getInterfaceConfig() throws IOException, ParseException{
 		
@@ -422,7 +433,7 @@ public class ConfigurationService {
 	}
 	
 	/*
-	 * 시스템 설정 > 기타 > 장애 회선 관리 > 장애 회선 임계치 설정
+	 * TopNav > 시스템 설정 > 기타 > 장애 회선 관리 > 장애 회선 임계치 설정
 	 */
 	public Map<String, Object> setInterfaceConfig(ConfigurationVo configurationVo) throws IOException, ParseException{
 		
@@ -446,7 +457,7 @@ public class ConfigurationService {
 	}
 	
 	/*
-	 * 시스템 설정 > 기타 > 장비 자동 등록 > 장비 자동 등록 설정
+	 * TopNav > 시스템 설정 > 기타 > 장비 자동 등록 > 장비 자동 등록 설정
 	 */
 	public int setDeviceRegisterConfig(ConfigurationVo configurationVo) throws IOException, ParseException{
 		
