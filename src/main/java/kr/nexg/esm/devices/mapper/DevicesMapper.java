@@ -20,7 +20,7 @@ public interface DevicesMapper {
     /*
      * 장비관리 > 장비추가리스트
      */
-	public List<Map<String, Object>> deviceCandidate(DevicesVo devicesVo);
+	public List<Map<String, Object>> deviceCandidate(int mode);
 	
     /*
      * 제품정보 리스트

@@ -850,3 +850,26 @@ BEGIN
     SELECT 1 as col;
   END IF;
 END
+
+***** getDeviceInfoList *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `getDeviceInfoList`(
+  IN ids VARCHAR(2048))
+BEGIN
+  -- 장비 정보 조회
+  DECLARE strWhere VARCHAR(3072);
+  SET strWhere = '';
+
+  IF NULLIF(ids, '') IS NOT NULL AND ids != '0' THEN
+    SET strWhere = CONCAT(strWhere, ' AND FIND_IN_SET(d.id, "', ids, '")');
+  ELSEIF NULLIF(ids, '') IS NULL THEN
+    SET strWhere = CONCAT(strWhere, ' AND FIND_IN_SET(d.id, "0")');
+  END IF;
+
+  SET @query = CONCAT("SELECT d.id, d.name as dn, d.`desc`, d.ip, p.id as product_id, dg.id as pGroupID, dg.name as gn,
+    di.serial, di.os, di.agent, di.hostname, di.company, di.customer, di.email, di.zip,
+    di.address, di.phone1, di.phone2, di.fax, di.mid, p.type
+    FROM device_info di, device_group dg, product p, device d, snmp_info si
+    WHERE d.candidate = 0 AND di.device_id = d.id AND dg.id = d.group_id AND p.id = d.product_id AND d.id = si.device_id ", strWhere);
+  PREPARE stmt3 FROM @query;
+  EXECUTE stmt3;
+END

@@ -1,6 +1,8 @@
 package kr.nexg.esm.devices.dto;
 
 
+import java.util.List;
+
 import lombok.Data;
 
 @Data
@@ -16,7 +18,8 @@ public class DevicesVo
     private String memo1;
     private String memo2;
     private String auth;
-    private String deviceIDs;
+    private List<String> deviceIDs;
+    private String rsDeviceIDs;
     private String pGroupID;
     private String groupIDs;
     private String deviceID;
@@ -60,5 +63,8 @@ public class DevicesVo
     private String snmpAuthpass;
     private String snmpPrivprot;
     private String snmpPrivpass;
-    private int mode;
+    private String mode;
+    private String rsMode;
+    private String dn;
+    private String setType;
 }
