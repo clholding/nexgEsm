@@ -20,6 +20,8 @@ public class DevicesVo
     private String auth;
     private List<String> deviceIDs;
     private String rsDeviceIDs;
+    private String hostname;
+    private String uptime;
     private String pGroupID;
     private String groupIDs;
     private String deviceID;
@@ -64,7 +66,6 @@ public class DevicesVo
     private String snmpPrivprot;
     private String snmpPrivpass;
     private String mode;
-    private String rsMode;
     private String dn;
-    private String setType;
+    private String manageNumberUses;
 }

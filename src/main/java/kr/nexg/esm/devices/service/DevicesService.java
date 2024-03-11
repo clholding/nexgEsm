@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.json.JSONException;
@@ -16,7 +17,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -92,6 +95,123 @@ public class DevicesService {
         return result;
     }
     
+
+//    public String emsgToStr(Map<String, String> emsg) throws JSONException {
+//        List<String> tmpPrintArray = new ArrayList<>();
+//        String rtnStr = "";
+//
+//        Map<String, String> keyDic = new HashMap<>();
+//        keyDic.put("pGroupID", "부모그룹");
+//        keyDic.put("deviceIDs", "장비ID");
+//        keyDic.put("groupIDs", "그룹ID");
+//        keyDic.put("desc", "설명");
+//        keyDic.put("id", "ID");
+//        keyDic.put("name", "이름");
+//        keyDic.put("groupNames", "그룹");
+//        keyDic.put("deviceNames", "장비");
+//        keyDic.put("gn", "그룹");
+//        keyDic.put("product_id", "제품명");
+//        keyDic.put("dn", "장비명");
+//        keyDic.put("active", "활성화");
+//        keyDic.put("ip", "주소");
+//        keyDic.put("licence", "라이선스");
+//        keyDic.put("log", "원본 로그 저장");
+//        keyDic.put("company", "고객사");
+//        keyDic.put("phone2", "전화");
+//        keyDic.put("fax", "FAX");
+//        keyDic.put("zip", "우편번호");
+//        keyDic.put("address", "주소");
+//        keyDic.put("customer", "담당자");
+//        keyDic.put("phone1", "핸드폰");
+//        keyDic.put("email", "E-mail");
+//        keyDic.put("alarm", "이벤트 이메일 전송");
+//
+//        for (String key : emsg.keySet()) {
+//        	
+//            String tmpPrint = "";
+//            String replaceKey = keyDic.containsKey(key) ? keyDic.get(key) : key;
+//
+//            if ("pGroupID".equals(key)) {
+//            	
+//                DevicesVo devicesVo = new DevicesVo();
+//                devicesVo.setPGroupID(emsg.get(key));
+//                
+//                List<Map<String, Object>> deviceGroupNames = devicesMapper.deviceGroupNames(devicesVo);
+//                tmpPrint = String.valueOf(deviceGroupNames.get(0).get("name"));
+//                
+//            } else if ("deviceIDs".equals(key)) {
+//                if ( emsg.get(key).length() > 0) {
+//                    String tmpWhere = String.join(",", emsg.get(key));
+//                    
+//                    DevicesVo devicesVo = new DevicesVo();
+//                    devicesVo.setRsDeviceIDs(tmpWhere);
+//                    List<Map<String, Object>> deviceNames = devicesMapper.deviceNames(devicesVo);
+//                    
+//                    List<String> tmpArray = new ArrayList<>();
+//                    for (Map<String, Object> tmp : deviceNames) {
+//                        tmpArray.add(String.valueOf(tmp.get("name")));
+//                    }
+//                    tmpPrint = String.join(",", tmpArray);
+//                }
+//            } else if ("groupIDs".equals(key)) {
+//            	if ( emsg.get(key).length() > 0) {
+//                    String tmpWhere = String.join(",", emsg.get(key));
+//                    
+//                    DevicesVo devicesVo = new DevicesVo();
+//                    devicesVo.setGroupIDs(tmpWhere);
+//                    
+//                    List<Map<String, Object>> deviceGroupNames = devicesMapper.deviceGroupNames(devicesVo);
+//                    
+//                    List<String> tmpArray = new ArrayList<>();
+//                    for (Map<String, Object> tmp : deviceGroupNames) {
+//                        tmpArray.add(String.valueOf(tmp.get("name")));
+//                    }
+//                    tmpPrint = String.join(",", tmpArray);
+//                }
+//            } else if ("alarm".equals(key) || "active".equals(key) || "log".equals(key)) {
+//                if (Integer.parseInt(emsg.get(key)) == 1) {
+//                	tmpPrintArray.add(key + '=' + "사용");
+//                } else {
+//                	tmpPrintArray.add(key + '=' + "미사용");
+//                }
+//            } else if ("product_id".equals(key)) {
+//                String tmpDeviceNum = emsg.get(key);
+//                
+//                DevicesVo devicesVo = new DevicesVo();
+//                devicesVo.setId(tmpDeviceNum);
+//                devicesMapper.productName(devicesVo);
+//                
+//                String tmpSearch = devicesMapper.productName(devicesVo);
+//                if ("".equals(tmpSearch)) {
+//                    tmpPrint = "Unknown Device";
+//                } else {
+//                    tmpPrint = tmpSearch;
+//                }
+//            }
+//
+//            if (tmpPrint.isEmpty()) {
+//            	if (emsg.get(key) instanceof List) {
+//                    List<String> keyList = (List<String>) emsg.get(key);
+//                    if (!keyList.isEmpty()) {
+//                        tmpPrintArray.add(replaceKey + '=' + String.join(",", keyList));
+//                    } else if (!key.equals("deviceNames") && !key.equals("groupNames") && !key.equals("deviceIDs") && !key.equals("groupIDs")) {
+//                        tmpPrintArray.add(replaceKey + '=' + "");
+//                    }
+//                } else {
+//                    if (!emsg.get(key).isEmpty() && !emsg.get(key).equals("null")) {
+//                        tmpPrintArray.add(replaceKey + '=' + emsg.get(key));
+//                    } else if (!key.equals("deviceNames") && !key.equals("groupNames") && !key.equals("deviceIDs") && !key.equals("groupIDs")) {
+//                        tmpPrintArray.add(replaceKey + '=' + "");
+//                    }
+//                }
+//            } else {
+//                tmpPrintArray.add(replaceKey + '=' + tmpPrint);
+//            }
+//
+//            rtnStr = String.join(", ", tmpPrintArray);
+//        }
+//        return rtnStr;
+//    }
     
     public String emsgToStr(JSONObject datas) throws JSONException {
         List<String> tmpPrintArray = new ArrayList<>();
@@ -216,7 +336,8 @@ public class DevicesService {
         return rtnStr;
     }
     
-    public String setAuditInfo(String fn, String yn, DevicesVo devicesVo) throws JSONException {
+    
+    public String setAuditInfo(String fn, String yn, DevicesVo devicesVo) throws JSONException, JsonProcessingException, ParseException {
         String auditMenu = "[장비관리]";
         String state = "성공";
         int auditlevel = 6;
@@ -235,7 +356,7 @@ public class DevicesService {
 
         if ("setDeviceInfo".equals(fn)) {
           dInfo = "추가";
-          if (!"".equals(devicesVo.getId())) {
+          if (devicesVo.getId() !=null && !"".equals(devicesVo.getId())) {
             dInfo = "수정";
           }
         } else if ("setDeviceGroupInfo".equals(fn)) {
@@ -245,11 +366,26 @@ public class DevicesService {
           }
         }
 
-        if (devicesVo.getDn() != null) {
-//          eMsg = eMsg + dInfo + " " + state + " " + emsgToStr(devicesVo); // Assuming emsgToStr is a method
+        if (devicesVo.getDn() != null && !"".equals(devicesVo.getDn())) {
+        	
+       	  ObjectMapper mapper = new ObjectMapper(); 
+          String jsonString = mapper.writeValueAsString(devicesVo);
+          
+          JSONParser jsonParser = new JSONParser();
+          JSONObject jsonObj = (JSONObject)jsonParser.parse(jsonString);
+          
+          log.info("==============="+jsonObj);
+//          eMsg = eMsg + dInfo + " " + state + " " + emsgToStr(jsonObj); // Assuming emsgToStr is a method
         } else {
           if (!"setDeviceGroup".equals(fn)) {
-//            eMsg = eMsg + dInfo + " " + state + " " + emsgToStr(devicesVo); // Assuming emsgToStr is a method
+       	    ObjectMapper mapper = new ObjectMapper(); 
+            String jsonString = mapper.writeValueAsString(devicesVo);
+          
+            JSONParser jsonParser = new JSONParser();
+            JSONObject jsonObj = (JSONObject)jsonParser.parse(jsonString);
+            log.info("==============="+jsonObj);
+            
+//            eMsg = eMsg + dInfo + " " + state + " " + emsgToStr(jsonObj); // Assuming emsgToStr is a method
           } else if ("setDeviceGroup".equals(fn)) {
             String tmpPrint = "";
             List<String> tmpArray = new ArrayList<>();
@@ -307,22 +443,21 @@ public class DevicesService {
     	
         if ("1".equals(devicesVo.getAuth())) {
             int modeValue = 0;
-            if (!"None".equals(devicesVo.getRsMode())) {
-                if ("ALL".equals(devicesVo.getRsMode())) {
+            if (!"None".equals(devicesVo.getMode())) {
+                if ("ALL".equals(devicesVo.getMode())) {
                     modeValue = 0;
                 }
             } else {
-                modeValue = mode_convert.convert_modedata(devicesVo.getRsMode());
+                modeValue = mode_convert.convert_modedata(devicesVo.getMode());
             }
 
             group_list = new ArrayList<>();
             
             SecurityContext context = SecurityContextHolder.getContext();
             Authentication authentication = context.getAuthentication();
-//            Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
             
             devicesVo.setSessionId(authentication.getName());
-//            devicesVo.setMode(modeValue);
+            devicesVo.setMode(String.valueOf(modeValue));
             
             List<Map<String, Object>> temp = devicesMapper.getDeviceGroupByLogin(devicesVo);
 
@@ -604,7 +739,7 @@ public class DevicesService {
      */
 	public Map<String, Object> getDeviceGroupInfo(DevicesVo devicesVo) throws IOException, ParseException{
 		
-		devicesVo.setSessionId(devicesVo.getDeviceID());		
+		devicesVo.setSessionId(devicesVo.getId());		
 		
 		return devicesMapper.getDeviceGroupInfo(devicesVo);
 	}
@@ -735,7 +870,7 @@ public class DevicesService {
 	        Authentication authentication = context.getAuthentication();
 //	        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
 	        
-			mode = mode_convert.convert_modedata(devicesVo.getRsMode());
+			mode = mode_convert.convert_modedata(devicesVo.getMode());
 			
 			devicesVo.setSessionId(authentication.getName());
 			devicesVo.setMode(String.valueOf(mode));
@@ -796,23 +931,24 @@ public class DevicesService {
 	    
 		String message = "장비/그룹이 수정되었습니다.";
 	    
-	    if(devicesVo.getId() == null) {
+	    if(devicesVo.getId() == null || "".equals(devicesVo.getId())) {
 	    	message = "장비/그룹이 추가되었습니다.";
 	    }
 	    
 	    int gp = 0;
-        if (!devicesVo.getPGroupID().equals("")) {
+        if (devicesVo.getPGroupID() != null && !"".equals(devicesVo.getId())) {
         	gp = Integer.parseInt(devicesVo.getPGroupID());
         }
         
         String topGroup = "전체";
-        
         int cnt = devicesMapper.deviceGroupCnt(devicesVo);
         if ((cnt > 0 || devicesVo.getName().equals(topGroup)) && devicesVo.getId() == null) {
         	message = "동일한 장비 그룹 이름이 존재합니다.";
         }else {
             SecurityContext context = SecurityContextHolder.getContext();
             Authentication authentication = context.getAuthentication();
+            
+            devicesVo.setSessionId(authentication.getName());
             
         	Map<String, Object> map = devicesMapper.setDeviceGroupInfo(devicesVo);
         	if("0".equals(map.get("select_id"))) {
@@ -835,12 +971,10 @@ public class DevicesService {
      */
 	public Map<String, Object> setDeviceInfo(DevicesVo devicesVo) throws Exception{
 		
-	    int mode = mode_convert.convert_modedata(devicesVo.getRsMode());
+	    int mode = mode_convert.convert_modedata(devicesVo.getMode());
 
 //	    # 유효성 검사
-	    
-        devicesVo.setId(devicesVo.getPGroupID());
-	    int rsGidCnt = devicesMapper.deviceGroupCnt(devicesVo);
+	    int rsGidCnt = devicesMapper.deviceGroupCnt2(devicesVo);
 	    Validation.deviceAdd_gid(rsGidCnt);
 	    
 //	    # 유효성 검사
@@ -850,8 +984,6 @@ public class DevicesService {
 //	    ## 유효성 검사
 	    Validation.deviceAdd_serial(devicesVo.getSerial());
 	    
-	    devicesVo = new DevicesVo();
-        devicesVo.setId(devicesVo.getProductId());
 	    int rsProductIdCnt = devicesMapper.productCnt(devicesVo);	    
 //	    ## 유효성 검사
 	    Validation.deviceAdd_product(rsProductIdCnt);
@@ -865,7 +997,7 @@ public class DevicesService {
             int overDGroupId = -1;
             int overDActive = 0;
 
-            if (!"".equals(devicesVo.getOverwriteid())) {
+            if (devicesVo.getOverwriteid() != null && !"".equals(devicesVo.getOverwriteid())) {
                 // Fetch overwrite device details
             	
                 devicesVo = new DevicesVo();
@@ -889,14 +1021,10 @@ public class DevicesService {
             
             if (mode == 0) {
             	
-            	devicesVo.setId(devicesVo.getPGroupID());
-            	
                 chkGroupMaximumChecker = devicesMapper.groupMaximumChkecker(devicesVo); 
             } else {
             	
-            	devicesVo.setId(devicesVo.getPGroupID());
             	devicesVo.setType(String.valueOf(mode));
-            	
                 chkGroupMaximumChecker = devicesMapper.groupMaximumChkecker2(devicesVo); 
             }
 
@@ -905,11 +1033,11 @@ public class DevicesService {
                 success = "false";
             }
 
-            if (!devicesVo.getId().equals("null")) {
+            if (devicesVo.getId() != null && !"".equals(devicesVo.getId())) {
             	message = "장비가 수정되었습니다.";
             }
 
-            if (devicesVo.getId().equals("null")) {
+            if (devicesVo.getId() == null && "".equals(devicesVo.getId())) {
                 // Check Duplicated device name
             	
                 devicesVo = new DevicesVo();
@@ -956,8 +1084,7 @@ public class DevicesService {
             		
             		device.add_device(col2);
             		config1.set_apply_status(true);
-            		
-            		if(devicesVo.getSetType() != null && devicesVo.getSetType().equals("Manual")) {
+            		if(devicesVo.getType() != null && devicesVo.getType().equals("Manual")) {
             			devicesVo = new DevicesVo();
             			devicesVo.setId(col2);
             			devicesMapper.updateDeviceInfo(devicesVo);

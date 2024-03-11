@@ -84,6 +84,7 @@ public interface DevicesMapper {
 	public int checkManagedCode(DevicesVo devicesVo);
 	
 	public int deviceGroupCnt(DevicesVo devicesVo);
+	public int deviceGroupCnt2(DevicesVo devicesVo);
 	
 	public List<Map<String, Object>> deviceGroupNames(DevicesVo devicesVo);
 	public List<Map<String, Object>> deviceNames(DevicesVo devicesVo);
