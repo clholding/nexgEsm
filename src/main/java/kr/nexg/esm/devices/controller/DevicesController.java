@@ -912,6 +912,7 @@ public class DevicesController {
         	Map<String, Object> result = devicesService.setDeviceGroupInfo(devicesVo);
         	
         	String eMsg = (String) result.get("eMsg");
+        	String success = (String) result.get("success");
         	
             int totalCount = 0;
         	
@@ -921,9 +922,13 @@ public class DevicesController {
                 	.totalCount(totalCount)
                 	.entitys("")
                 	.build();
-        	
-			esmAuditLog.esmlog(6, sessionId, clientIp, eMsg);
 			
+        	if("success".equals(success)) {
+        		esmAuditLog.esmlog(6, sessionId, clientIp, eMsg);
+        	}else {
+        		esmAuditLog.esmlog(4, sessionId, clientIp, eMsg);
+        	}
+        	
 		} catch (Exception e) {
 			log.error("Error : ", e);
 			message = MessageVo.builder()
@@ -933,6 +938,7 @@ public class DevicesController {
 	            	.errTitle("")
 	            	.build();
 			
+			esmAuditLog.esmlog(4, sessionId, clientIp, "A failure has occurred.");
 		} 
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -961,17 +967,22 @@ public class DevicesController {
         	Map<String, Object> result = devicesService.setDeviceInfo(devicesVo);
         	
         	String eMsg = (String) result.get("eMsg");
+        	String success = (String) result.get("success");
         	
             int totalCount = 0;
         	
         	message = MessageVo.builder()
-                	.success("true")
+                	.success(success)
                 	.message(String.valueOf(result.get("message")))
                 	.totalCount(totalCount)
                 	.entitys("")
                 	.build();
         	
-        	esmAuditLog.esmlog(6, sessionId, clientIp, eMsg);
+        	if("success".equals(success)) {
+        		esmAuditLog.esmlog(6, sessionId, clientIp, eMsg);
+        	}else {
+        		esmAuditLog.esmlog(4, sessionId, clientIp, eMsg);
+        	}
         	
 		} catch (Exception e) {
 			log.error("Error : ", e);
@@ -982,6 +993,7 @@ public class DevicesController {
 	            	.errTitle("")
 	            	.build();
 			
+			esmAuditLog.esmlog(4, sessionId, clientIp, "A failure has occurred.");
 		} 
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);

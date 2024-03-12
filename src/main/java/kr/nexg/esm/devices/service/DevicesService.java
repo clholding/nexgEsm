@@ -96,124 +96,7 @@ public class DevicesService {
     }
     
 
-//    public String emsgToStr(Map<String, String> emsg) throws JSONException {
-//        List<String> tmpPrintArray = new ArrayList<>();
-//        String rtnStr = "";
-//
-//        Map<String, String> keyDic = new HashMap<>();
-//        keyDic.put("pGroupID", "부모그룹");
-//        keyDic.put("deviceIDs", "장비ID");
-//        keyDic.put("groupIDs", "그룹ID");
-//        keyDic.put("desc", "설명");
-//        keyDic.put("id", "ID");
-//        keyDic.put("name", "이름");
-//        keyDic.put("groupNames", "그룹");
-//        keyDic.put("deviceNames", "장비");
-//        keyDic.put("gn", "그룹");
-//        keyDic.put("product_id", "제품명");
-//        keyDic.put("dn", "장비명");
-//        keyDic.put("active", "활성화");
-//        keyDic.put("ip", "주소");
-//        keyDic.put("licence", "라이선스");
-//        keyDic.put("log", "원본 로그 저장");
-//        keyDic.put("company", "고객사");
-//        keyDic.put("phone2", "전화");
-//        keyDic.put("fax", "FAX");
-//        keyDic.put("zip", "우편번호");
-//        keyDic.put("address", "주소");
-//        keyDic.put("customer", "담당자");
-//        keyDic.put("phone1", "핸드폰");
-//        keyDic.put("email", "E-mail");
-//        keyDic.put("alarm", "이벤트 이메일 전송");
-//
-//        for (String key : emsg.keySet()) {
-//        	
-//            String tmpPrint = "";
-//            String replaceKey = keyDic.containsKey(key) ? keyDic.get(key) : key;
-//
-//            if ("pGroupID".equals(key)) {
-//            	
-//                DevicesVo devicesVo = new DevicesVo();
-//                devicesVo.setPGroupID(emsg.get(key));
-//                
-//                List<Map<String, Object>> deviceGroupNames = devicesMapper.deviceGroupNames(devicesVo);
-//                tmpPrint = String.valueOf(deviceGroupNames.get(0).get("name"));
-//                
-//            } else if ("deviceIDs".equals(key)) {
-//                if ( emsg.get(key).length() > 0) {
-//                    String tmpWhere = String.join(",", emsg.get(key));
-//                    
-//                    DevicesVo devicesVo = new DevicesVo();
-//                    devicesVo.setRsDeviceIDs(tmpWhere);
-//                    List<Map<String, Object>> deviceNames = devicesMapper.deviceNames(devicesVo);
-//                    
-//                    List<String> tmpArray = new ArrayList<>();
-//                    for (Map<String, Object> tmp : deviceNames) {
-//                        tmpArray.add(String.valueOf(tmp.get("name")));
-//                    }
-//                    tmpPrint = String.join(",", tmpArray);
-//                }
-//            } else if ("groupIDs".equals(key)) {
-//            	if ( emsg.get(key).length() > 0) {
-//                    String tmpWhere = String.join(",", emsg.get(key));
-//                    
-//                    DevicesVo devicesVo = new DevicesVo();
-//                    devicesVo.setGroupIDs(tmpWhere);
-//                    
-//                    List<Map<String, Object>> deviceGroupNames = devicesMapper.deviceGroupNames(devicesVo);
-//                    
-//                    List<String> tmpArray = new ArrayList<>();
-//                    for (Map<String, Object> tmp : deviceGroupNames) {
-//                        tmpArray.add(String.valueOf(tmp.get("name")));
-//                    }
-//                    tmpPrint = String.join(",", tmpArray);
-//                }
-//            } else if ("alarm".equals(key) || "active".equals(key) || "log".equals(key)) {
-//                if (Integer.parseInt(emsg.get(key)) == 1) {
-//                	tmpPrintArray.add(key + '=' + "사용");
-//                } else {
-//                	tmpPrintArray.add(key + '=' + "미사용");
-//                }
-//            } else if ("product_id".equals(key)) {
-//                String tmpDeviceNum = emsg.get(key);
-//                
-//                DevicesVo devicesVo = new DevicesVo();
-//                devicesVo.setId(tmpDeviceNum);
-//                devicesMapper.productName(devicesVo);
-//                
-//                String tmpSearch = devicesMapper.productName(devicesVo);
-//                if ("".equals(tmpSearch)) {
-//                    tmpPrint = "Unknown Device";
-//                } else {
-//                    tmpPrint = tmpSearch;
-//                }
-//            }
-//
-//            if (tmpPrint.isEmpty()) {
-//            	if (emsg.get(key) instanceof List) {
-//                    List<String> keyList = (List<String>) emsg.get(key);
-//                    if (!keyList.isEmpty()) {
-//                        tmpPrintArray.add(replaceKey + '=' + String.join(",", keyList));
-//                    } else if (!key.equals("deviceNames") && !key.equals("groupNames") && !key.equals("deviceIDs") && !key.equals("groupIDs")) {
-//                        tmpPrintArray.add(replaceKey + '=' + "");
-//                    }
-//                } else {
-//                    if (!emsg.get(key).isEmpty() && !emsg.get(key).equals("null")) {
-//                        tmpPrintArray.add(replaceKey + '=' + emsg.get(key));
-//                    } else if (!key.equals("deviceNames") && !key.equals("groupNames") && !key.equals("deviceIDs") && !key.equals("groupIDs")) {
-//                        tmpPrintArray.add(replaceKey + '=' + "");
-//                    }
-//                }
-//            } else {
-//                tmpPrintArray.add(replaceKey + '=' + tmpPrint);
-//            }
-//
-//            rtnStr = String.join(", ", tmpPrintArray);
-//        }
-//        return rtnStr;
-//    }
-    
-    public String emsgToStr(JSONObject datas) throws JSONException {
+    public String emsgToStr(Map<String, Object> emsg) throws JSONException {
         List<String> tmpPrintArray = new ArrayList<>();
         String rtnStr = "";
 
@@ -243,28 +126,23 @@ public class DevicesService {
         keyDic.put("email", "E-mail");
         keyDic.put("alarm", "이벤트 이메일 전송");
 
-        Iterator<String> keysIterator = datas.keys();
-        while (keysIterator.hasNext()) {
+        for (String key : emsg.keySet()) {
         	
-        	String key = keysIterator.next();
-        	log.info("key = " + key);
-        	
-        	String replaceKey = keyDic.containsKey(key) ? keyDic.get(key) : key;
-            log.info("replaceKey = "+ replaceKey);
             String tmpPrint = "";
-            String tmpSearch;
+            String replaceKey = keyDic.containsKey(key) ? keyDic.get(key) : key;
 
+//            log.info("key ===================="+key);
             if ("pGroupID".equals(key)) {
             	
                 DevicesVo devicesVo = new DevicesVo();
-                devicesVo.setPGroupID(datas.getString("pGroupID"));
+                devicesVo.setPGroupID(String.valueOf(emsg.get(key)));
                 
                 List<Map<String, Object>> deviceGroupNames = devicesMapper.deviceGroupNames(devicesVo);
                 tmpPrint = String.valueOf(deviceGroupNames.get(0).get("name"));
                 
-            } else if ("deviceIDs".equals(key)) {
-                if ( datas.getString(key).length() > 0) {
-                    String tmpWhere = String.join(",", datas.getString(key));
+            } else if ("deviceIDs".equals(key) && emsg.get(key) != null) {
+                if ( String.valueOf(emsg.get(key)).length() > 0) {
+                    String tmpWhere = String.join(",", String.valueOf(emsg.get(key)));
                     
                     DevicesVo devicesVo = new DevicesVo();
                     devicesVo.setRsDeviceIDs(tmpWhere);
@@ -276,9 +154,9 @@ public class DevicesService {
                     }
                     tmpPrint = String.join(",", tmpArray);
                 }
-            } else if ("groupIDs".equals(key)) {
-            	if ( datas.getString(key).length() > 0) {
-                    String tmpWhere = String.join(",", datas.getString(key));
+            } else if ("groupIDs".equals(key) && emsg.get(key) != null) {
+            	if ( String.valueOf(emsg.get(key)).length() > 0) {
+                    String tmpWhere = String.join(",", String.valueOf(emsg.get(key)));
                     
                     DevicesVo devicesVo = new DevicesVo();
                     devicesVo.setGroupIDs(tmpWhere);
@@ -291,20 +169,20 @@ public class DevicesService {
                     }
                     tmpPrint = String.join(",", tmpArray);
                 }
-            } else if ("alarm".equals(key) || "active".equals(key) || "log".equals(key)) {
-                if (Integer.parseInt(datas.getString(key)) == 1) {
+            } else if (("alarm".equals(key) && emsg.get(key) != null )|| ("active".equals(key) && emsg.get(key) != null )|| ("log".equals(key) && emsg.get(key) != null)) {
+                if (Integer.parseInt(String.valueOf(emsg.get(key))) == 1) {
                 	tmpPrintArray.add(key + '=' + "사용");
                 } else {
                 	tmpPrintArray.add(key + '=' + "미사용");
                 }
-            } else if ("product_id".equals(key)) {
-                String tmpDeviceNum = datas.getString("product_id");
+            } else if ("product_id".equals(key) && emsg.get(key) != null) {
+                String tmpDeviceNum = String.valueOf(emsg.get(key));
                 
                 DevicesVo devicesVo = new DevicesVo();
                 devicesVo.setId(tmpDeviceNum);
                 devicesMapper.productName(devicesVo);
                 
-                tmpSearch = devicesMapper.productName(devicesVo);
+                String tmpSearch = devicesMapper.productName(devicesVo);
                 if ("".equals(tmpSearch)) {
                     tmpPrint = "Unknown Device";
                 } else {
@@ -312,17 +190,18 @@ public class DevicesService {
                 }
             }
 
-            if (tmpPrint.isEmpty()) {
-                if (datas.get(key) instanceof List) {
-                    List<String> keyList = (List<String>) datas.get(key);
-                    if (!keyList.isEmpty()) {
-                        tmpPrintArray.add(replaceKey + '=' + String.join(",", keyList));
-                    } else if (!key.equals("deviceNames") && !key.equals("groupNames") && !key.equals("deviceIDs") && !key.equals("groupIDs")) {
-                        tmpPrintArray.add(replaceKey + '=' + "");
-                    }
-                } else {
-                    if (!datas.getString(key).isEmpty() && !datas.getString(key).equals("null")) {
-                        tmpPrintArray.add(replaceKey + '=' + datas.getString(key));
+            if ("".equals(tmpPrint)) {
+            	if (emsg.get(key) != null && emsg.get(key) instanceof List) {
+            	    List<String> keyList = (List<String>) emsg.get(key);
+            	    if (!keyList.isEmpty()) {
+            	        tmpPrintArray.add(replaceKey + '=' + String.join(",", keyList));
+            	    } else if (!key.equals("deviceNames") && !key.equals("groupNames") && !key.equals("deviceIDs") && !key.equals("groupIDs")) {
+            	        tmpPrintArray.add(replaceKey + '=' + "");
+            	    }
+            	}  else {
+            		
+                    if (emsg.get(key) != null || !"".equals(emsg.get(key)) ) {
+                        tmpPrintArray.add(replaceKey + '=' + emsg.get(key));
                     } else if (!key.equals("deviceNames") && !key.equals("groupNames") && !key.equals("deviceIDs") && !key.equals("groupIDs")) {
                         tmpPrintArray.add(replaceKey + '=' + "");
                     }
@@ -331,13 +210,16 @@ public class DevicesService {
                 tmpPrintArray.add(replaceKey + '=' + tmpPrint);
             }
 
-            rtnStr = String.join(", ", tmpPrintArray);
         }
+        
+        rtnStr = String.join(", ", tmpPrintArray);
+        
         return rtnStr;
     }
     
     
-    public String setAuditInfo(String fn, String yn, DevicesVo devicesVo) throws JSONException, JsonProcessingException, ParseException {
+    
+    public String setAuditInfo(String fn, String yn, DevicesVo devicesVo) throws JSONException, ParseException, IOException {
         String auditMenu = "[장비관리]";
         String state = "성공";
         int auditlevel = 6;
@@ -370,22 +252,22 @@ public class DevicesService {
         	
        	  ObjectMapper mapper = new ObjectMapper(); 
           String jsonString = mapper.writeValueAsString(devicesVo);
+//          log.info("jsonString==============="+jsonString);
           
-          JSONParser jsonParser = new JSONParser();
-          JSONObject jsonObj = (JSONObject)jsonParser.parse(jsonString);
+          Map<String, Object> rsDatas = new ObjectMapper().readValue(jsonString, Map.class);
           
-          log.info("==============="+jsonObj);
-//          eMsg = eMsg + dInfo + " " + state + " " + emsgToStr(jsonObj); // Assuming emsgToStr is a method
+//          log.info("rsDatas==============="+rsDatas);
+          eMsg = eMsg + dInfo + " " + state + " " + emsgToStr(rsDatas); // Assuming emsgToStr is a method
         } else {
           if (!"setDeviceGroup".equals(fn)) {
        	    ObjectMapper mapper = new ObjectMapper(); 
             String jsonString = mapper.writeValueAsString(devicesVo);
-          
-            JSONParser jsonParser = new JSONParser();
-            JSONObject jsonObj = (JSONObject)jsonParser.parse(jsonString);
-            log.info("==============="+jsonObj);
+//            log.info("jsonString==============="+jsonString);
             
-//            eMsg = eMsg + dInfo + " " + state + " " + emsgToStr(jsonObj); // Assuming emsgToStr is a method
+            Map<String, Object> rsDatas = new ObjectMapper().readValue(jsonString, Map.class);
+//            log.info("rsDatas==============="+rsDatas);
+            
+            eMsg = eMsg + dInfo + " " + state + " " + emsgToStr(rsDatas); // Assuming emsgToStr is a method
           } else if ("setDeviceGroup".equals(fn)) {
             String tmpPrint = "";
             List<String> tmpArray = new ArrayList<>();
@@ -929,6 +811,7 @@ public class DevicesService {
 //	    # 유효성 검사
    	    Validation.groupAdd_name(devicesVo.getName());
 	    
+   	    String success = "true";
 		String message = "장비/그룹이 수정되었습니다.";
 	    
 	    if(devicesVo.getId() == null || "".equals(devicesVo.getId())) {
@@ -944,6 +827,7 @@ public class DevicesService {
         int cnt = devicesMapper.deviceGroupCnt(devicesVo);
         if ((cnt > 0 || devicesVo.getName().equals(topGroup)) && devicesVo.getId() == null) {
         	message = "동일한 장비 그룹 이름이 존재합니다.";
+        	success = "false";
         }else {
             SecurityContext context = SecurityContextHolder.getContext();
             Authentication authentication = context.getAuthentication();
@@ -953,14 +837,16 @@ public class DevicesService {
         	Map<String, Object> map = devicesMapper.setDeviceGroupInfo(devicesVo);
         	if("0".equals(map.get("select_id"))) {
         		message = "동일한 장비 그룹 이름이 존재합니다.";
+        		success = "false";
         	}
         }
         
-        String eMsg = setAuditInfo("setDeviceGroupInfo", "success", devicesVo);
+        String eMsg = setAuditInfo("setDeviceGroupInfo", success, devicesVo);
         log.info("eMsg : "+eMsg);
         
         Map<String, Object> map = new HashMap<String,Object>(); 
         map.put("message", message);
+        map.put("success", success);
         map.put("eMsg", eMsg);
         
 		return map;
@@ -1000,8 +886,6 @@ public class DevicesService {
             if (devicesVo.getOverwriteid() != null && !"".equals(devicesVo.getOverwriteid())) {
                 // Fetch overwrite device details
             	
-                devicesVo = new DevicesVo();
-                
             	Map<String, Object> map = devicesMapper.overwriteDevice(devicesVo);
                 overDId = Integer.parseInt((String) map.get("id"));
                 overDName = (String) map.get("name");
@@ -1046,6 +930,7 @@ public class DevicesService {
                     // Duplicated device name found
                     message = "동일한 장비 이름이 존재합니다.";
                     success = "false";                    
+                    
                 }
             }
 
@@ -1058,6 +943,7 @@ public class DevicesService {
             			message = "동일한 라이센스 또는 시리얼을 가진 장비가 존재합니다.";
             		}else {
             			message = "동일한 장비 이름이 존재합니다.";
+            			
             		}
             	}else {
             		config1.set_apply_status(true);
@@ -1086,7 +972,7 @@ public class DevicesService {
             		config1.set_apply_status(true);
             		if(devicesVo.getType() != null && devicesVo.getType().equals("Manual")) {
             			devicesVo = new DevicesVo();
-            			devicesVo.setId(col2);
+            			devicesVo.setDeviceID(col2);
             			devicesMapper.updateDeviceInfo(devicesVo);
             		}
             	}
@@ -1097,11 +983,12 @@ public class DevicesService {
             success = "false";
         }
 	
-        String eMsg = setAuditInfo("setDeviceInfo", "success", devicesVo);
+        String eMsg = setAuditInfo("setDeviceInfo", success, devicesVo);
         log.info("eMsg : "+eMsg);
         
         Map<String, Object> map = new HashMap<String,Object>(); 
         map.put("message", message);
+        map.put("success", success);
         map.put("eMsg", eMsg);
         
         
