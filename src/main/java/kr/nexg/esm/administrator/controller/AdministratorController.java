@@ -2,6 +2,7 @@ package kr.nexg.esm.administrator.controller;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,11 +52,11 @@ public class AdministratorController {
 	* 시스템 설정 > 계정관리 > 관리자 생성/수정
 	* 관리자정보 조회
 	* 
-	* @ param Map
+	* @ param AdministratorVo
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/getUserInfo")
-    public ResponseEntity<MessageVo> getUserInfo(@RequestParam Map<String,String> paramMap) {
+    public ResponseEntity<MessageVo> getUserInfo(@RequestBody AdministratorVo administratorVo) {
     	
     	HttpHeaders headers= new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -64,7 +65,7 @@ public class AdministratorController {
         
         try {
         	
-        	List<Map<String, Object>> list = administratorService.getUserInfo(paramMap);
+        	List<Map<String, Object>> list = administratorService.getUserInfo(administratorVo);
             int totalCount = list.size();
         	
         	message = MessageVo.builder()
@@ -90,17 +91,17 @@ public class AdministratorController {
 	* 시스템 설정 > 계정관리 > 관리자 생성/수정
 	* 관리자정보 리스트
 	* 
-	* @ param Map
+	* @ param AdministratorVo
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/getUser")
-    public ResponseEntity<MessageVo> getUser(@RequestParam Map<String,Object> paramMap) {
+    public ResponseEntity<MessageVo> getUser(@RequestBody AdministratorVo administratorVo) {
 		
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         
         String sessionId = authentication.getName();
-        paramMap.put("sessionId", sessionId);
+        administratorVo.setSessionId(sessionId);
     	
     	HttpHeaders headers= new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -109,7 +110,7 @@ public class AdministratorController {
         
         try {
         	
-        	List<Map<String, Object>> list = administratorService.getUser(paramMap);
+        	List<Map<String, Object>> list = administratorService.getUser(administratorVo);
             
             int totalCount = 0;
             if(list.size() > 0) {
@@ -143,11 +144,11 @@ public class AdministratorController {
 	* 시스템 설정 > 계정관리 > 관리자 생성/수정
 	* 관리자정보 삭제
 	* 
-	* @ param Map
+	* @ param AdministratorVo
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/delUser")
-    public ResponseEntity<MessageVo> delUser(HttpServletRequest request, @RequestParam Map<String,Object> paramMap) {
+    public ResponseEntity<MessageVo> delUser(HttpServletRequest request, @RequestBody AdministratorVo administratorVo) {
 
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
@@ -161,12 +162,12 @@ public class AdministratorController {
         MessageVo message;
         
         try {
-        	List<String> admin_names = administratorService.delUser(paramMap);
+        	List<String> admin_names = administratorService.delUser(administratorVo);
         	String arr = String.join(",", admin_names);
         	
         	message = MessageVo.builder()
                 	.success("true")
-                	.message("")
+                	.message("관리자 정보가 삭제되었습니다.")
                 	.entitys("")
                 	.build();
         	
@@ -190,11 +191,11 @@ public class AdministratorController {
 	* 시스템 설정 > 계정관리 > 관리자 그룹
 	* 관리자정보 그룹 삭제
 	* 
-	* @ param Map
+	* @ param AdministratorVo
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/delUserGroup")
-    public ResponseEntity<MessageVo> delUserGroup(HttpServletRequest request, @RequestParam Map<String,Object> paramMap) {
+    public ResponseEntity<MessageVo> delUserGroup(HttpServletRequest request, @RequestBody AdministratorVo administratorVo) {
 
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
@@ -208,7 +209,7 @@ public class AdministratorController {
         MessageVo message;
         
         try {
-        	List<Map<String, Object>> list = administratorService.selectUserGroup(paramMap);
+        	List<Map<String, Object>> list = administratorService.selectUserGroup(administratorVo);
         	if(list.size() > 0) {
         		message = MessageVo.builder()
                     	.success("false")
@@ -218,11 +219,11 @@ public class AdministratorController {
         	} else {
         		message = MessageVo.builder()
                     	.success("true")
-                    	.message("")
+                    	.message("관리자그룹 정보가 삭제되었습니다.")
                     	.entitys("")
                     	.build();
         	}
-        	List<String> user_group_names = administratorService.delUserGroup(paramMap);
+        	List<String> user_group_names = administratorService.delUserGroup(administratorVo);
         	String arr = String.join(",", user_group_names);
         	
         	esmAuditLog.esmlog(6, sessionId, clientIp, String.format("[설정/관리자] 관리자 그룹 삭제가 성공하였습니다. (id=%s)", arr));
@@ -245,11 +246,11 @@ public class AdministratorController {
 	* 시스템 설정 > 계정관리 > 관리자 생성/수정 > 관리자 추가/수정(modal)
 	* 관리자정보 추가/수정
 	* 
-	* @ param Map
+	* @ param AdministratorVo
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/setUserInfo")
-    public ResponseEntity<MessageVo> setUserInfo(HttpServletRequest request, @RequestParam Map<String,Object> paramMap) {
+    public ResponseEntity<MessageVo> setUserInfo(HttpServletRequest request, @RequestBody AdministratorVo administratorVo) {
 
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
@@ -257,7 +258,7 @@ public class AdministratorController {
         String sessionId = authentication.getName();
         String clientIp = ClientIpUtil.getClientIP(request);
         
-        paramMap.put("sessionId", sessionId);
+        administratorVo.setSessionId(sessionId);
 		
     	HttpHeaders headers= new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -265,7 +266,7 @@ public class AdministratorController {
         MessageVo message;
         
         try {
-        	Map<String, Object> result = administratorService.setUserInfo(paramMap);
+        	Map<String, Object> result = administratorService.setUserInfo(administratorVo);
         	String audit_msg = (String) result.get("audit_msg");
         	int mode = (Integer) result.get("mode");
         	String msg = "";
@@ -309,11 +310,11 @@ public class AdministratorController {
 	* 시스템 설정 > 계정관리 > 관리자 생성/수정
 	* 관리자정보 권한 수정
 	* 
-	* @ param Map
+	* @ param AdministratorVo
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/setUserGroup")
-    public ResponseEntity<MessageVo> setUserGroup(HttpServletRequest request, @RequestParam Map<String,Object> paramMap) {
+    public ResponseEntity<MessageVo> setUserGroup(HttpServletRequest request, @RequestBody AdministratorVo administratorVo) {
         
     	HttpHeaders headers= new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -321,7 +322,7 @@ public class AdministratorController {
         MessageVo message;
         
         try {
-        	int result = administratorService.setUserGroup(paramMap);
+        	int result = administratorService.setUserGroup(administratorVo);
         	message = MessageVo.builder()
                 	.success("true")
                 	.message("관리자 권한 그룹정보가 수정되었습니다.")
@@ -355,18 +356,19 @@ public class AdministratorController {
 	* 시스템 설정 > 계정관리 > 관리자 그룹
 	* 관리자 권한그룹 조회
 	* 
-	* @ param Map
+	* @ param AdministratorVo
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/getUserGroupInfo")
-    public ResponseEntity<MessageVo> getUserGroupInfo(HttpServletRequest request, @RequestParam Map<String,Object> paramMap) {
+    public ResponseEntity<MessageVo> getUserGroupInfo(HttpServletRequest request) {
 		
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         
         String sessionId = authentication.getName();
         String clientIp = ClientIpUtil.getClientIP(request);
-        String groupId = authentication.getAuthorities().toString().replace("[", "").replace("]", "").replace("ROLE_", "");;
+        String groupId = authentication.getAuthorities().toString().replace("[", "").replace("]", "").replace("ROLE_", "");
+        Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("groupId", groupId);
 
     	HttpHeaders headers= new HttpHeaders();
