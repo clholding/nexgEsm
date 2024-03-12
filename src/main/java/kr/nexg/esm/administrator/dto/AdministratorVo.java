@@ -7,7 +7,6 @@ import lombok.Data;
 
 @Data
 public class AdministratorVo extends CommonVo {
-	private String sessionId;
     private String adminID;			//관리자 ID
     private String adminName;		//관리자 이름
     private String desc;			//설명

@@ -17,11 +17,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import kr.nexg.esm.common.dto.MessageVo;
+import kr.nexg.esm.global.dto.GlobalVo;
 import kr.nexg.esm.global.service.GlobalService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -81,18 +83,19 @@ public class GlobalController {
 	* 메인 > 탑 메뉴 메인 > 초기 대시보드
 	* 관리자 권한정보 조회 (로그인시 또는 F5키 누를시만 호출)
 	* 
-	* @ param Map
+	* @ param 
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/getUserInfoByLogin")
-    public ResponseEntity<MessageVo> getUserInfoByLogin(@RequestParam Map<String,Object> paramMap) {
+    public ResponseEntity<MessageVo> getUserInfoByLogin() {
 		
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         
         String sessionId = authentication.getName();
-        
-        paramMap.put("sessionId", sessionId);
+
+        GlobalVo globalVo = new GlobalVo();
+        globalVo.setSessionId(sessionId);
     	
     	HttpHeaders headers= new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -101,7 +104,7 @@ public class GlobalController {
         
         try {
         	
-        	List<Map<String, Object>> list = globalService.getUserInfoByLogin(paramMap);
+        	List<Map<String, Object>> list = globalService.getUserInfoByLogin(globalVo);
             int totalCount = list.size();
         	
         	message = MessageVo.builder()
@@ -127,18 +130,17 @@ public class GlobalController {
 	* -
 	* 관리자가 관리하는 모드별 전체 장비 개수 및 장애 장비 개수 조회
 	* 
-	* @ param Map
+	* @ param GlobalVo
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/getDeviceStatusByLogin")
-    public ResponseEntity<MessageVo> getDeviceStatusByLogin(@RequestParam Map<String,Object> paramMap) {
+    public ResponseEntity<MessageVo> getDeviceStatusByLogin(@RequestBody GlobalVo globalVo) {
 		
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         
         String sessionId = authentication.getName();
-        
-        paramMap.put("sessionId", sessionId);
+        globalVo.setSessionId(sessionId);
     	
     	HttpHeaders headers= new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -147,7 +149,7 @@ public class GlobalController {
         
         try {
         	
-        	List<Map<String, Object>> list = globalService.getDeviceStatusByLogin(paramMap);
+        	List<Map<String, Object>> list = globalService.getDeviceStatusByLogin(globalVo);
             int totalCount = list.size();
         	
         	message = MessageVo.builder()
@@ -173,18 +175,18 @@ public class GlobalController {
 	* 메인 > 대시보드 >장비현황
 	* 관리자가 관리하는 전체 그룹(하위 그룹 포함)에 속한 장비에 대한 장비 장애 조회
 	* 
-	* @ param Map
+	* @ param GlobalVo
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/getDeviceFaultStatus")
-    public ResponseEntity<MessageVo> getDeviceFaultStatus(@RequestParam Map<String,Object> paramMap) {
+    public ResponseEntity<MessageVo> getDeviceFaultStatus(@RequestBody GlobalVo globalVo) {
 		
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         
         String sessionId = authentication.getName();
         
-        paramMap.put("sessionId", sessionId);
+        globalVo.setSessionId(sessionId);
 		
     	HttpHeaders headers= new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -193,7 +195,7 @@ public class GlobalController {
         
         try {
         	
-        	List<Map<String, Object>> list = globalService.getDeviceFaultStatus(paramMap);
+        	List<Map<String, Object>> list = globalService.getDeviceFaultStatus(globalVo);
             int totalCount = list.size();
         	
         	message = MessageVo.builder()
@@ -219,18 +221,18 @@ public class GlobalController {
 	* -
 	* 관리자가 관리하는 장비 그룹 리스트를 조회
 	* 
-	* @ param Map
+	* @ param GlobalVo
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/getAllDeviceFaultStatus")
-    public ResponseEntity<MessageVo> getAllDeviceFaultStatus(@RequestParam Map<String,Object> paramMap) {
+    public ResponseEntity<MessageVo> getAllDeviceFaultStatus(@RequestBody GlobalVo globalVo) {
 		
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         
         String sessionId = authentication.getName();
         
-        paramMap.put("sessionId", sessionId);
+        globalVo.setSessionId(sessionId);
 		
     	HttpHeaders headers= new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -239,7 +241,7 @@ public class GlobalController {
         
         try {
         	
-        	List<Map<String, Object>> list = globalService.getAllDeviceFaultStatus(paramMap);
+        	List<Map<String, Object>> list = globalService.getAllDeviceFaultStatus(globalVo);
             int totalCount = 1;
         	
         	message = MessageVo.builder()
@@ -265,18 +267,18 @@ public class GlobalController {
 	* -
 	* 실시간 알람 메세지 체크
 	* 
-	* @ param Map
+	* @ param GlobalVo
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/getAlarmMsg")
-    public ResponseEntity<MessageVo> getAlarmMsg(@RequestParam Map<String,Object> paramMap) {
+    public ResponseEntity<MessageVo> getAlarmMsg(@RequestBody GlobalVo globalVo) {
 		
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         
         String sessionId = authentication.getName();
         
-        paramMap.put("sessionId", sessionId);
+        globalVo.setSessionId(sessionId);
 		
     	HttpHeaders headers= new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -285,7 +287,7 @@ public class GlobalController {
         
         try {
         	
-        	Map<String, Object> map = globalService.getAlarmMsg(paramMap);
+        	Map<String, Object> map = globalService.getAlarmMsg(globalVo);
         	List<Map<String, Object>> list = (List<Map<String, Object>>) map.get("result");
         	String userStatus = (String) map.get("userStatus");
             int totalCount = (int) map.get("totalCount");
@@ -313,11 +315,11 @@ public class GlobalController {
 	* -
 	* -
 	* 
-	* @ param Map
+	* @ param 
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/getApplyStatus")
-    public ResponseEntity<MessageVo> getApplyStatus(@RequestParam Map<String,Object> paramMap) {
+    public ResponseEntity<MessageVo> getApplyStatus() {
 		
     	HttpHeaders headers= new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -326,7 +328,7 @@ public class GlobalController {
         
         try {
         	
-        	List<Map<String, Object>> list = globalService.getApplyStatus(paramMap);
+        	List<Map<String, Object>> list = globalService.getApplyStatus();
         	int totalCount = list.size();
         	
         	message = MessageVo.builder()
@@ -351,11 +353,11 @@ public class GlobalController {
 	/**
 	* 세션의 남은 유효 시간
 	* 
-	* @ param Map
+	* @ param 
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/remaintimeCheck")
-    public ResponseEntity<MessageVo> remaintimeCheck(@RequestParam Map<String,Object> paramMap, HttpSession session) {
+    public ResponseEntity<MessageVo> remaintimeCheck(HttpSession session) {
 		
 		long remainTime = 0;
         if (session != null) {

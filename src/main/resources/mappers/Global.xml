@@ -22,6 +22,11 @@
 		CALL sesm.getDeviceFaultStatus( #{sessionId}, #{deviceIds} ,#{mode} );
 	</select>
 	
+	<select id="getAllDeviceFaultStatus" parameterType="String" resultType="map">
+		/* GlobalMapper.getAllDeviceFaultStatus */	
+		CALL sesm.getAllDeviceFaultStatus( #{sessionId}, #{deviceIds} );
+	</select>
+	
 	<select id="selectUserStatus" parameterType="String" resultType="String">
 		/* GlobalMapper.selectUserStatus */	
 		SELECT status FROM user where login = #{sessionId}

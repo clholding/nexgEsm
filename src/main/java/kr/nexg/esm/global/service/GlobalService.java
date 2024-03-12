@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.nexg.esm.administrator.dto.AdministratorEnum;
 import kr.nexg.esm.common.util.EnumUtil;
+import kr.nexg.esm.global.dto.GlobalVo;
 import kr.nexg.esm.global.mapper.GlobalMapper;
 import kr.nexg.esm.nexgesm.mariadb.Log;
 import kr.nexg.esm.util.config;
@@ -50,9 +51,9 @@ public class GlobalService {
 		return result;
 	}
 	
-	public List<Map<String, Object>> getUserInfoByLogin(Map<String, Object> paramMap) throws Exception{
+	public List<Map<String, Object>> getUserInfoByLogin(GlobalVo globalVo) throws Exception{
 		
-		String sessionId = (String) paramMap.get("sessionId");
+		String sessionId = globalVo.getSessionId();
 		
 		List<Map<String, Object>> list = globalMapper.getUserInfoByLogin(sessionId);
 		List<Map<String, Object>> result = new ArrayList<>();
@@ -116,10 +117,10 @@ public class GlobalService {
 		return result;
 	}
 	
-	public List<Map<String, Object>> getDeviceStatusByLogin(Map<String, Object> paramMap) throws Exception{
+	public List<Map<String, Object>> getDeviceStatusByLogin(GlobalVo globalVo) throws Exception{
 		
-		String sessionId = (String) paramMap.get("sessionId");
-		String rs_mode = (String) paramMap.get("mode");
+		String sessionId = globalVo.getSessionId();
+		String rs_mode = globalVo.getMode();
 		int mode = mode_convert.convert_modedata(rs_mode);
 		
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -141,15 +142,13 @@ public class GlobalService {
 		return result;
 	}
 	
-	public List<Map<String, Object>> getDeviceFaultStatus(Map<String, Object> paramMap) throws Exception{
+	public List<Map<String, Object>> getDeviceFaultStatus(GlobalVo globalVo) throws Exception{
 		
-		String sessionId = (String) paramMap.get("sessionId");
-		String rs_mode = (String) paramMap.get("mode");
+		String sessionId = globalVo.getSessionId();
+		String rs_mode = globalVo.getMode();
 		int mode = mode_convert.convert_modedata(rs_mode);
-		String datas = (String) paramMap.get("datas");
 		
-		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
-		List<String> rs_deviceIDs = (List<String>) config.setValue(rsDatas, "deviceIDs", new ArrayList<>());
+		List<String> rs_deviceIDs = globalVo.getDeviceIDs();
 		String deviceIds = String.join(",", rs_deviceIDs);
 		
 		List<Map<String, Object>> list = globalMapper.getDeviceFaultStatus(sessionId, deviceIds ,Integer.toString(mode));
@@ -173,14 +172,12 @@ public class GlobalService {
 		return result;
 	}
 	
-	public List<Map<String, Object>> getAllDeviceFaultStatus(Map<String, Object> paramMap) throws Exception{
+	public List<Map<String, Object>> getAllDeviceFaultStatus(GlobalVo globalVo) throws Exception{
 		
-		String sessionId = (String) paramMap.get("sessionId");
-		String datas = (String) paramMap.get("datas");
+		String sessionId = globalVo.getSessionId();
 		
 		//rs_deviceIDs = "0" 을 넘기면 현재 로그인한 계정에 대한 전체 장애장비 조회가 가능하다.
-		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
-		List<String> rs_deviceIDs = (List<String>) config.setValue(rsDatas, "deviceIDs", new ArrayList<>());
+		List<String> rs_deviceIDs = globalVo.getDeviceIDs();
 		String deviceIds = String.join(",", rs_deviceIDs);
 		
 		List<Map<String, Object>> list = globalMapper.getAllDeviceFaultStatus(sessionId, deviceIds);
@@ -246,10 +243,10 @@ public class GlobalService {
 		return result;
 	}
 	
-	public Map<String, Object> getAlarmMsg(Map<String, Object> paramMap) throws Exception{
+	public Map<String, Object> getAlarmMsg(GlobalVo globalVo) throws Exception{
 		
-		String sessionId = (String) paramMap.get("sessionId");
-		String rs_mode = (String) paramMap.get("mode");
+		String sessionId = globalVo.getSessionId();
+		String rs_mode = globalVo.getMode();
 		int mode = mode_convert.convert_modedata(rs_mode);
 		
         List<Map<String, Object>> list = new ArrayList<Map<String,Object>>();
@@ -286,7 +283,7 @@ public class GlobalService {
 		return resultMap;
 	}
 	
-	public List<Map<String, Object>> getApplyStatus(Map<String, Object> paramMap) throws Exception{
+	public List<Map<String, Object>> getApplyStatus() throws Exception{
 		
 		String val = globalMapper.getApplyStatus();
 		

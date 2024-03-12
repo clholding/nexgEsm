@@ -64,5 +64,8 @@ public class CommonVo {
     
     /** 검색키워드 */
     private String search = "";
+    
+    /** 세션ID */
+    private String sessionId;
 
 }

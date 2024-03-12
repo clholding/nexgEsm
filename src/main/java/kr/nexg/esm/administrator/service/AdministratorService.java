@@ -41,15 +41,11 @@ public class AdministratorService {
 	@Autowired
 	User.UserGroup userGroup;
 	
-	public List<Map<String, Object>> getUserInfo(Map<String, String> paramMap) throws Exception {
+	public List<Map<String, Object>> getUserInfo(AdministratorVo administratorVo) throws Exception {
 		
-		String datas = paramMap.get("datas");
-		
-		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
-		String rs_adminID = (String)config.setValue(rsDatas, "adminID", "1");
-		
-		AdministratorVo administratorVo = new AdministratorVo();
-		administratorVo.setAdminID(rs_adminID);
+		if(administratorVo.getAdminID().isBlank()) {
+			administratorVo.setAdminID("1");
+		}
 		
 		List<Map<String, Object>> list = administratorMapper.getUserInfo(administratorVo);
 		
@@ -91,22 +87,7 @@ public class AdministratorService {
 		return result;
 	}
 	
-	public List<Map<String, Object>> getUser(Map<String, Object> paramMap) throws Exception{
-		
-		
-		String sessionId = (String) paramMap.get("sessionId");
-		String limit = (String) paramMap.get("limit");
-		String page = (String) paramMap.get("page");
-		String datas = (String) paramMap.get("datas");
-		
-		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
-		String rs_search = (String)config.setValue(rsDatas, "search", "");
-		
-		AdministratorVo administratorVo = new AdministratorVo();
-		administratorVo.setSessionId(sessionId);
-		administratorVo.setSearch(rs_search);
-		administratorVo.setLimit(Integer.parseInt(limit));
-		administratorVo.setPage(Integer.parseInt(page));
+	public List<Map<String, Object>> getUser(AdministratorVo administratorVo) throws Exception{
 		
 		List<Map<String, Object>> list = administratorMapper.getUser(administratorVo);
 		List<Map<String, Object>> result = new ArrayList<>();
@@ -167,16 +148,10 @@ public class AdministratorService {
 		return result;
 	}
 	
-	public List<String> delUser(Map<String, Object> paramMap) throws Exception{
+	public List<String> delUser(AdministratorVo administratorVo) throws Exception{
 		
-		String datas = (String) paramMap.get("datas");
+		List<String> rs_adminIDs = administratorVo.getAdminIDs();
 		
-		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
-		List<String> rs_adminIDs = (List<String>)config.setValue(rsDatas, "adminIDs", new ArrayList<>());
-		
-//		List<String> rs_adminID_list = rs_adminIDs.stream()
-//                .map(Object::toString)
-//                .collect(Collectors.toList());
 		
 		List<String> admin_names = new ArrayList<>();
 		if(rs_adminIDs.size() > 0) {
@@ -192,24 +167,14 @@ public class AdministratorService {
 		return admin_names;
 	}
 	
-	public List<Map<String, Object>> selectUserGroup(Map<String, Object> paramMap) throws Exception {
-		
-		String datas = (String) paramMap.get("datas");
-		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
-		List<String> rs_adminGroupIDs = (List<String>)config.setValue(rsDatas, "adminGroupIDs", new ArrayList<>());
-		
-		AdministratorVo administratorVo = new AdministratorVo();
-		administratorVo.setAdminGroupIDs(rs_adminGroupIDs);
+	public List<Map<String, Object>> selectUserGroup(AdministratorVo administratorVo) throws Exception {
 		
 		return administratorMapper.selectUserGroup(administratorVo);
 	}
 	
-	public List<String> delUserGroup(Map<String, Object> paramMap) throws Exception {
+	public List<String> delUserGroup(AdministratorVo administratorVo) throws Exception {
 		
-		String datas = (String) paramMap.get("datas");
-		
-		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
-		List<String> rs_adminGroupIDs = (List<String>)config.setValue(rsDatas, "adminGroupIDs", new ArrayList<>());
+		List<String> rs_adminGroupIDs = administratorVo.getAdminGroupIDs();
 		
 		List<String> user_group_names = new ArrayList<>();
 		if(rs_adminGroupIDs.size() > 0) {
@@ -225,45 +190,41 @@ public class AdministratorService {
 		return user_group_names;
 	}
 	
-	public Map<String, Object> setUserInfo(Map<String, Object> paramMap) throws Exception {
+	public Map<String, Object> setUserInfo(AdministratorVo administratorVo) throws Exception {
 		
 		int mode = AdministratorEnum.mode.valueOf("MODE_ADD").getVal();
-		String sessionId = (String) paramMap.get("sessionId");
-		String datas = (String) paramMap.get("datas");
+		String sessionId = administratorVo.getSessionId();
 		
 		Map<String, Object> resultMap = new HashMap<>();
 		
-		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
-		String rs_adminID = (String) config.setValue(rsDatas, "adminID", "null");
-		String rs_adminName = (String) config.setValue(rsDatas, "adminName", "");
-		String rs_desc = (String) config.setValue(rsDatas, "desc", "");
-		String rs_adminGroupID = (String) config.setValue(rsDatas, "adminGroupID", "");
-		List<String> rs_deviceGroupIDs = (List<String>) config.setValue(rsDatas, "deviceGroupIDs", new ArrayList<>());
-		String rs_defMode = (String) config.setValue(rsDatas, "defMode", "");
-		String rs_sessionTime = (String) config.setValue(rsDatas, "sessionTimeout", "");
-		String rs_alarm = (String) config.setValue(rsDatas, "alarm", "");
-		String rs_popupTime = (String) config.setValue(rsDatas, "popupTime", "7");
-		String rs_login = (String) config.setValue(rsDatas, "login", "");
-		String rs_pwd = (String) config.setValue(rsDatas, "pwd", "");
-		String rs_newPwd = (String) config.setValue(rsDatas, "newPwd", "");
-		String rs_active = (String) config.setValue(rsDatas, "active", "");
-		String rs_allow_ip1 = (String) config.setValue(rsDatas, "allow_ip1", "");
-		String rs_allow_ip2 = (String) config.setValue(rsDatas, "allow_ip2", "");
-		String rs_device_state = (String) config.setValue(rsDatas, "device_state", "");
-		String rs_recent_fail_device = (String) config.setValue(rsDatas, "recent_fail_device", "");
-		String rs_resource_top5 = (String) config.setValue(rsDatas, "resource_top5", "");
-		String rs_week_log_stats = (String) config.setValue(rsDatas, "week_log_stats", "");
-		String rs_week_fail_state = (String) config.setValue(rsDatas, "week_fail_state", "");
-		String rs_device_sort = (String) config.setValue(rsDatas, "device_sort", "0");
-		String rs_device_order = (String) config.setValue(rsDatas, "device_order", "0");
-		String rs_email = (String) config.setValue(rsDatas, "adminEmail", "");
-		String rs_expire_date = (String) config.setValue(rsDatas, "adminExpireDate", "");
-		String rs_lifetime = (String) config.setValue(rsDatas, "adminLifetime", "365");
-		String rs_password_expire_cycle = (String) config.setValue(rsDatas, "passwordExpireCycle", "90");
-		String rs_device_id = (String) config.setValue(rsDatas, "monitorDeviceID", "0");
-		String rs_pwdInit = (String) config.setValue(rsDatas, "pwdInit", "0");
-		
-		AdministratorVo administratorVo = new AdministratorVo();
+		String rs_adminID = !administratorVo.getAdminID().isBlank() ? administratorVo.getAdminID() : "null";
+		String rs_adminName = administratorVo.getAdminName();
+		String rs_desc = administratorVo.getDesc();
+		String rs_adminGroupID = administratorVo.getAdminGroupID();
+		List<String> rs_deviceGroupIDs = administratorVo.getDeviceGroupIDs();
+		String rs_defMode = administratorVo.getDefMode();
+		String rs_sessionTime = administratorVo.getSessionTimeout();
+		String rs_alarm = administratorVo.getAlarm();
+		String rs_popupTime = !administratorVo.getPopupTime().isBlank() ? administratorVo.getPopupTime() : "7";
+		String rs_login = administratorVo.getLogin();
+		String rs_pwd = administratorVo.getPwd();
+		String rs_newPwd = administratorVo.getNewPwd();
+		String rs_active = administratorVo.getActive();
+		String rs_allow_ip1 = administratorVo.getAllow_ip1();
+		String rs_allow_ip2 = administratorVo.getAllow_ip2();
+		String rs_device_state = administratorVo.getDevice_state();
+		String rs_recent_fail_device = administratorVo.getRecent_fail_device();
+		String rs_resource_top5 = administratorVo.getResource_top5();
+		String rs_week_log_stats = administratorVo.getWeek_log_stats();
+		String rs_week_fail_state = administratorVo.getWeek_fail_state();
+		String rs_device_sort = !administratorVo.getDevice_sort().isBlank() ? administratorVo.getDevice_sort() : "0";
+		String rs_device_order = !administratorVo.getDevice_order().isBlank() ? administratorVo.getDevice_order() : "0";
+		String rs_email = administratorVo.getAdminEmail();
+		String rs_expire_date = administratorVo.getAdminExpireDate();
+		String rs_lifetime = !administratorVo.getAdminLifetime().isBlank() ? administratorVo.getAdminLifetime() : "365";
+		String rs_password_expire_cycle = !administratorVo.getPasswordExpireCycle().isBlank() ? administratorVo.getPasswordExpireCycle() : "90";
+		String rs_device_id = !administratorVo.getMonitorDeviceID().isBlank() ? administratorVo.getMonitorDeviceID() : "0";
+		String rs_pwdInit = !administratorVo.getPwdInit().isBlank() ? administratorVo.getPwdInit() : "0";
 		
 		Validation.userAdd_adminName(rs_adminName);
 		
@@ -428,14 +389,11 @@ public class AdministratorService {
 		
 	}
 	
-	public int setUserGroup(Map<String, Object> paramMap) throws Exception {
+	public int setUserGroup(AdministratorVo administratorVo) throws Exception {
 		
-		String datas = (String) paramMap.get("datas");
-		
-		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
-		List<String> rs_adminIDs = (List<String>)config.setValue(rsDatas, "adminIDs", new ArrayList<>());
+		List<String> rs_adminIDs = administratorVo.getAdminIDs();
 		String rs_adminIDs_str = String.join(",", rs_adminIDs);
-		String rs_adminGroupID = (String) config.setValue(rsDatas, "adminGroupID", "");
+		String rs_adminGroupID = administratorVo.getAdminGroupID();
 		
 		int result = 0;
 		if(rs_adminIDs.size() > 0 && !rs_adminGroupID.isBlank()) {
