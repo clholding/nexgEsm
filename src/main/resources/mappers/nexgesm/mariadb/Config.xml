@@ -7,5 +7,29 @@
 		UPDATE config SET val = #{val}  WHERE attr='is_apply'
 	</update>
 	
+	<select id="get_configbackup_count" resultType="int">
+		/* ConfigMapper.get_configbackup_count */	
+		SELECT count(id) FROM configbackup
+	</select>
+	
+	<select id="get_configbackup_list" parameterType="int" resultType="map">
+		/* ConfigMapper.get_configbackup_list */	
+		SELECT id, user as admin, type, device, sdate as time
+          FROM configbackup 
+         ORDER BY id DESC LIMIT #{skip}, #{limit}
+	</select>
+	
+	<select id="get_systemconfigbackup_count" resultType="int">
+		/* ConfigMapper.get_systemconfigbackup_count */	
+		SELECT count(id) FROM systemconfigbackup
+	</select>
+	
+	<select id="get_systemconfigbackup_list" parameterType="int" resultType="map">
+		/* ConfigMapper.get_systemconfigbackup_list */	
+		SELECT id, user as admin, type, sdate as time
+          FROM systemconfigbackup 
+         ORDER BY id DESC LIMIT #{skip}, #{limit}
+	</select>
+	
 
 </mapper>

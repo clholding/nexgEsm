@@ -19,6 +19,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,7 +27,9 @@ import org.springframework.web.bind.annotation.RestController;
 import kr.nexg.esm.common.StatusEnum;
 import kr.nexg.esm.common.dto.MessageVo;
 import kr.nexg.esm.common.util.ClientIpUtil;
+import kr.nexg.esm.devices.dto.DevicesVo;
 import kr.nexg.esm.devices.service.DevicesService;
+import kr.nexg.esm.nexgesm.command.Device;
 import kr.nexg.esm.nexgesm.mariadb.Log;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,6 +44,9 @@ public class DevicesController {
 	
 	@Autowired
 	Log.EsmAuditLog esmAuditLog;
+	
+	@Autowired
+	Device device;
 	
 //    @PostMapping("/addPrivateNetwork")
 //    public ResponseEntity<MessageVo> addPrivateNetwork() throws IOException  {
@@ -100,6 +106,9 @@ public class DevicesController {
                 	.totalCount(totalCount)
                 	.entitys("")
                 	.build();
+        	
+        	device.apply_device(sessionId, clientIp);
+        	
 		} catch (Exception e) {
 			log.error("Error : ", e);
 			message = MessageVo.builder()
@@ -150,14 +159,14 @@ public class DevicesController {
 	 * DeviceFinder > 개별정보 > 정보 > 기본정보 > 관리번호 중복체크
 	 */
     @PostMapping("/checkManagedCode")
-    public ResponseEntity<MessageVo> checkManagedCode(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
+    public ResponseEntity<MessageVo> checkManagedCode(@RequestBody DevicesVo devicesVo) throws IOException, ParseException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
         MessageVo message;
         
-        Map<String, Object> result = devicesService.checkManagedCode(paramMap);
+        Map<String, Object> result = devicesService.checkManagedCode(devicesVo);
         
         try {
         	
@@ -236,7 +245,7 @@ public class DevicesController {
      * 장비관리 > 장비 추가 > 대상장비 선택
      */
     @PostMapping("/deviceAll")
-    public ResponseEntity<MessageVo> deviceAll(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
+    public ResponseEntity<MessageVo> deviceAll(@RequestBody DevicesVo devicesVo) throws IOException, ParseException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -245,7 +254,7 @@ public class DevicesController {
         
         try {
         	
-        	List<Map<String, Object>> list = devicesService.deviceAll(paramMap);
+        	List<Map<String, Object>> list = devicesService.deviceAll(devicesVo);
             int totalCount = list.size();
         	
         	message = MessageVo.builder()
@@ -272,7 +281,7 @@ public class DevicesController {
      * 장비관리 > 장비추가리스트
      */
     @PostMapping("/deviceCandidate")
-    public ResponseEntity<MessageVo> deviceCandidate(@RequestParam Map<String,String> paramMap) throws IOException  {
+    public ResponseEntity<MessageVo> deviceCandidate(@RequestBody DevicesVo devicesVo) throws IOException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -281,7 +290,7 @@ public class DevicesController {
         
         try {
         	
-        	List<Map<String, Object>> list = devicesService.deviceCandidate(paramMap);
+        	List<Map<String, Object>> list = devicesService.deviceCandidate(devicesVo);
             int totalCount = list.size();
         	
         	message = MessageVo.builder()
@@ -308,7 +317,7 @@ public class DevicesController {
      * 메인 화면 > 탑메뉴 > 시스템 설정 > 알람 > 장비/그릅 임계치 설정
      */
     @PostMapping("/getAlarmDeviceGroupListNDeviceListAll")
-    public ResponseEntity<MessageVo> getAlarmDeviceGroupListNDeviceListAll(@RequestParam Map<String,String> paramMap) throws IOException  {
+    public ResponseEntity<MessageVo> getAlarmDeviceGroupListNDeviceListAll(@RequestBody DevicesVo devicesVo) throws IOException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -317,7 +326,7 @@ public class DevicesController {
         
         try {
         	
-        	List<Map<String, Object>> list = devicesService.getAlarmDeviceGroupListNDeviceListAll(paramMap);
+        	List<Map<String, Object>> list = devicesService.getAlarmDeviceGroupListNDeviceListAll(devicesVo);
             int totalCount = list.size();
         	
         	message = MessageVo.builder()
@@ -381,7 +390,6 @@ public class DevicesController {
 //    	HttpHeaders headers= new HttpHeaders();
 //    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
 //
-//    	log.info("devicesVo : "+paramMap.get("datas"));
 //    	
 //        MessageVo message;
 //        
@@ -414,18 +422,16 @@ public class DevicesController {
 	 * DeviceFinder > 개별정보 > 정보 > 장애내역
 	 */    
     @PostMapping("/getDeviceFailList")
-    public ResponseEntity<MessageVo> getDeviceFailList(@RequestParam Map<String,String> paramMap) throws IOException  {
+    public ResponseEntity<MessageVo> getDeviceFailList(@RequestBody DevicesVo devicesVo) throws IOException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
-    	
-    	log.info("devicesVo : "+paramMap.get("datas"));
     	
         MessageVo message;
         
         try {
         	
-        	List<Map<String, Object>> list = devicesService.getDeviceFailList(paramMap);
+        	List<Map<String, Object>> list = devicesService.getDeviceFailList(devicesVo);
             int totalCount = list.size();
         	
         	message = MessageVo.builder()
@@ -438,7 +444,7 @@ public class DevicesController {
 			log.error("Error : ", e);
 			message = MessageVo.builder()
 	            	.success("false")
-	            	.message("")
+	            	.message("장애내역 조회중 오류가 발생하였습니다.")
 	            	.errMsg(e.getMessage())
 	            	.errTitle("")
 	            	.build();
@@ -452,18 +458,16 @@ public class DevicesController {
      * DeviceFinder > 그룹정보 > 정보 > 기본정보
      */
     @PostMapping("/getDeviceGroupInfo")
-    public ResponseEntity<MessageVo> getDeviceGroupInfo(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
+    public ResponseEntity<MessageVo> getDeviceGroupInfo(@RequestBody DevicesVo devicesVo) throws IOException, ParseException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
-    	
-    	log.info("devicesVo : "+paramMap.get("datas"));
     	
         MessageVo message;
         
         try {
         	
-        	Map<String, Object> result = devicesService.getDeviceGroupInfo(paramMap);
+        	Map<String, Object> result = devicesService.getDeviceGroupInfo(devicesVo);
             int totalCount = 0;
         	
         	message = MessageVo.builder()
@@ -528,18 +532,17 @@ public class DevicesController {
      * 메인 > SideBar > 토플로지 > 타사 장비 추가 > 기본정보 
      */
     @PostMapping("/getDeviceInfo")
-    public ResponseEntity<MessageVo> getDeviceInfo(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
+    public ResponseEntity<MessageVo> getDeviceInfo(@RequestBody DevicesVo devicesVo) throws IOException, ParseException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
-    	log.info("devicesVo : "+paramMap.get("datas"));
     	
         MessageVo message;
         
         try {
         	
-        	Map<String, Object> result = devicesService.getDeviceInfo(paramMap);
+        	Map<String, Object> result = devicesService.getDeviceInfo(devicesVo);
             int totalCount = 0;
         	
         	message = MessageVo.builder()
@@ -564,7 +567,7 @@ public class DevicesController {
     
 
     @PostMapping("/getDeviceInfoList")
-    public ResponseEntity<MessageVo> getDeviceInfoList(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
+    public ResponseEntity<MessageVo> getDeviceInfoList(@RequestBody DevicesVo devicesVo) throws IOException, ParseException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -573,7 +576,7 @@ public class DevicesController {
         
         try {
         	
-        	List<Map<String, Object>> list = devicesService.getDeviceInfoList(paramMap);
+        	List<Map<String, Object>> list = devicesService.getDeviceInfoList(devicesVo);
             int totalCount = list.size();
         	
         	message = MessageVo.builder()
@@ -600,7 +603,7 @@ public class DevicesController {
      * DeviceFinder > 개별정보 > 정보 > 인터페이스
      */
     @PostMapping("/getDeviceInterface")
-    public ResponseEntity<MessageVo> getDeviceInterface(@RequestParam Map<String,String> paramMap) throws IOException  {
+    public ResponseEntity<MessageVo> getDeviceInterface(@RequestBody DevicesVo devicesVo) throws IOException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -609,7 +612,7 @@ public class DevicesController {
         
         try {
         	
-        	List<Map<String, Object>> list = devicesService.getDeviceInterface(paramMap);
+        	List<Map<String, Object>> list = devicesService.getDeviceInterface(devicesVo);
             int totalCount = list.size();
         	
         	message = MessageVo.builder()
@@ -685,7 +688,7 @@ public class DevicesController {
      * DeviceFinder > 개별정보 > 장비미리보기
      */    
     @PostMapping("/getDeviceStatus")
-    public ResponseEntity<MessageVo> getDeviceStatus(@RequestParam Map<String,String> paramMap) throws IOException  {
+    public ResponseEntity<MessageVo> getDeviceStatus(@RequestBody DevicesVo devicesVo) throws IOException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -694,7 +697,7 @@ public class DevicesController {
         
         try {
         	
-        	List<Map<String, Object>> list = devicesService.getDeviceStatus(paramMap);
+        	List<Map<String, Object>> list = devicesService.getDeviceStatus(devicesVo);
             int totalCount = list.size();
         	
         	message = MessageVo.builder()
@@ -771,18 +774,16 @@ public class DevicesController {
      * 장비관리 > 장비 추가 > 제품명
      */
     @PostMapping("/getProductList")
-    public ResponseEntity<MessageVo> getProductList(@RequestParam Map<String,String> paramMap) throws IOException, ParseException  {
+    public ResponseEntity<MessageVo> getProductList(@RequestBody DevicesVo devicesVo) throws IOException, ParseException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
-    	
-    	log.info("devicesVo : "+paramMap.get("datas"));
     	
         MessageVo message;
         
         try {
         	
-        	List<Map<String, Object>> list = devicesService.getProductList(paramMap);
+        	List<Map<String, Object>> list = devicesService.getProductList(devicesVo);
             int totalCount = list.size();
         	
         	message = MessageVo.builder()
@@ -841,18 +842,16 @@ public class DevicesController {
 	 * 메인화면 > SideBar > 자산이력
 	 */
     @PostMapping("/searchDeviceInfoList")
-    public ResponseEntity<MessageVo> searchDeviceInfoList(@RequestParam Map<String,String> paramMap) throws IOException  {
+    public ResponseEntity<MessageVo> searchDeviceInfoList(@RequestBody DevicesVo devicesVo) throws IOException  {
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
-    	
-    	log.info("devicesVo : "+paramMap.get("datas"));
     	
         MessageVo message;
         
         try {
         	
-        	List<Map<String, Object>> list = devicesService.searchDeviceInfoList(paramMap);
+        	List<Map<String, Object>> list = devicesService.searchDeviceInfoList(devicesVo);
             int totalCount = list.size();
         	
         	message = MessageVo.builder()
@@ -895,7 +894,7 @@ public class DevicesController {
      * DeviceFinder > 그룹정보 > 정보 > 기본정보 > 저장
      */
     @PostMapping("/setDeviceGroupInfo")
-    public ResponseEntity<MessageVo> setDeviceGroupInfo(HttpServletRequest request, @RequestParam Map<String,String> paramMap) throws IOException  {
+    public ResponseEntity<MessageVo> setDeviceGroupInfo(HttpServletRequest request, @RequestBody DevicesVo devicesVo) throws IOException  {
     	
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
@@ -910,9 +909,10 @@ public class DevicesController {
         
         try {
         	
-        	Map<String, Object> result = devicesService.setDeviceGroupInfo(paramMap);
+        	Map<String, Object> result = devicesService.setDeviceGroupInfo(devicesVo);
         	
         	String eMsg = (String) result.get("eMsg");
+        	String success = (String) result.get("success");
         	
             int totalCount = 0;
         	
@@ -922,9 +922,13 @@ public class DevicesController {
                 	.totalCount(totalCount)
                 	.entitys("")
                 	.build();
-        	
-			esmAuditLog.esmlog(6, sessionId, clientIp, eMsg);
 			
+        	if("success".equals(success)) {
+        		esmAuditLog.esmlog(6, sessionId, clientIp, eMsg);
+        	}else {
+        		esmAuditLog.esmlog(4, sessionId, clientIp, eMsg);
+        	}
+        	
 		} catch (Exception e) {
 			log.error("Error : ", e);
 			message = MessageVo.builder()
@@ -934,6 +938,7 @@ public class DevicesController {
 	            	.errTitle("")
 	            	.build();
 			
+			esmAuditLog.esmlog(4, sessionId, clientIp, "A failure has occurred.");
 		} 
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -944,7 +949,7 @@ public class DevicesController {
      * DeviceFinder -> 개별정보 -> 정보 -> 기본정보 -> 저장
      */
     @PostMapping("/setDeviceInfo")
-    public ResponseEntity<MessageVo> setDeviceInfo(HttpServletRequest request, @RequestParam Map<String,String> paramMap) throws IOException  {
+    public ResponseEntity<MessageVo> setDeviceInfo(HttpServletRequest request, @RequestBody DevicesVo devicesVo) throws IOException  {
     	
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
@@ -959,20 +964,25 @@ public class DevicesController {
         
         try {
         	
-        	Map<String, Object> result = devicesService.setDeviceInfo(paramMap);
+        	Map<String, Object> result = devicesService.setDeviceInfo(devicesVo);
         	
         	String eMsg = (String) result.get("eMsg");
+        	String success = (String) result.get("success");
         	
             int totalCount = 0;
         	
         	message = MessageVo.builder()
-                	.success("true")
+                	.success(success)
                 	.message(String.valueOf(result.get("message")))
                 	.totalCount(totalCount)
                 	.entitys("")
                 	.build();
         	
-        	esmAuditLog.esmlog(6, sessionId, clientIp, eMsg);
+        	if("success".equals(success)) {
+        		esmAuditLog.esmlog(6, sessionId, clientIp, eMsg);
+        	}else {
+        		esmAuditLog.esmlog(4, sessionId, clientIp, eMsg);
+        	}
         	
 		} catch (Exception e) {
 			log.error("Error : ", e);
@@ -983,8 +993,7 @@ public class DevicesController {
 	            	.errTitle("")
 	            	.build();
 			
-//			setAuditInfo("setDeviceGroupInfo", results["success"])
-//			esmAuditLog.esmlog(4, sessionId, clientIp, "장비/그룹정보");
+			esmAuditLog.esmlog(4, sessionId, clientIp, "A failure has occurred.");
 		} 
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
@@ -1032,7 +1041,6 @@ public class DevicesController {
 //    	HttpHeaders headers= new HttpHeaders();
 //    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
 //    	
-//    	log.info("devicesVo : "+paramMap.get("datas"));
 //    	
 //        MessageVo message;
 //        

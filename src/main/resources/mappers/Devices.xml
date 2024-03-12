@@ -11,7 +11,7 @@
 		CALL sesm.getDeviceListByLogin( #{sessionId}, '2', #{mode} );
 	</select>
 	
-	<select id="deviceCandidate" resultType="map">
+	<select id="deviceCandidate" parameterType="int" resultType="map">
 		/* DevicesMapper.deviceCandidate */	
 		CALL sesm.getCandidateList( #{mode} );
 	</select>
@@ -38,7 +38,7 @@
 	
 	<select id="getDeviceInfoList" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.getDeviceInfoList */	
-		CALL sesm.getDeviceInfoList( #{deviceIDs} );
+	 	CALL sesm.getDeviceInfoList( #{deviceID} );	 
 	</select>
 	
 	<select id="getDeviceGroupInfo" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
@@ -53,12 +53,12 @@
 	
 	<select id="getDeviceInterface" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.getDeviceInterface */	
-		Call sesm.getDeviceInterface( #{id}, #{isActive} );
+		Call sesm.getDeviceInterface( #{deviceID}, #{isActive} );
 	</select>
 	
 	<select id="getDeviceStatus" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.getDeviceStatus */	
-		CALL sesm.getDeviceStatus( #{deviceIDs} );
+	 	CALL sesm.getDeviceStatus( #{deviceID} );	 
 	</select>
 	
 	<select id="getProductList" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
@@ -83,7 +83,7 @@
 	
 	<select id="searchDeviceInfoList" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.searchDeviceInfoList */	
-		Call sesm.searchDeviceInfoList( #{deviceIDs}, #{productId}, #{dname}, #{gname}, #{ip}, #{serial}, #{os}, #{agent}, #{desc}, #{company}, 
+		Call sesm.searchDeviceInfoList( #{deviceID}, #{productId}, #{dname}, #{gname}, #{ip}, #{serial}, #{os}, #{agent}, #{desc}, #{company}, 
 		#{phone1}, #{fax}, #{zip}, #{address}, #{customer}, #{phone2}, #{email}, #{page}, #{viewCount} );
 	</select>
 	
@@ -100,8 +100,15 @@
 		<if test="name neq '' and name != null">		 
 		   AND name = #{name}
 		</if>
-		<if test="id neq '' and id != null">		   
-		   AND id = #{id}
+	</select>
+	
+	<select id="deviceGroupCnt2" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="int">
+		/* DevicesMapper.deviceGroupCnt */	
+		SELECT count(1) cnt 
+		  FROM device_group 
+		 WHERE 1 = 1
+		<if test="pGroupID neq '' and pGroupID != null">		   
+		   AND id = #{pGroupID}
 		</if>		   
 	</select>
 	
@@ -123,8 +130,8 @@
 		SELECT name
 		  FROM device 
 		 WHERE 1 = 1
-		<if test="deviceIDs neq '' and deviceIDs != null">		 
-		    in ( #{deviceIDs} )
+		<if test="rsDeviceIDs neq '' and rsDeviceIDs != null">		 
+		    in ( #{rsDeviceIDs} )
 		</if>
 	</select>
 	
@@ -133,8 +140,8 @@
 		SELECT count(1) cnt 
 		  FROM product 
 		 WHERE 1 = 1
-		<if test="id neq '' and id != null">		 
-		   AND id = #{id}
+		<if test="productId neq '' and productId != null">		 
+		   AND id = #{productId}
 		</if>
 	</select>
 
@@ -180,7 +187,7 @@
 	
 	<select id="groupMaximumChkecker" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="int">
 		/* DevicesMapper.groupMaximumChkecker */	
-		SELECT COUNT(*) cnt FROM device WHERE group_id = #{id}
+		SELECT COUNT(*) cnt FROM device WHERE group_id = #{pGroupID}
 	</select>
 	
 	<select id="groupMaximumChkecker2" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="int">
@@ -189,7 +196,7 @@
 		  FROM device, product p 
 		 WHERE p.id = device.product_id 
 		   AND p.type = #{type}
-		   AND group_id = #{id}
+		   AND group_id = #{pGroupID}
 	</select>
 	
 	<select id="overwriteDeviceInfo" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">

@@ -777,3 +777,337 @@ BEGIN
     END IF;
   END;
 END
+
+
+***** getIntegrityInfoList *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `getIntegrityInfoList`(IN skip VARCHAR(8), IN limits VARCHAR(8))
+BEGIN
+  -- 무결성 정보 조회 (ESM)
+  DECLARE strLimit VARCHAR(32);
+  SET strLimit = '';
+
+  IF (NULLIF(skip, '') IS NOT NULL) AND (NULLIF(limits, '') IS NOT NULL) THEN
+    SET strLimit = CONCAT(strLimit, ' LIMIT ', skip, ',', limits);
+  END IF;
+
+  SET @Total = (SELECT COUNT(*) FROM sesm.integrity);
+
+  SET @query = CONCAT("SELECT id, item, size, mdate, cdate, status, checksum, ", @Total, " as total FROM integrity ", strLimit);
+  PREPARE stmt FROM @query;
+  EXECUTE stmt;
+  DEALLOCATE PREPARE stmt;
+
+END
+
+
+***** setLogDiskInfo *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `setLogDiskInfo`(IN logdisk_delete VARCHAR(255), IN logdisk_warn VARCHAR(255))
+BEGIN
+  -- 로그 디스크 임계치 정보 설정 (경보, 삭제)
+  DECLARE cur_state INT DEFAULT '0';
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET cur_state = 1;
+  DECLARE CONTINUE HANDLER FOR SQLWARNING  SET cur_state = 2;
+  DECLARE CONTINUE HANDLER FOR SQLEXCEPTION SET cur_state = 3;
+
+  START TRANSACTION;
+
+  UPDATE config SET val=logdisk_delete WHERE attr='logdisk_delete';
+  UPDATE config SET val=logdisk_warn WHERE attr='logdisk_warn';
+
+  IF cur_state THEN
+    ROLLBACK;
+    SELECT 0 as col;
+  ELSE
+    COMMIT;
+    SELECT 1 as col;
+  END IF;
+END
+
+
+***** setInterfaceConfig *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `setInterfaceConfig`(
+  IN interface_downtime VARCHAR(255),
+  IN interface_updown_count VARCHAR(255),
+  IN interface_updown_hours VARCHAR(255))
+BEGIN
+  -- 회선 관리 정보 설정
+  DECLARE cur_state INT DEFAULT '0';
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET cur_state = 1;
+  DECLARE CONTINUE HANDLER FOR SQLWARNING  SET cur_state = 2;
+  DECLARE CONTINUE HANDLER FOR SQLEXCEPTION SET cur_state = 3;
+
+  START TRANSACTION;
+
+  UPDATE config SET val=interface_downtime WHERE attr='interface_downtime';
+  UPDATE config SET val=interface_updown_count WHERE attr='interface_updown_count';
+  UPDATE config SET val=interface_updown_hours WHERE attr='interface_updown_hours';
+
+  IF cur_state THEN
+    ROLLBACK;
+    SELECT 0 as col;
+  ELSE
+    COMMIT;
+    SELECT 1 as col;
+  END IF;
+END
+
+***** getDeviceInfoList *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `getDeviceInfoList`(
+  IN ids VARCHAR(2048))
+BEGIN
+  -- 장비 정보 조회
+  DECLARE strWhere VARCHAR(3072);
+  SET strWhere = '';
+
+  IF NULLIF(ids, '') IS NOT NULL AND ids != '0' THEN
+    SET strWhere = CONCAT(strWhere, ' AND FIND_IN_SET(d.id, "', ids, '")');
+  ELSEIF NULLIF(ids, '') IS NULL THEN
+    SET strWhere = CONCAT(strWhere, ' AND FIND_IN_SET(d.id, "0")');
+  END IF;
+
+  SET @query = CONCAT("SELECT d.id, d.name as dn, d.`desc`, d.ip, p.id as product_id, dg.id as pGroupID, dg.name as gn,
+    di.serial, di.os, di.agent, di.hostname, di.company, di.customer, di.email, di.zip,
+    di.address, di.phone1, di.phone2, di.fax, di.mid, p.type
+    FROM device_info di, device_group dg, product p, device d, snmp_info si
+    WHERE d.candidate = 0 AND di.device_id = d.id AND dg.id = d.group_id AND p.id = d.product_id AND d.id = si.device_id ", strWhere);
+  PREPARE stmt3 FROM @query;
+  EXECUTE stmt3;
+END
+
+***** setAlarmInfo *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `setAlarmInfo`(
+  IN id INT, IN use_alarm INT ,
+  IN email VARCHAR(255), IN use_inherit INT,
+  IN cpu INT, IN mem INT,
+  IN disk0 INT, IN disk1 INT,
+  IN session INT, IN host INT, IN tunnel INT, IN cps INT,
+  IN rbytes INT, IN tbytes INT,
+  IN rpkts INT, IN tpkts INT,
+  IN rtt INT)
+BEGIN
+  -- 장비 또는 장비 그룹의 임계치 설정
+  DECLARE cur_state INT DEFAULT '0';
+  DECLARE select_id INT DEFAULT '0';
+  DECLARE ids varchar(1024);
+  DECLARE alarm_id int DEFAULT 0;
+
+  DECLARE current_lv int UNSIGNED;
+  DECLARE parent_ids varchar(10000);
+  DECLARE child_ids varchar(10000);
+  DECLARE cnt int DEFAULT 0;
+  DECLARE before_cnt int DEFAULT 0;
+  DECLARE inherit int DEFAULT 0;
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET cur_state = 1;
+  DECLARE CONTINUE HANDLER FOR SQLWARNING  SET cur_state = 1;
+  DECLARE CONTINUE HANDLER FOR SQLEXCEPTION SET cur_state = 1;
+
+  SET ids = '';
+
+  SET SESSION sql_log_bin = OFF;
+  SET SESSION tx_isolation = 'READ-COMMITTED';
+  SET @_current_lv := 1;
+
+  START TRANSACTION;
+
+  -- alarm_config 테이블에 설정한 임계치 값 업데이트
+  INSERT INTO alarm_config VALUES (id, use_alarm, email, use_inherit, cpu, mem, disk0, disk1, session, host, tunnel, cps, rbytes, tbytes, rpkts, tpkts, rtt)
+    ON DUPLICATE KEY UPDATE alarm_config.use_alarm=use_alarm, alarm_config.email=email, alarm_config.use_inherit=use_inherit,
+    alarm_config.cpu=cpu, alarm_config.mem=mem, alarm_config.disk0=disk0, alarm_config.disk1=disk1, alarm_config.session=session,
+    alarm_config.host=host, alarm_config.tunnel=tunnel, alarm_config.cps=cps,
+    alarm_config.rbytes=rbytes, alarm_config.tbytes=tbytes, alarm_config.rpkts=rpkts, alarm_config.tpkts=tpkts, alarm_config.rtt=rtt;
+
+
+  IF id IS NULL THEN
+    SELECT LAST_INSERT_ID() INTO select_id;
+  ELSE
+    SET select_id = id;
+  END IF;
+
+  -- 장비 그룹의 임계치 설정인지 장비의 임계치 설정인지 확인
+  SELECT COUNT(*) INTO @gr_cnt FROM device_group WHERE device_group.id = select_id;
+
+  -- 그룹 설정인 경우
+  IF @gr_cnt > 0 THEN
+    -- 하위 그룹 리스트 중 상위 그룹 설정을 따름으로 설정되어 있거나
+    -- 하위 그룹 리스트 중 기본 설정을 따름으로 설정되어 있는 그룹 조회
+    drop table if exists _temp_buffer;
+    CREATE TEMPORARY TABLE IF NOT EXISTS _temp_buffer (
+      id int(11),
+      name varchar(255),
+      group_id int(11),
+      lv int,
+      INDEX ix_lv (lv)
+      ) ENGINE = MEMORY;
+
+    IF select_id = 0 THEN
+      INSERT INTO _temp_buffer SELECT dg.id, dg.name, dg.group_id, @_current_lv AS lv
+        FROM device_group dg, alarm_config ac
+        WHERE ac.id = dg.id AND ac.use_inherit = 0 GROUP BY dg.id;
+    ELSE
+      INSERT INTO _temp_buffer SELECT dg.id, dg.name, dg.group_id, @_current_lv AS lv
+        FROM device_group dg, alarm_config ac
+        WHERE dg.id = select_id AND ac.id = dg.id;
+    END IF;
+
+    recursion:
+    REPEAT
+      SET before_cnt = cnt;
+      SELECT GROUP_CONCAT(_temp_buffer.id), COUNT(*) INTO parent_ids, cnt FROM _temp_buffer WHERE lv = @_current_lv;
+
+      IF cnt = 0 THEN
+        LEAVE recursion;
+      END IF;
+
+      IF select_id = 0 THEN
+        SET @query = CONCAT("INSERT INTO _temp_buffer
+          SELECT dg.id, dg.name, dg.group_id, (@_current_lv + 1) AS lv
+          FROM device_group dg, alarm_config ac WHERE (dg.id <> dg.group_id) AND dg.group_id IN (", parent_ids, ") AND (ac.use_inherit = 1 OR ac.use_inherit = 0) AND ac.id = dg.id");
+        PREPARE stmt3 FROM @query;
+        EXECUTE stmt3;
+      ELSE
+        SET @query = CONCAT("INSERT INTO _temp_buffer
+          SELECT dg.id, dg.name, dg.group_id, (@_current_lv + 1) AS lv
+          FROM device_group dg, alarm_config ac WHERE dg.group_id IN (", parent_ids, ") AND ac.use_inherit = 1 AND ac.id = dg.id");
+        PREPARE stmt3 FROM @query;
+        EXECUTE stmt3;
+      END IF;
+
+      SET @_current_lv = @_current_lv + 1;
+    UNTIL 0 END REPEAT;
+
+    -- 자신을 포함한 하위 그룹 리스트 = child_ids
+    SELECT GROUP_CONCAT(DISTINCT _temp_buffer.id) INTO child_ids FROM _temp_buffer;
+
+    SET cur_state = 0;
+    SET inherit = 1;
+    SET ids = child_ids;
+
+    -- 기본 설정이 변경된 경우
+    IF select_id = 0 THEN
+      IF ids IS NOT NULL AND ids != "" THEN
+        SET @query= CONCAT("UPDATE alarm_config as ac1, alarm_config as ac2, device_group as dg
+          SET ac1.cpu=ac2.cpu, ac1.mem=ac2.mem, ac1.disk0=ac2.disk0, ac1.disk1=ac2.disk1, ac1.session=ac2.session, ac1.host=ac2.host, ac1.tunnel=ac2.tunnel, ac1.cps=ac2.cps,
+          ac1.rbytes=ac2.rbytes, ac1.tbytes=ac2.tbytes, ac1.rpkts=ac2.rpkts, ac1.tpkts=ac2.tpkts, ac1.rtt=ac2.rtt
+          WHERE dg.id IN (", ids, ") AND dg.id = ac1.id AND ac2.id = 0");
+        PREPARE stmt3 FROM @query;
+        EXECUTE stmt3;
+
+        -- 기본 설정을 상속받는 그룹들중 그룹에 속한 장비가 상위 그룹 설정으로 되어 있는 경우 임계치 업데이트
+        SET @query= CONCAT("UPDATE alarm_config as ac1, alarm_config as ac2, device as d
+          SET ac1.cpu=ac2.cpu, ac1.mem=ac2.mem, ac1.disk0=ac2.disk0, ac1.disk1=ac2.disk1, ac1.session=ac2.session, ac1.host=ac2.host, ac1.tunnel=ac2.tunnel, ac1.cps=ac2.cps,
+          ac1.rbytes=ac2.rbytes, ac1.tbytes=ac2.tbytes, ac1.rpkts=ac2.rpkts, ac1.tpkts=ac2.tpkts, ac1.rtt=ac2.rtt
+          WHERE d.group_id IN (", ids, ") AND d.id = ac1.id AND ac1.use_inherit = 1 AND ac2.id = 0");
+        PREPARE stmt3 FROM @query;
+        EXECUTE stmt3;
+      END IF;
+
+      -- 기본 설정을 사용하는 장비의 임계치 업데이트
+      UPDATE alarm_config as ac1, alarm_config as ac2
+        SET ac1.cpu=ac2.cpu, ac1.mem=ac2.mem, ac1.disk0=ac2.disk0, ac1.disk1=ac2.disk1, ac1.session=ac2.session, ac1.host=ac2.host, ac1.tunnel=ac2.tunnel, ac1.cps=ac2.cps,
+        ac1.rbytes=ac2.rbytes, ac1.tbytes=ac2.tbytes, ac1.rpkts=ac2.rpkts, ac1.tpkts=ac2.tpkts, ac1.rtt=ac2.rtt
+        WHERE ac1.use_inherit = 0 AND ac2.id = 0;
+
+    -- 그룹 설정이 변경된 경우
+    -- 기본 설정을 따름으로 설정이 변경된 경우
+    ELSEIF use_inherit = 0 THEN
+      SET @query= CONCAT("UPDATE alarm_config as ac1, alarm_config as ac2
+        SET ac1.cpu=ac2.cpu, ac1.mem=ac2.mem, ac1.disk0=ac2.disk0, ac1.disk1=ac2.disk1, ac1.session=ac2.session, ac1.host=ac2.host, ac1.tunnel=ac2.tunnel, ac1.cps=ac2.cps,
+        ac1.rbytes=ac2.rbytes, ac1.tbytes=ac2.tbytes, ac1.rpkts=ac2.rpkts, ac1.tpkts=ac2.tpkts, ac1.rtt=ac2.rtt
+        WHERE ac1.id = ", select_id, " AND ac2.id = 0");
+      PREPARE stmt3 FROM @query;
+      EXECUTE stmt3;
+
+      -- 하위 그룹들 중 상위 그룹 설정을 따름으로 설정되어 있는 장비 임계치 업데이트
+      IF ids IS NOT NULL AND ids != "" THEN
+        SET @query= CONCAT("UPDATE alarm_config as ac1, alarm_config as ac2, device_group as dg
+          SET ac1.cpu=ac2.cpu, ac1.mem=ac2.mem, ac1.disk0=ac2.disk0, ac1.disk1=ac2.disk1, ac1.session=ac2.session, ac1.host=ac2.host, ac1.tunnel=ac2.tunnel, ac1.cps=ac2.cps,
+          ac1.rbytes=ac2.rbytes, ac1.tbytes=ac2.tbytes, ac1.rpkts=ac2.rpkts, ac1.tpkts=ac2.tpkts, ac1.rtt=ac2.rtt
+          WHERE dg.id IN (", ids, ") AND ac1.use_inherit = 1 AND dg.id = ac1.id AND ac2.id = 0");
+        PREPARE stmt3 FROM @query;
+        EXECUTE stmt3;
+
+        SET @query= CONCAT("UPDATE alarm_config as ac1, alarm_config as ac2, device as d
+          SET ac1.cpu=ac2.cpu, ac1.mem=ac2.mem, ac1.disk0=ac2.disk0, ac1.disk1=ac2.disk1, ac1.session=ac2.session, ac1.host=ac2.host, ac1.tunnel=ac2.tunnel, ac1.cps=ac2.cps,
+          ac1.rbytes=ac2.rbytes, ac1.tbytes=ac2.tbytes, ac1.rpkts=ac2.rpkts, ac1.tpkts=ac2.tpkts, ac1.rtt=ac2.rtt
+          WHERE d.group_id IN (", ids, ") AND d.id = ac1.id AND ac1.use_inherit = 1 AND ac2.id = 0");
+        PREPARE stmt3 FROM @query;
+        EXECUTE stmt3;
+      END IF;
+    -- 상위 그룹 설정을 따름으로 설정이 변경된 경우
+    ELSEIF use_inherit = 1 THEN
+      SELECT dg.group_id INTO @pgroup FROM device_group dg WHERE dg.id = select_id;
+
+      IF ids IS NOT NULL AND ids != "" THEN
+        SET @query= CONCAT("UPDATE alarm_config as ac1, alarm_config as ac2, device_group as dg
+          SET ac1.cpu=ac2.cpu, ac1.mem=ac2.mem, ac1.disk0=ac2.disk0, ac1.disk1=ac2.disk1, ac1.session=ac2.session, ac1.host=ac2.host, ac1.tunnel=ac2.tunnel, ac1.cps=ac2.cps,
+          ac1.rbytes=ac2.rbytes, ac1.tbytes=ac2.tbytes, ac1.rpkts=ac2.rpkts, ac1.tpkts=ac2.tpkts, ac1.rtt=ac2.rtt
+          WHERE dg.id IN (", ids, ") AND ac1.use_inherit = 1 AND dg.id = ac1.id AND ac2.id = @pgroup");
+        PREPARE stmt3 FROM @query;
+        EXECUTE stmt3;
+
+        SET @query= CONCAT("UPDATE alarm_config as ac1, alarm_config as ac2, device_group dg
+          SET ac1.cpu=ac2.cpu, ac1.mem=ac2.mem, ac1.disk0=ac2.disk0, ac1.disk1=ac2.disk1, ac1.session=ac2.session, ac1.host=ac2.host, ac1.tunnel=ac2.tunnel, ac1.cps=ac2.cps,
+          ac1.rbytes=ac2.rbytes, ac1.tbytes=ac2.tbytes, ac1.rpkts=ac2.rpkts, ac1.tpkts=ac2.tpkts, ac1.rtt=ac2.rtt
+          WHERE ac1.id IN (", ids, ") AND ac1.use_inherit = 1 AND ac2.id = @pgroup");
+        PREPARE stmt3 FROM @query;
+        EXECUTE stmt3;
+
+        SET @query= CONCAT("UPDATE alarm_config as ac1, alarm_config as ac2, device d
+          SET ac1.cpu=ac2.cpu, ac1.mem=ac2.mem, ac1.disk0=ac2.disk0, ac1.disk1=ac2.disk1, ac1.session=ac2.session, ac1.host=ac2.host, ac1.tunnel=ac2.tunnel, ac1.cps=ac2.cps,
+          ac1.rbytes=ac2.rbytes, ac1.tbytes=ac2.tbytes, ac1.rpkts=ac2.rpkts, ac1.tpkts=ac2.tpkts, ac1.rtt=ac2.rtt
+          WHERE ac1.id = d.id AND ac1.use_inherit = 1 AND ac2.id = @pgroup AND d.group_id IN (", ids, ")");
+        PREPARE stmt3 FROM @query;
+        EXECUTE stmt3;
+      END IF;
+
+    -- 장비 그룹 개별설정이 변경된 경우
+    ELSE
+      IF ids IS NOT NULL AND ids != "" THEN
+        SET @query= CONCAT("UPDATE alarm_config as ac1, alarm_config as ac2, device_group as dg
+          SET ac1.cpu=ac2.cpu, ac1.mem=ac2.mem, ac1.disk0=ac2.disk0, ac1.disk1=ac2.disk1, ac1.session=ac2.session, ac1.host=ac2.host, ac1.tunnel=ac2.tunnel, ac1.cps=ac2.cps,
+          ac1.rbytes=ac2.rbytes, ac1.tbytes=ac2.tbytes, ac1.rpkts=ac2.rpkts, ac1.tpkts=ac2.tpkts, ac1.rtt=ac2.rtt
+          WHERE dg.id IN (", ids, ") AND ac1.use_inherit = 1 AND dg.id = ac1.id AND ac2.id = ", select_id);
+        PREPARE stmt3 FROM @query;
+        EXECUTE stmt3;
+
+        SET @query= CONCAT("UPDATE alarm_config as ac1, alarm_config as ac2, device as d
+          SET ac1.cpu=ac2.cpu, ac1.mem=ac2.mem, ac1.disk0=ac2.disk0, ac1.disk1=ac2.disk1, ac1.session=ac2.session, ac1.host=ac2.host, ac1.tunnel=ac2.tunnel, ac1.cps=ac2.cps,
+          ac1.rbytes=ac2.rbytes, ac1.tbytes=ac2.tbytes, ac1.rpkts=ac2.rpkts, ac1.tpkts=ac2.tpkts, ac1.rtt=ac2.rtt
+          WHERE d.group_id IN (", ids, ") AND d.id = ac1.id AND ac1.use_inherit = 1 AND ac2.id = ", select_id);
+        PREPARE stmt3 FROM @query;
+        EXECUTE stmt3;
+      END IF;
+
+    END IF;
+
+  -- 장비 설정
+  ELSE
+    -- 기본 설정 따름
+    IF use_inherit = 0 THEN
+      UPDATE alarm_config as ac1, alarm_config as ac2
+        SET ac1.cpu=ac2.cpu, ac1.mem=ac2.mem, ac1.disk0=ac2.disk0, ac1.disk1=ac2.disk1, ac1.session=ac2.session, ac1.host=ac2.host, ac1.tunnel=ac2.tunnel, ac1.cps=ac2.cps,
+        ac1.rbytes=ac2.rbytes, ac1.tbytes=ac2.tbytes, ac1.rpkts=ac2.rpkts, ac1.tpkts=ac2.tpkts, ac1.rtt=ac2.rtt
+        WHERE ac1.id = select_id AND ac2.id = 0;
+    -- 상위 그룹 설정 따름
+    ELSEIF use_inherit = 1 THEN
+      SELECT d.group_id INTO @pgroup FROM device d WHERE d.id = select_id;
+      UPDATE alarm_config as ac1, alarm_config as ac2, device_group dg
+        SET ac1.cpu=ac2.cpu, ac1.mem=ac2.mem, ac1.disk0=ac2.disk0, ac1.disk1=ac2.disk1, ac1.session=ac2.session, ac1.host=ac2.host, ac1.tunnel=ac2.tunnel, ac1.cps=ac2.cps,
+        ac1.rbytes=ac2.rbytes, ac1.tbytes=ac2.tbytes, ac1.rpkts=ac2.rpkts, ac1.tpkts=ac2.tpkts, ac1.rtt=ac2.rtt
+        WHERE ac1.id = select_id AND ac2.id = @pgroup;
+    END IF;
+  END IF;
+
+  IF cur_state THEN
+    ROLLBACK;
+    SELECT 0 as col;
+  ELSE
+    COMMIT;
+    SELECT 1 as col;
+  END IF;
+
+  TRUNCATE TABLE _temp_buffer;
+  SET SESSION sql_log_bin = ON;
+  SET SESSION tx_isolation = 'REPEATABLE-READ';
+END

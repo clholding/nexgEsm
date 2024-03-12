@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.nexg.esm.configuration.mapper.ConfigurationMapper">
+
+	<select id="getNtpInfo" resultType="map">
+		/* ConfigurationMapper.getNtpInfo */	
+		CALL sesm.getNtpInfo();
+	</select>
+	
+	<select id="getIntegrityInfoList" parameterType="kr.nexg.esm.configuration.dto.ConfigurationVo" resultType="map">
+		/* ConfigurationMapper.getIntegrityInfoList */	
+		CALL sesm.getIntegrityInfoList( #{skip}, #{limit});
+	</select>
+	
+	<select id="getDeviceIntegrityInfo" resultType="map">
+		/* ConfigurationMapper.getDeviceIntegrityInfo */	
+		CALL sesm.getAgentIntegrityInfoList();
+	</select>
+	
+	<select id="getConfigBackupInfo" resultType="map">
+		/* ConfigurationMapper.getConfigBackupInfo */	
+		CALL sesm.getConfigBackupInfo(1);
+	</select>
+	
+	<select id="getSystemConfigBackupInfo" resultType="map">
+		/* ConfigurationMapper.getSystemConfigBackupInfo */	
+		CALL sesm.getSystemConfigBackupInfo();
+	</select>
+	
+	<select id="getLogDiskInfo" resultType="map">
+		/* ConfigurationMapper.getLogDiskInfo */	
+		CALL sesm.getLogDiskInfo();
+	</select>
+	
+	<select id="setLogDiskInfo" parameterType="kr.nexg.esm.configuration.dto.ConfigurationVo" resultType="map">
+		/* ConfigurationMapper.setLogDiskInfo */	
+		CALL sesm.setLogDiskInfo( #{delLog}, #{warning} );
+	</select>
+	
+	<select id="getAlarmInfo" parameterType="kr.nexg.esm.configuration.dto.ConfigurationVo" resultType="map">
+		/* ConfigurationMapper.getAlarmInfo */	
+		<if test="devid neq '' and devid != null">
+		CALL sesm.getAlarmInfo( #{devid} );
+		</if>
+		<if test="groupid neq '' and groupid != null">
+		CALL sesm.getAlarmInfo( #{groupid} );
+		</if>
+	</select>
+	
+	<select id="setAlarmInfo" parameterType="kr.nexg.esm.configuration.dto.ConfigurationVo" resultType="map">
+		/* ConfigurationMapper.setAlarmInfo */	
+		CALL sesm.setAlarmInfo( #{deviceid}, 1, '', #{action}, #{cpu}, #{memory}, #{disk0}, #{disk1}, #{session}, #{host}, #{tunnel}, #{cps}, #{rxb}, #{txb}, #{rxp}, #{txp}, #{rtt} );
+	</select>
+	
+	<select id="getSmtpInfo" resultType="map">
+		/* ConfigurationMapper.getSmtpInfo */	
+		CALL sesm.getSmtpInfo();
+	</select>
+	
+	<select id="getSmtpEventInfo" resultType="map">
+		/* ConfigurationMapper.getSmtpEventInfo */	
+		CALL sesm.getSmtpEvent();
+	</select>
+	
+	<select id="getSnmpInfo" resultType="map">
+		/* ConfigurationMapper.getSnmpInfo */	
+		CALL sesm.getSnmpInfo();
+	</select>
+	
+	<select id="getSnmpTrapInfo" resultType="map">
+		/* ConfigurationMapper.getSnmpTrapInfo */	
+		CALL sesm.getSnmpTrapInfo();
+	</select>
+	
+	<select id="getInterfaceConfig" resultType="map">
+		/* ConfigurationMapper.getInterfaceConfig */	
+		CALL sesm.getInterfaceConfig();
+	</select>
+	
+	<select id="setInterfaceConfig" parameterType="kr.nexg.esm.configuration.dto.ConfigurationVo" resultType="map">
+		/* ConfigurationMapper.setInterfaceConfig */	
+		CALL sesm.setInterfaceConfig(#{interfaceDowntime}, #{interfaceUpdownCount}, #{interfaceUpdownHours});
+	</select>
+	
+	<select id="getDeviceRegisterConfig" resultType="map">
+		/* ConfigurationMapper.getDeviceRegisterConfig */	
+		CALL sesm.getDeviceRegisterConfig();
+	</select>
+	
+	<update id="setDeviceRegisterConfig" parameterType="kr.nexg.esm.configuration.dto.ConfigurationVo">
+		/* ConfigurationMapper.setDeviceRegisterConfig */	
+		CALL sesm.setDeviceRegisterConfig(#{enable}, #{groupid}, #{active}, #{log});
+	</update>
+				
+</mapper>
