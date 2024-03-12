@@ -39,7 +39,17 @@
 	
 	<select id="getAlarmInfo" parameterType="kr.nexg.esm.configuration.dto.ConfigurationVo" resultType="map">
 		/* ConfigurationMapper.getAlarmInfo */	
+		<if test="devid neq '' and devid != null">
 		CALL sesm.getAlarmInfo( #{devid} );
+		</if>
+		<if test="groupid neq '' and groupid != null">
+		CALL sesm.getAlarmInfo( #{groupid} );
+		</if>
+	</select>
+	
+	<select id="setAlarmInfo" parameterType="kr.nexg.esm.configuration.dto.ConfigurationVo" resultType="map">
+		/* ConfigurationMapper.setAlarmInfo */	
+		CALL sesm.setAlarmInfo( #{deviceid}, 1, '', #{action}, #{cpu}, #{memory}, #{disk0}, #{disk1}, #{session}, #{host}, #{tunnel}, #{cps}, #{rxb}, #{txb}, #{rxp}, #{txp}, #{rtt} );
 	</select>
 	
 	<select id="getSmtpInfo" resultType="map">

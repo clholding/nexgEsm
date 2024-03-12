@@ -298,33 +298,72 @@ public class ConfigurationService {
 	 */
 	public Map<String, Object> setAlarmInfo(ConfigurationVo configurationVo) throws IOException, ParseException{
 		
-		if(configurationVo.getGroupid() == null) {
+		if(configurationVo.getGroupid() == null || "".equals(configurationVo.getGroupid())) {
 			configurationVo.setGroupid("0");
 		}
 		
-		Map<String, Object> result = configurationMapper.getAlarmInfo(configurationVo);
+		if("0".equals(configurationVo.getDeviceid())) {
+			configurationVo.setAction("2");
+		}
 		
-		Map<String, Object> map = new LinkedHashMap<>();
-		map.put("deviceid", result.get("id"));
-		map.put("useAlarm", result.get("use_alarm"));
-		map.put("email", 	result.get("email"));
-		map.put("action", 	result.get("use_inherit"));
-		map.put("cpu", 		result.get("cpu"));
-		map.put("memory", 	result.get("mem"));
-		map.put("disk0", 	result.get("disk0"));
-		map.put("disk1", 	result.get("disk1"));
-		map.put("session", 	result.get("session"));
-		map.put("host", 	result.get("host"));
-		map.put("tunnel",	result.get("tunnel"));
-		map.put("cps", 		result.get("cps"));
-		map.put("rxb", 		result.get("rbytes"));
-		map.put("txb", 		result.get("tbytes"));
-		map.put("rxp", 		result.get("rpkts"));
-		map.put("txp", 		result.get("tpkts"));
-		map.put("rtt", 		result.get("rtt"));
-		map.put("groupid", 	configurationVo.getGroupid());
+		if("2".equals(configurationVo.getAction())) {
+			
+			if(configurationVo.getRxbType() == null || "".equals(configurationVo.getRxbType())) {
+				configurationVo.setRxbType("1000");
+			}
+			configurationVo.setRxb( String.valueOf(Integer.parseInt(configurationVo.getRxb()) * Integer.parseInt(configurationVo.getRxbType())) );
+			
+			if(configurationVo.getRxpType() == null || "".equals(configurationVo.getRxpType())) {
+				configurationVo.setRxpType("1000");
+			}
+			configurationVo.setRxp( String.valueOf(Integer.parseInt(configurationVo.getRxp()) * Integer.parseInt(configurationVo.getRxpType())) );
+			
+			if(configurationVo.getTxpType() == null || "".equals(configurationVo.getTxpType())) {
+				configurationVo.setTxpType("1000");
+			}
+			configurationVo.setTxp( String.valueOf(Integer.parseInt(configurationVo.getTxp()) * Integer.parseInt(configurationVo.getTxpType())) );
+			
+			
+		}else if("1".equals(configurationVo.getAction())) {
+			
+			Map<String, Object> result = configurationMapper.getAlarmInfo(configurationVo);
+			
+			configurationVo.setCpu(String.valueOf(result.get("cpu")));
+			configurationVo.setMemory(String.valueOf(result.get("mem")));
+			configurationVo.setDisk0(String.valueOf(result.get("disk0")));
+			configurationVo.setDisk1(String.valueOf(result.get("disk1")));
+			configurationVo.setSession(String.valueOf(result.get("session")));
+			configurationVo.setHost(String.valueOf(result.get("host")));
+			configurationVo.setTunnel(String.valueOf(result.get("tunnel")));
+			configurationVo.setCps(String.valueOf(result.get("cps")));
+			configurationVo.setRxb(String.valueOf(result.get("rbytes")));
+			configurationVo.setTxb(String.valueOf(result.get("tbytes")));
+			configurationVo.setRxp(String.valueOf(result.get("rpkts")));
+			configurationVo.setTxp(String.valueOf(result.get("tpkts")));
+			configurationVo.setRtt(String.valueOf(result.get("rtt")));
+			
+		}else {
+			
+			configurationVo.setGroupid("0");
+			Map<String, Object> result = configurationMapper.getAlarmInfo(configurationVo);
+			
+			configurationVo.setCpu(String.valueOf(result.get("cpu")));
+			configurationVo.setMemory(String.valueOf(result.get("mem")));
+			configurationVo.setDisk0(String.valueOf(result.get("disk0")));
+			configurationVo.setDisk1(String.valueOf(result.get("disk1")));
+			configurationVo.setSession(String.valueOf(result.get("session")));
+			configurationVo.setHost(String.valueOf(result.get("host")));
+			configurationVo.setTunnel(String.valueOf(result.get("tunnel")));
+			configurationVo.setCps(String.valueOf(result.get("cps")));
+			configurationVo.setRxb(String.valueOf(result.get("rbytes")));
+			configurationVo.setTxb(String.valueOf(result.get("tbytes")));
+			configurationVo.setRxp(String.valueOf(result.get("rpkts")));
+			configurationVo.setTxp(String.valueOf(result.get("tpkts")));
+			configurationVo.setRtt(String.valueOf(result.get("rtt")));
+		}
 		
-		return map;
+		
+		return configurationMapper.setAlarmInfo(configurationVo);
 	}
 	
     /*

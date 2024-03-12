@@ -53,6 +53,11 @@ public interface ConfigurationMapper {
 	 */
 	public Map<String, Object> getAlarmInfo(ConfigurationVo configurationVo);
 	
+	/*
+	 * TopNav > 시스템 설정 > 알람 > 장비/그릅 입계치 설정 > 장비/그룹 기본설정 / 기본 설정 
+	 */
+	public Map<String, Object> setAlarmInfo(ConfigurationVo configurationVo);
+	
     /*
      * TopNav > 시스템 설정 > 알람 > SMTP 설정
      */

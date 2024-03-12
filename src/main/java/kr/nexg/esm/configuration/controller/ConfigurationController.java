@@ -583,6 +583,7 @@ public class ConfigurationController {
     		
     		
     	} catch (Exception e) {
+    		
     		message = MessageVo.builder()
     				.success("false")
     				.message("장비 임계치 설정 실패되었습니다.")
