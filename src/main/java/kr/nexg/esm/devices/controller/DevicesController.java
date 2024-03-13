@@ -192,21 +192,52 @@ public class DevicesController {
     	
     } 
     
-//    @PostMapping("/delCandidate")
-//    public ResponseEntity<MessageVo> delCandidate() throws IOException  {
-//    	
-//    	HttpHeaders headers= new HttpHeaders();
-//    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
-//    	
-//    	MessageVo message = MessageVo.builder()
-//    			.status(StatusEnum.OK)
-//    			.message("")
-//    			.entitys("")
-//    			.build();
-//    	
-//    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
-//    	
-//    } 
+    /*
+     * DeviceTree > 설정 > 장비추가 > 삭제(리스트에서 장비 삭제)
+     */      
+    @PostMapping("/delCandidate")
+    public ResponseEntity<MessageVo> delCandidate(@RequestBody DevicesVo devicesVo) throws IOException  {
+    	
+    	HttpHeaders headers= new HttpHeaders();
+    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+    	
+        MessageVo message;
+        
+        try {
+        	
+        	Map<String, Object> result = devicesService.delCandidate(devicesVo);
+            int totalCount = 0;
+            
+            if("0".equals(result.get("col"))) {
+            	
+            	message = MessageVo.builder()
+                    	.success("false")
+                    	.message("장비 삭제 실패")
+                    	.totalCount(totalCount)
+                    	.entitys("")
+                    	.build();
+            }
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("장비 삭제 성공")
+                	.totalCount(totalCount)
+                	.entitys(result)
+                	.build();
+        	
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("db connection error")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}  
+    	
+    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
+    	
+    } 
 //    
 //    @PostMapping("/delDeviceInterface")
 //    public ResponseEntity<MessageVo> delDeviceInterface() throws IOException  {
@@ -223,22 +254,25 @@ public class DevicesController {
 //    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
 //    	
 //    } 
-//    
-//    @PostMapping("/delDeviceNGroup")
-//    public ResponseEntity<MessageVo> delDeviceNGroup() throws IOException  {
-//    	
-//    	HttpHeaders headers= new HttpHeaders();
-//    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
-//    	
-//    	MessageVo message = MessageVo.builder()
-//    			.status(StatusEnum.OK)
-//    			.message("")
-//    			.entitys("")
-//    			.build();
-//    	
-//    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
-//    	
-//    } 
+    
+    /*
+     * DeviceTree > 설정 트리 > 특정 장비를 선택 삭제
+     */    
+    @PostMapping("/delDeviceNGroup")
+    public ResponseEntity<MessageVo> delDeviceNGroup(@RequestBody DevicesVo devicesVo) throws IOException  {
+    	
+    	HttpHeaders headers= new HttpHeaders();
+    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+    	
+    	MessageVo message = MessageVo.builder()
+    			.status(StatusEnum.OK)
+    			.message("")
+    			.entitys("")
+    			.build();
+    	
+    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
+    	
+    } 
     
     /*
      * DeviceFinder
@@ -874,21 +908,24 @@ public class DevicesController {
     	
     } 
     
-//    @PostMapping("/setDeviceGroup")
-//    public ResponseEntity<MessageVo> setDeviceGroup() throws IOException  {
-//    	
-//    	HttpHeaders headers= new HttpHeaders();
-//    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
-//    	
-//    	MessageVo message = MessageVo.builder()
-//    			.status(StatusEnum.OK)
-//    			.message("")
-//    			.entitys("")
-//    			.build();
-//    	
-//    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
-//    	
-//    } 
+    /*
+     * DeviceTree > 설정 > 특정 장비 그룹 지정
+     */    
+    @PostMapping("/setDeviceGroup")
+    public ResponseEntity<MessageVo> setDeviceGroup(@RequestBody DevicesVo devicesVo) throws IOException  {
+    	
+    	HttpHeaders headers= new HttpHeaders();
+    	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+    	
+    	MessageVo message = MessageVo.builder()
+    			.status(StatusEnum.OK)
+    			.message("")
+    			.entitys("")
+    			.build();
+    	
+    	return new ResponseEntity<>(message, headers, HttpStatus.OK);
+    	
+    } 
     
     /*
      * DeviceFinder > 그룹정보 > 정보 > 기본정보 > 저장

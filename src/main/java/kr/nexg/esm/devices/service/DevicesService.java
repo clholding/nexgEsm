@@ -803,6 +803,28 @@ public class DevicesService {
 		return map;
 	}
 	
+	/*
+	 * DeviceTree > 설정 > 장비추가 > 삭제(리스트에서 장비 삭제)
+	 */
+	public Map<String, Object> delCandidate(DevicesVo devicesVo) throws IOException, ParseException{
+		
+		Map<String, Object> ressult = new HashMap<String,Object>(); 
+		
+		if(devicesVo.getDeviceIDs() != null) {
+			
+			String ids = String.join(",", devicesVo.getDeviceIDs());
+			devicesVo.setDeviceID(ids);	
+			
+			for(String data : devicesVo.getDeviceIDs()) {
+				log.info("data : "+data);
+				device.del_device(data);
+			}
+			
+			ressult = devicesMapper.delCandidate(devicesVo);
+		}
+		return ressult;
+	}
+	
     /*
      * DeviceFinder > 그룹정보 > 정보 > 기본정보 > 저장
      */

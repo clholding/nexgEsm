@@ -112,6 +112,11 @@
 		</if>		   
 	</select>
 	
+	<select id="delCandidate" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
+		/* DevicesMapper.delCandidate */	
+		Call sesm.delDeviceNGroup( #{deviceID}, 0)
+	</select>
+	
 	<select id="deviceGroupNames" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.deviceGroupNames */	
 		SELECT name
