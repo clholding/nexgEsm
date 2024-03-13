@@ -19,15 +19,15 @@ public class DevicesVo
     private String memo2;
     private String auth;
     private List<String> deviceIDs;
+    private List<String> groupIDs;
     private String rsDeviceIDs;
     private String hostname;
     private String uptime;
     private String pGroupID;
-    private String groupIDs;
     private String deviceID;
     private String memo;
     private String failID;
-    private int groupID;
+    private String groupID;
     private String productId;
     private String dname;
     private String gname;

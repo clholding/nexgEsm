@@ -264,11 +264,29 @@ public class DevicesController {
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
-    	MessageVo message = MessageVo.builder()
-    			.status(StatusEnum.OK)
-    			.message("")
-    			.entitys("")
-    			.build();
+        MessageVo message;
+        
+        try {
+        	
+        	Map<String, Object> result = devicesService.delDeviceNGroup(devicesVo);
+            int totalCount = 0;
+        	
+        	message = MessageVo.builder()
+                	.success(String.valueOf(result.get("success")))
+                	.message(String.valueOf(result.get("message")))
+                	.totalCount(totalCount)
+                	.entitys("")
+                	.build();
+        	
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("no request datas")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		} 
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
     	
@@ -917,11 +935,28 @@ public class DevicesController {
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
-    	MessageVo message = MessageVo.builder()
-    			.status(StatusEnum.OK)
-    			.message("")
-    			.entitys("")
-    			.build();
+        MessageVo message;
+        
+        try {
+        	
+        	Map<String, Object> result = devicesService.setDeviceGroup(devicesVo);
+        	
+        	message = MessageVo.builder()
+                	.success(String.valueOf(result.get("success")))
+                	.message(String.valueOf(result.get("message")))
+                	.totalCount(Integer.parseInt((String) result.get("total")))
+                	.entitys("")
+                	.build();
+        	
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("no request datas")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}
     	
     	return new ResponseEntity<>(message, headers, HttpStatus.OK);
     	

@@ -112,9 +112,24 @@
 		</if>		   
 	</select>
 	
-	<select id="delCandidate" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
-		/* DevicesMapper.delCandidate */	
-		Call sesm.delDeviceNGroup( #{deviceID}, 0)
+	<select id="setDeviceGroup" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
+		/* DevicesMapper.setDeviceGroup */	
+		<if test="deviceID neq '' and deviceID != null">	
+		Call sesm.setDeviceGroup( #{deviceID}, 0, #{pGroupID})
+		</if>
+		<if test="groupID neq '' and groupID != null">	
+		Call sesm.setDeviceGroup( #{groupID}, 1, #{pGroupID})
+		</if>
+	</select>
+		
+	<select id="delDeviceNGroup" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
+		/* DevicesMapper.delDeviceNGroup */	
+		<if test="deviceID neq '' and deviceID != null">	
+		Call sesm.delDeviceNGroup( #{deviceID} , 0)
+		</if>
+		<if test="groupID neq '' and groupID != null">	
+		Call sesm.delDeviceNGroup( #{groupID}, 1)
+		</if>
 	</select>
 	
 	<select id="deviceGroupNames" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
@@ -125,8 +140,8 @@
 		<if test="pGroupID neq '' and pGroupID != null">		 
 		   AND id = #{pGroupID}
 		</if>
-		<if test="groupIDs neq '' and groupIDs != null">		 
-		    in ( #{groupIDs} )
+		<if test="groupID neq '' and groupID != null">		 
+		    in ( #{groupID} )
 		</if>
 	</select>
 	

@@ -142,7 +142,8 @@ public class DevicesService {
                 
             } else if ("deviceIDs".equals(key) && emsg.get(key) != null) {
                 if ( String.valueOf(emsg.get(key)).length() > 0) {
-                    String tmpWhere = String.join(",", String.valueOf(emsg.get(key)));
+                	
+                    String tmpWhere = String.join(",", String.valueOf(emsg.get(key)).replace("[", "").replace("]", ""));
                     
                     DevicesVo devicesVo = new DevicesVo();
                     devicesVo.setRsDeviceIDs(tmpWhere);
@@ -156,10 +157,10 @@ public class DevicesService {
                 }
             } else if ("groupIDs".equals(key) && emsg.get(key) != null) {
             	if ( String.valueOf(emsg.get(key)).length() > 0) {
-                    String tmpWhere = String.join(",", String.valueOf(emsg.get(key)));
+                    String tmpWhere = String.join(",", String.valueOf(emsg.get(key)).replace("[", "").replace("]", ""));
                     
                     DevicesVo devicesVo = new DevicesVo();
-                    devicesVo.setGroupIDs(tmpWhere);
+                    devicesVo.setGroupID(tmpWhere);
                     
                     List<Map<String, Object>> deviceGroupNames = devicesMapper.deviceGroupNames(devicesVo);
                     
@@ -282,7 +283,7 @@ public class DevicesService {
               String tmpWhere = String.join(",", devicesVo.getGroupIDs());
               
               devicesVo = new DevicesVo();
-              devicesVo.setGroupIDs(tmpWhere);
+              devicesVo.setGroupID(tmpWhere);
               
               tmpParentSearch = devicesMapper.deviceGroupNames(devicesVo);
               
@@ -804,11 +805,93 @@ public class DevicesService {
 	}
 	
 	/*
+	 * DeviceTree > 설정 > 특정 장비 그룹 지정
+	 */
+	public Map<String, Object> setDeviceGroup(DevicesVo devicesVo) throws IOException, ParseException{
+		
+		Map<String, Object> result = new HashMap<String,Object>(); 
+		
+		log.info("devicesVo : " + devicesVo);
+		
+		String success = "true";
+		String message = "그룹이동이 완료되었습니다.";
+		int total = 0;
+		
+		log.info("devicesVo.getPGroupID() : " + devicesVo.getId());
+		log.info("devicesVo.getPGroupID() : " + devicesVo.getPGroupID());
+		log.info("devicesVo.getPGroupID() : " + devicesVo.getPGroupID());
+		log.info("devicesVo.getDeviceIDs() : " + devicesVo.getDeviceIDs());
+		
+		devicesVo.setPGroupID(devicesVo.getId());
+		if(devicesVo.getPGroupID() != null) {
+			
+			if(devicesVo.getDeviceIDs() != null) {
+			
+	            int chkGroupMaximumChecker = 0;
+	            
+	            int mode = mode_convert.convert_modedata(devicesVo.getMode());
+	            if (mode == 0) {
+	            	
+	                chkGroupMaximumChecker = devicesMapper.groupMaximumChkecker(devicesVo); 
+	            } else {
+	            	
+	            	devicesVo.setType(String.valueOf(mode));
+	                chkGroupMaximumChecker = devicesMapper.groupMaximumChkecker2(devicesVo); 
+	            }
+	            
+	            total = chkGroupMaximumChecker;
+				
+	            int devicesCount = devicesVo.getDeviceIDs().size();
+	            if(total + devicesCount > 150) {
+	            	success = "false";
+	            	message = "하나의 그룹에 150개 이상의 장비가 추가 될수 없습니다.";
+	            }
+	            
+				String ids = String.join(",", devicesVo.getDeviceIDs());
+				devicesVo.setDeviceID(ids);	
+	            Map<String, Object> info = devicesMapper.delDeviceNGroup(devicesVo);
+	            
+	            if("0".equals(info.get("col"))) {
+	            	success = "false";
+	            	message = "동일한 장비 그룹 이름이 존재합니다.";
+	            }
+			}
+			
+			if(devicesVo.getGroupIDs() != null) {
+				
+				String ids = String.join(",", devicesVo.getGroupIDs());
+				devicesVo.setGroupID(ids);	
+				
+				Map<String, Object> info = devicesMapper.delDeviceNGroup(devicesVo);
+				
+				if("0".equals(info.get("col"))) {
+					success = "false";
+					message = "동일한 장비 그룹 이름이 존재합니다.";
+				}
+				
+			}			
+			
+		}else {
+        	success = "false";
+        	message = "no request datas";
+		}
+		
+		
+		result.put("success", success);
+		result.put("message", message);
+		result.put("total", String.valueOf(total));
+		
+		String eMsg = setAuditInfo("setDeviceGroup", success, devicesVo);
+		
+		return result;
+	}
+	
+	/*
 	 * DeviceTree > 설정 > 장비추가 > 삭제(리스트에서 장비 삭제)
 	 */
 	public Map<String, Object> delCandidate(DevicesVo devicesVo) throws IOException, ParseException{
 		
-		Map<String, Object> ressult = new HashMap<String,Object>(); 
+		Map<String, Object> result = new HashMap<String,Object>(); 
 		
 		if(devicesVo.getDeviceIDs() != null) {
 			
@@ -820,9 +903,61 @@ public class DevicesService {
 				device.del_device(data);
 			}
 			
-			ressult = devicesMapper.delCandidate(devicesVo);
+			result = devicesMapper.delDeviceNGroup(devicesVo);
 		}
-		return ressult;
+		return result;
+	}
+	
+	/*
+	 * DeviceTree > 설정 트리 > 특정 장비를 선택 삭제
+	 */
+	public Map<String, Object> delDeviceNGroup(DevicesVo devicesVo) throws IOException, ParseException{
+		
+		Map<String, Object> result = new HashMap<String,Object>(); 
+		
+		String success = "true";
+		String message = "장비정보가 삭제되었습니다.";
+		if(devicesVo.getDeviceIDs() != null) {
+			
+			String ids = String.join(",", devicesVo.getDeviceIDs());
+			devicesVo.setDeviceID(ids);	
+			
+			for(String data : devicesVo.getDeviceIDs()) {
+				log.info("data : "+data);
+				device.del_device(data);
+			}
+			
+			result = devicesMapper.delDeviceNGroup(devicesVo);
+			
+			if("0".equals(result.get("col"))) {
+				success = "false";
+				message = "하위 그룹 또는 장비가 존재합니다. (다른 모드의 장비가 남아있을수 있습니다.)";
+			}
+			
+			config1.set_apply_status(true);
+		}
+		
+		if(devicesVo.getGroupIDs() != null) {
+			
+			String ids = String.join(",", devicesVo.getGroupIDs());
+			devicesVo.setGroupID(ids);	
+			
+			result = devicesMapper.delDeviceNGroup(devicesVo);
+			
+			if("0".equals(result.get("col"))) {
+				success = "false";
+				message = "하위 그룹 또는 장비가 존재합니다. (다른 모드의 장비가 남아있을수 있습니다.)";
+			}
+			
+			config1.set_apply_status(true);
+		}
+		
+		result.put("success", success);
+		result.put("message", message);
+		
+		String eMsg = setAuditInfo("delDeviceNGroup", success, devicesVo);
+		
+		return result;
 	}
 	
     /*
