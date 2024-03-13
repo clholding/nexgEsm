@@ -13,12 +13,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import kr.nexg.esm.common.dto.MessageVo;
 import kr.nexg.esm.global.controller.GlobalController;
+import kr.nexg.esm.logs.dto.LogsVo;
 import kr.nexg.esm.logs.service.LogsService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,14 +45,14 @@ public class LogsController {
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/lastFailDevice")
-    public ResponseEntity<MessageVo> lastFailDevice(@RequestParam Map<String,Object> paramMap) {
+    public ResponseEntity<MessageVo> lastFailDevice(@RequestBody LogsVo logsVo) {
 		
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         
         String sessionId = authentication.getName();
         
-        paramMap.put("sessionId", sessionId);
+        logsVo.setSessionId(sessionId);
     	
     	HttpHeaders headers= new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -59,7 +61,7 @@ public class LogsController {
         
         try {
         	
-        	List<Map<String, Object>> list = logsService.lastFailDevice(paramMap);
+        	List<Map<String, Object>> list = logsService.lastFailDevice(logsVo);
             int totalCount = list.size();
         	
         	message = MessageVo.builder()

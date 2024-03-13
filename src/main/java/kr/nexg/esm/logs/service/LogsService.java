@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import kr.nexg.esm.logs.dto.LogsVo;
 import kr.nexg.esm.logs.mapper.LogsMapper;
 import kr.nexg.esm.nexgesm.mariadb.Log;
 import kr.nexg.esm.util.config;
@@ -24,18 +25,18 @@ public class LogsService {
 	@Autowired
 	Log.FailLog failLog;
 	
-	public List<Map<String, Object>> lastFailDevice(Map<String, Object> paramMap) throws Exception{
+	public List<Map<String, Object>> lastFailDevice(LogsVo logsVo) throws Exception{
 		
-		String sessionId = (String) paramMap.get("sessionId");
-		String datas = (String) paramMap.get("datas");
+		String sessionId = logsVo.getSessionId();
+		int page = logsVo.getPage();
+		int limit = logsVo.getLimit();
 		
-		Map<String, Object> rsDatas = new ObjectMapper().readValue(datas, Map.class);
-		String rs_page = (String)config.setValue(rsDatas, "page", "1");
-		String rs_viewCount = (String)config.setValue(rsDatas, "viewCount", "10");
-		List<String> rs_deviceIDs = (List<String>)config.setValue(rsDatas, "deviceIDs", new ArrayList<>());
+		String rs_page = Integer.toString(page);
+		String rs_viewCount = Integer.toString(limit);
+		List<String> rs_deviceIDs = logsVo.getDeviceIDs();
 		String deviceIds = String.join(",", rs_deviceIDs);
 		
-		String rs_mode = (String) paramMap.get("mode");
+		String rs_mode = logsVo.getMode();
 		int mode = mode_convert.convert_modedata(rs_mode);
 		
 		int skip = (Integer.parseInt(rs_page) - 1) * (Integer.parseInt(rs_viewCount) - 1);
