@@ -2,9 +2,34 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="kr.nexg.esm.monitoring.mapper.MonitoringMapper">
 
-	<select id="getGroupToDeviceListByLogin" parameterType="String" resultType="map">
-		/* LogsMapper.getGroupToDeviceListByLogin */	
+	<select id="getGroupToDeviceListByLogin" parameterType="String" resultType="String">
+		/* MonitoringMapper.getGroupToDeviceListByLogin */	
 		CALL sesm.getGroupToDeviceListByLogin( #{groupId}, #{sessionId}, #{mode} );
+	</select>
+	
+	<select id="getIntStatus" parameterType="String" resultType="map">
+		/* MonitoringMapper.getIntStatus */	
+		CALL sesm.getIntStatus( #{deviceId} );
+	</select>
+	
+	<select id="getTrackStatus" parameterType="String" resultType="map">
+		/* MonitoringMapper.getTrackStatus */	
+		CALL sesm.getTrackStatus( #{deviceId} );
+	</select>
+	
+	<select id="eixStatus" parameterType="String" resultType="map">
+		/* MonitoringMapper.eixStatus */
+		SELECT identity, peerip, status, uptime, ifname FROM eix_status WHERE device_id = #{deviceId}
+	</select>
+	
+	<select id="vrrpStatus" parameterType="String" resultType="map">
+		/* MonitoringMapper.vrrpStatus */
+		SELECT name, status, ip FROM vrrp_status WHERE device_id = #{deviceId}
+	</select>
+	
+	<select id="getFailInterface" parameterType="String" resultType="map">
+		/* MonitoringMapper.getFailInterface */
+		CALL sesm.getFailInterface( #{deviceId} );
 	</select>
 	
 </mapper>
