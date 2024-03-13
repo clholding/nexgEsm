@@ -351,6 +351,42 @@ public class GlobalController {
     }
 	
 	/**
+	* -
+	* -
+	* 
+	* @ param 
+	* @ return ResponseEntity
+	*/
+	@PostMapping("/checkOn")
+    public ResponseEntity<MessageVo> checkOn() {
+		
+    	HttpHeaders headers= new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+        
+        MessageVo message;
+        
+        try {
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("")
+                	.totalCount(0)
+                	.entitys("")
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}
+    	
+        return new ResponseEntity<>(message, headers, HttpStatus.OK);
+    }
+	
+	/**
 	* 세션의 남은 유효 시간
 	* 
 	* @ param 

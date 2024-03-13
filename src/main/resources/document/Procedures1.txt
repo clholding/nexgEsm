@@ -321,3 +321,85 @@ BEGIN
   EXECUTE stmt3;
 
 END
+
+
+***** getGroupToDeviceListByLogin *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `sesm`.`getGroupToDeviceListByLogin`(IN pid INT, IN login VARCHAR(128), IN type INT)
+BEGIN
+  -- pid 그룹(하위 그룹 포함)내에 login(관리자)가 관리하는 장비 리스트 조회
+  -- type = 0 이면 전체 조회, 그 외 FW, UTM, SW 선택하여 조회 가능
+
+  DECLARE current_lv int UNSIGNED;
+  DECLARE parent_ids varchar(10000);
+  DECLARE child_ids varchar(10000);
+  DECLARE cnt int DEFAULT 0;
+  DECLARE find int DEFAULT 0;
+  DECLARE before_cnt int DEFAULT 0;
+
+  SET SESSION sql_log_bin = OFF;
+  SET SESSION tx_isolation = 'READ-COMMITTED';
+  SET @_current_lv := 1;
+
+  -- login(관리자)가 관리하는 그룹 중 pid 그룹의 하위 그룹 리스트 작성 - begin
+  drop table if exists _temp_buffer;
+  CREATE TEMPORARY TABLE IF NOT EXISTS _temp_buffer (
+    id int(11),
+    name varchar(255),
+    group_id int(11),
+    lv int,
+    INDEX ix_lv (lv)
+    ) ENGINE = MEMORY;
+
+    INSERT INTO _temp_buffer SELECT dg.id, dg.name, dg.group_id, @_current_lv AS lv
+    FROM user_dgroup ud, device_group dg, user u WHERE u.id = ud.user_id AND ud.device_group_id = dg.id AND u.login = login GROUP BY dg.id;
+
+  recursion:
+  REPEAT
+    SET before_cnt = cnt;
+    SELECT GROUP_CONCAT(_temp_buffer.id), COUNT(*) INTO parent_ids, cnt FROM _temp_buffer WHERE lv = @_current_lv;
+
+    IF cnt = 0 THEN
+      SELECT COUNT(*) INTO @cnt2 FROM _temp_buffer WHERE _temp_buffer.id = pid;
+      IF @cnt2 = 0 THEN
+        DELETE FROM _temp_buffer;
+      END IF;
+      LEAVE recursion;
+    END IF;
+
+    IF find = 0 AND pid IS NOT NULL AND pid != 0 THEN
+      SELECT COUNT(*) INTO @cnt2 FROM _temp_buffer WHERE _temp_buffer.id = pid;
+      IF @cnt2 = 1 THEN
+        SET find = 1;
+        DELETE FROM _temp_buffer WHERE _temp_buffer.id <> pid;
+      END IF;
+    END IF;
+
+    SET @query = CONCAT("INSERT INTO _temp_buffer
+      SELECT dg.id, dg.name, dg.group_id, (@_current_lv + 1) AS lv
+      FROM device_group dg WHERE (dg.id <> dg.group_id) AND dg.group_id IN (", parent_ids, ")");
+    PREPARE stmt3 FROM @query;
+    EXECUTE stmt3;
+
+    SET @_current_lv = @_current_lv + 1;
+  UNTIL 0 END REPEAT;
+
+  -- login(관리자)가 관리하는 그룹 중 pid 그룹의 하위 그룹 리스트 작성 - end
+  -- child_ids = pid 하위 그룹 id 리스트
+  SELECT GROUP_CONCAT(DISTINCT _temp_buffer.id) INTO child_ids FROM _temp_buffer;
+
+  TRUNCATE TABLE _temp_buffer;
+  SET SESSION sql_log_bin = ON;
+  SET SESSION tx_isolation = 'REPEATABLE-READ';
+
+  IF child_ids IS NULL THEN
+    SELECT (NULL);
+  ELSE
+    SET @query = CONCAT("SELECT GROUP_CONCAT(DISTINCT d.id) as ids
+      FROM device as d, device_info as di, product as p, device_status as ds
+      WHERE d.candidate = 0 AND d.id = di.device_id AND d.id = ds.device_id AND d.product_id = p.id AND group_id IN (", child_ids, ") AND CASE ", type, " WHEN 0 THEN 1 = 1 ELSE p.type = ", type, " END");
+    PREPARE stmt FROM @query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+  END IF;
+
+END
