@@ -10,5 +10,6 @@ public class MonitoringVo extends CommonVo {
 	private String mode;
 	private String groupID;
 	private String target;
+	private int viewCount = 0;
 	private List<String> deviceIDs;
 }
