@@ -23,12 +23,12 @@ public class DevicesVo
     private String rsDeviceIDs;
     private String hostname;
     private String uptime;
-    private String pGroupID;
+    private String pgroupID;
     private String deviceID;
     private String memo;
     private String failID;
     private String groupID;
-    private String productId;
+    private String productID;
     private String dname;
     private String gname;
     private String name;

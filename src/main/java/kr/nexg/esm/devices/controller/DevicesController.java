@@ -161,6 +161,8 @@ public class DevicesController {
     @PostMapping("/checkManagedCode")
     public ResponseEntity<MessageVo> checkManagedCode(@RequestBody DevicesVo devicesVo) throws IOException, ParseException  {
     	
+    	log.info("devicesVo : "+devicesVo);
+    	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
@@ -197,6 +199,8 @@ public class DevicesController {
      */      
     @PostMapping("/delCandidate")
     public ResponseEntity<MessageVo> delCandidate(@RequestBody DevicesVo devicesVo) throws IOException  {
+    	
+    	log.info("devicesVo : "+devicesVo);
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -261,6 +265,8 @@ public class DevicesController {
     @PostMapping("/delDeviceNGroup")
     public ResponseEntity<MessageVo> delDeviceNGroup(@RequestBody DevicesVo devicesVo) throws IOException  {
     	
+    	log.info("devicesVo : "+devicesVo);
+    	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
@@ -299,6 +305,8 @@ public class DevicesController {
     @PostMapping("/deviceAll")
     public ResponseEntity<MessageVo> deviceAll(@RequestBody DevicesVo devicesVo) throws IOException, ParseException  {
     	
+    	log.info("devicesVo : "+devicesVo);
+    	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
@@ -335,6 +343,8 @@ public class DevicesController {
     @PostMapping("/deviceCandidate")
     public ResponseEntity<MessageVo> deviceCandidate(@RequestBody DevicesVo devicesVo) throws IOException  {
     	
+    	log.info("devicesVo : "+devicesVo);
+    	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
@@ -370,6 +380,8 @@ public class DevicesController {
      */
     @PostMapping("/getAlarmDeviceGroupListNDeviceListAll")
     public ResponseEntity<MessageVo> getAlarmDeviceGroupListNDeviceListAll(@RequestBody DevicesVo devicesVo) throws IOException  {
+    	
+    	log.info("devicesVo : "+devicesVo);
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -476,6 +488,8 @@ public class DevicesController {
     @PostMapping("/getDeviceFailList")
     public ResponseEntity<MessageVo> getDeviceFailList(@RequestBody DevicesVo devicesVo) throws IOException  {
     	
+    	log.info("devicesVo : "+devicesVo);
+    	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
@@ -511,6 +525,8 @@ public class DevicesController {
      */
     @PostMapping("/getDeviceGroupInfo")
     public ResponseEntity<MessageVo> getDeviceGroupInfo(@RequestBody DevicesVo devicesVo) throws IOException, ParseException  {
+    	
+    	log.info("devicesVo : "+devicesVo);
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -586,6 +602,8 @@ public class DevicesController {
     @PostMapping("/getDeviceInfo")
     public ResponseEntity<MessageVo> getDeviceInfo(@RequestBody DevicesVo devicesVo) throws IOException, ParseException  {
     	
+    	log.info("devicesVo : "+devicesVo);
+    	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
@@ -620,6 +638,8 @@ public class DevicesController {
 
     @PostMapping("/getDeviceInfoList")
     public ResponseEntity<MessageVo> getDeviceInfoList(@RequestBody DevicesVo devicesVo) throws IOException, ParseException  {
+    	
+    	log.info("devicesVo : "+devicesVo);
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -656,6 +676,8 @@ public class DevicesController {
      */
     @PostMapping("/getDeviceInterface")
     public ResponseEntity<MessageVo> getDeviceInterface(@RequestBody DevicesVo devicesVo) throws IOException  {
+    	
+    	log.info("devicesVo : "+devicesVo);
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -741,6 +763,8 @@ public class DevicesController {
      */    
     @PostMapping("/getDeviceStatus")
     public ResponseEntity<MessageVo> getDeviceStatus(@RequestBody DevicesVo devicesVo) throws IOException  {
+    	
+    	log.info("devicesVo : "+devicesVo);
     	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -896,6 +920,8 @@ public class DevicesController {
     @PostMapping("/searchDeviceInfoList")
     public ResponseEntity<MessageVo> searchDeviceInfoList(@RequestBody DevicesVo devicesVo) throws IOException  {
     	
+    	log.info("devicesVo : "+devicesVo);
+    	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
@@ -932,6 +958,8 @@ public class DevicesController {
     @PostMapping("/setDeviceGroup")
     public ResponseEntity<MessageVo> setDeviceGroup(@RequestBody DevicesVo devicesVo) throws IOException  {
     	
+    	log.info("devicesVo : "+devicesVo);
+    	
     	HttpHeaders headers= new HttpHeaders();
     	headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
     	
@@ -967,6 +995,8 @@ public class DevicesController {
      */
     @PostMapping("/setDeviceGroupInfo")
     public ResponseEntity<MessageVo> setDeviceGroupInfo(HttpServletRequest request, @RequestBody DevicesVo devicesVo) throws IOException  {
+    	
+    	log.info("devicesVo : "+devicesVo);
     	
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
@@ -1022,6 +1052,8 @@ public class DevicesController {
      */
     @PostMapping("/setDeviceInfo")
     public ResponseEntity<MessageVo> setDeviceInfo(HttpServletRequest request, @RequestBody DevicesVo devicesVo) throws IOException  {
+    	
+    	log.info("devicesVo : "+devicesVo);
     	
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();

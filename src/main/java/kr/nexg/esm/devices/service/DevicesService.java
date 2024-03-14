@@ -101,7 +101,7 @@ public class DevicesService {
         String rtnStr = "";
 
         Map<String, String> keyDic = new HashMap<>();
-        keyDic.put("pGroupID", "부모그룹");
+        keyDic.put("pgroupID", "부모그룹");
         keyDic.put("deviceIDs", "장비ID");
         keyDic.put("groupIDs", "그룹ID");
         keyDic.put("desc", "설명");
@@ -110,7 +110,7 @@ public class DevicesService {
         keyDic.put("groupNames", "그룹");
         keyDic.put("deviceNames", "장비");
         keyDic.put("gn", "그룹");
-        keyDic.put("product_id", "제품명");
+        keyDic.put("productID", "제품명");
         keyDic.put("dn", "장비명");
         keyDic.put("active", "활성화");
         keyDic.put("ip", "주소");
@@ -132,10 +132,10 @@ public class DevicesService {
             String replaceKey = keyDic.containsKey(key) ? keyDic.get(key) : key;
 
 //            log.info("key ===================="+key);
-            if ("pGroupID".equals(key)) {
+            if ("pgroupID".equals(key)) {
             	
                 DevicesVo devicesVo = new DevicesVo();
-                devicesVo.setPGroupID(String.valueOf(emsg.get(key)));
+                devicesVo.setPgroupID(String.valueOf(emsg.get(key)));
                 
                 List<Map<String, Object>> deviceGroupNames = devicesMapper.deviceGroupNames(devicesVo);
                 tmpPrint = String.valueOf(deviceGroupNames.get(0).get("name"));
@@ -176,7 +176,7 @@ public class DevicesService {
                 } else {
                 	tmpPrintArray.add(key + '=' + "미사용");
                 }
-            } else if ("product_id".equals(key) && emsg.get(key) != null) {
+            } else if ("productID".equals(key) && emsg.get(key) != null) {
                 String tmpDeviceNum = String.valueOf(emsg.get(key));
                 
                 DevicesVo devicesVo = new DevicesVo();
@@ -273,7 +273,7 @@ public class DevicesService {
             String tmpPrint = "";
             List<String> tmpArray = new ArrayList<>();
             
-            devicesVo.setPGroupID(String.valueOf(devicesVo.getPGroupID()));
+            devicesVo.setPgroupID(String.valueOf(devicesVo.getPgroupID()));
             
             List<Map<String, Object>> tmpParentSearch = devicesMapper.deviceGroupNames(devicesVo);
             String tmpParent = String.valueOf(tmpParentSearch.get(0).get("name"));
@@ -655,8 +655,8 @@ public class DevicesService {
 			map.put("dn", vo.get("dn"));
 			map.put("desc", vo.get("desc"));
 			map.put("ip", vo.get("id"));
-			map.put("product_id", vo.get("product_id"));
-			map.put("pGroupID", vo.get("pGroupID"));
+			map.put("productID", vo.get("product_id"));
+			map.put("pgroupID", vo.get("pgroupID"));
 			map.put("gn", vo.get("gn"));
 			map.put("serial", vo.get("serial"));
 			map.put("os", vo.get("os"));
@@ -817,13 +817,7 @@ public class DevicesService {
 		String message = "그룹이동이 완료되었습니다.";
 		int total = 0;
 		
-		log.info("devicesVo.getPGroupID() : " + devicesVo.getId());
-		log.info("devicesVo.getPGroupID() : " + devicesVo.getPGroupID());
-		log.info("devicesVo.getPGroupID() : " + devicesVo.getPGroupID());
-		log.info("devicesVo.getDeviceIDs() : " + devicesVo.getDeviceIDs());
-		
-		devicesVo.setPGroupID(devicesVo.getId());
-		if(devicesVo.getPGroupID() != null) {
+		if(devicesVo.getPgroupID() != null) {
 			
 			if(devicesVo.getDeviceIDs() != null) {
 			
@@ -976,8 +970,8 @@ public class DevicesService {
 	    }
 	    
 	    int gp = 0;
-        if (devicesVo.getPGroupID() != null && !"".equals(devicesVo.getId())) {
-        	gp = Integer.parseInt(devicesVo.getPGroupID());
+        if (devicesVo.getPgroupID() != null && !"".equals(devicesVo.getId())) {
+        	gp = Integer.parseInt(devicesVo.getPgroupID());
         }
         
         String topGroup = "전체";
@@ -1069,7 +1063,7 @@ public class DevicesService {
                 chkGroupMaximumChecker = devicesMapper.groupMaximumChkecker2(devicesVo); 
             }
 
-            if (chkGroupMaximumChecker >= 150 && (overDGroupId != Integer.parseInt(devicesVo.getPGroupID()))) {
+            if (chkGroupMaximumChecker >= 150 && (overDGroupId != Integer.parseInt(devicesVo.getPgroupID()))) {
                 message = "하나의 그룹에 150개 이상의 장비가 추가 될수 없습니다.";
                 success = "false";
             }
