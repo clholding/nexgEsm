@@ -126,6 +126,7 @@ public class ConfigurationController {
 	@PostMapping("/getIntegrityInfo")
 	public ResponseEntity<MessageVo> getIntegrityInfo(@RequestBody ConfigurationVo configurationVo) throws IOException  {
 		
+		log.info("configurationVo : "+configurationVo);
 		
 		HttpHeaders headers= new HttpHeaders();
 		headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -306,6 +307,8 @@ public class ConfigurationController {
     @PostMapping("/getConfigBackupList")
     public ResponseEntity<MessageVo> getConfigBackupList(@RequestBody ConfigurationVo configurationVo) throws IOException  {
   	
+    	log.info("configurationVo : "+configurationVo);
+    	
 		HttpHeaders headers= new HttpHeaders();
 		headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
 		
@@ -379,6 +382,8 @@ public class ConfigurationController {
     @PostMapping("/getSystemConfigBackupList")
     public ResponseEntity<MessageVo> getSystemConfigBackupList(@RequestBody ConfigurationVo configurationVo) throws IOException  {
   	
+    	log.info("configurationVo : "+configurationVo);
+    	
 		HttpHeaders headers= new HttpHeaders();
 		headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
 		
@@ -451,6 +456,8 @@ public class ConfigurationController {
     @PostMapping("/setLogDiskInfo")
     public ResponseEntity<MessageVo> setLogDiskInfo(HttpServletRequest request, @RequestBody ConfigurationVo configurationVo) throws IOException  {
   	
+    	log.info("configurationVo : "+configurationVo);
+    	
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         
@@ -506,6 +513,8 @@ public class ConfigurationController {
     @PostMapping("/getAlarmInfo")
     public ResponseEntity<MessageVo> getAlarmInfo(@RequestBody ConfigurationVo configurationVo) throws IOException  {
   	
+    	log.info("configurationVo : "+configurationVo);
+    	
 		HttpHeaders headers= new HttpHeaders();
 		headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
 		
@@ -541,6 +550,8 @@ public class ConfigurationController {
      */
     @PostMapping("/setAlarmInfo")
     public ResponseEntity<MessageVo> setAlarmInfo(HttpServletRequest request, @RequestBody ConfigurationVo configurationVo) throws IOException  {
+    	
+    	log.info("configurationVo : "+configurationVo);
     	
 		SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
@@ -785,7 +796,9 @@ public class ConfigurationController {
      */
     @PostMapping("/setInterfaceConfig")
     public ResponseEntity<MessageVo> setInterfaceConfig(HttpServletRequest request, @RequestBody ConfigurationVo configurationVo) throws IOException  {
-  	
+    	
+    	log.info("configurationVo : "+configurationVo);
+    	
     	SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = context.getAuthentication();
         
@@ -902,6 +915,7 @@ public class ConfigurationController {
     @PostMapping("/setDeviceRegisterConfig")
     public ResponseEntity<MessageVo> setDeviceRegisterConfig(@RequestBody ConfigurationVo configurationVo) throws IOException  {
   	
+    	log.info("configurationVo : "+configurationVo);
 		HttpHeaders headers= new HttpHeaders();
 		headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
 		

@@ -1111,3 +1111,58 @@ BEGIN
   SET SESSION sql_log_bin = ON;
   SET SESSION tx_isolation = 'REPEATABLE-READ';
 END
+
+
+***** delDeviceNGroup *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `delDeviceNGroup`(IN ids VARCHAR(2048), IN type INT)
+BEGIN
+  -- 장비 그룹 또는 장비 리스트 삭제
+  -- 단, 장비 그룹은 하위에 그룹 또는 장비가 없어야 삭제 가능하다.
+  DECLARE cur_state INT DEFAULT '0';
+  DECLARE cnt1 INT DEFAULT '0';
+  DECLARE cnt2 INT DEFAULT '0';
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET cur_state = 1;
+  DECLARE CONTINUE HANDLER FOR SQLWARNING  SET cur_state = 1;
+  DECLARE CONTINUE HANDLER FOR SQLEXCEPTION SET cur_state = 1;
+
+  # 그룹 type = 1
+  IF type = 1 THEN
+    set @query = CONCAT('SELECT COUNT(*) INTO @cnt1 FROM device_group WHERE group_id IN (', ids, ')');
+    PREPARE stmt FROM @query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+    SET cnt1 = @cnt1;
+
+    set @query = CONCAT('SELECT COUNT(*) INTO @cnt2 FROM device WHERE group_id IN (', ids, ')');
+    PREPARE stmt FROM @query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+    SET cnt2 = @cnt2;
+
+    IF cnt1 > 0 OR cnt2 > 0 THEN
+      SET cur_state = 1;
+    END IF;
+  END IF;
+
+  START TRANSACTION;
+
+  IF type = 1 THEN
+    set @query = CONCAT('DELETE FROM device_group WHERE id IN (', ids, ')');
+    PREPARE stmt FROM @query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+  ELSE
+    set @query = CONCAT('DELETE FROM device WHERE id IN (', ids, ')');
+    PREPARE stmt FROM @query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+  END IF;
+
+  IF cur_state THEN
+    ROLLBACK;
+    SELECT 0 as col;
+  ELSE
+    COMMIT;
+    SELECT 1 as col;
+  END IF;
+END

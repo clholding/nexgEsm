@@ -86,6 +86,16 @@ public interface DevicesMapper {
 	public int deviceGroupCnt(DevicesVo devicesVo);
 	public int deviceGroupCnt2(DevicesVo devicesVo);
 	
+	/*
+	 * DeviceTree > 설정 > 특정 장비 그룹 지정
+	 */
+	public Map<String, Object> setDeviceGroup(DevicesVo devicesVo);
+	
+	/*
+	 * DeviceTree > 설정 트리 > 특정 장비를 선택 삭제
+	 */
+	public Map<String, Object> delDeviceNGroup(DevicesVo devicesVo);
+	
 	public List<Map<String, Object>> deviceGroupNames(DevicesVo devicesVo);
 	public List<Map<String, Object>> deviceNames(DevicesVo devicesVo);
 	public String productName(DevicesVo devicesVo);

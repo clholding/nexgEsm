@@ -83,7 +83,7 @@
 	
 	<select id="searchDeviceInfoList" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.searchDeviceInfoList */	
-		Call sesm.searchDeviceInfoList( #{deviceID}, #{productId}, #{dname}, #{gname}, #{ip}, #{serial}, #{os}, #{agent}, #{desc}, #{company}, 
+		Call sesm.searchDeviceInfoList( #{deviceID}, #{productID}, #{dname}, #{gname}, #{ip}, #{serial}, #{os}, #{agent}, #{desc}, #{company}, 
 		#{phone1}, #{fax}, #{zip}, #{address}, #{customer}, #{phone2}, #{email}, #{page}, #{viewCount} );
 	</select>
 	
@@ -107,9 +107,29 @@
 		SELECT count(1) cnt 
 		  FROM device_group 
 		 WHERE 1 = 1
-		<if test="pGroupID neq '' and pGroupID != null">		   
-		   AND id = #{pGroupID}
+		<if test="pgroupID neq '' and pgroupID != null">		   
+		   AND id = #{pgroupID}
 		</if>		   
+	</select>
+	
+	<select id="setDeviceGroup" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
+		/* DevicesMapper.setDeviceGroup */	
+		<if test="deviceID neq '' and deviceID != null">	
+		Call sesm.setDeviceGroup( #{deviceID}, 0, #{pgroupID})
+		</if>
+		<if test="groupID neq '' and groupID != null">	
+		Call sesm.setDeviceGroup( #{groupID}, 1, #{pgroupID})
+		</if>
+	</select>
+		
+	<select id="delDeviceNGroup" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
+		/* DevicesMapper.delDeviceNGroup */	
+		<if test="deviceID neq '' and deviceID != null">	
+		Call sesm.delDeviceNGroup( #{deviceID} , 0)
+		</if>
+		<if test="groupID neq '' and groupID != null">	
+		Call sesm.delDeviceNGroup( #{groupID}, 1)
+		</if>
 	</select>
 	
 	<select id="deviceGroupNames" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
@@ -117,11 +137,11 @@
 		SELECT name
 		  FROM device_group 
 		 WHERE 1 = 1
-		<if test="pGroupID neq '' and pGroupID != null">		 
-		   AND id = #{pGroupID}
+		<if test="pgroupID neq '' and pgroupID != null">		 
+		   AND id = #{pgroupID}
 		</if>
-		<if test="groupIDs neq '' and groupIDs != null">		 
-		    in ( #{groupIDs} )
+		<if test="groupID neq '' and groupID != null">		 
+		    in ( #{groupID} )
 		</if>
 	</select>
 	
@@ -140,8 +160,8 @@
 		SELECT count(1) cnt 
 		  FROM product 
 		 WHERE 1 = 1
-		<if test="productId neq '' and productId != null">		 
-		   AND id = #{productId}
+		<if test="productID neq '' and productID != null">		 
+		   AND id = #{productID}
 		</if>
 	</select>
 
@@ -187,7 +207,7 @@
 	
 	<select id="groupMaximumChkecker" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="int">
 		/* DevicesMapper.groupMaximumChkecker */	
-		SELECT COUNT(*) cnt FROM device WHERE group_id = #{pGroupID}
+		SELECT COUNT(*) cnt FROM device WHERE group_id = #{pgroupID}
 	</select>
 	
 	<select id="groupMaximumChkecker2" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="int">
@@ -196,21 +216,21 @@
 		  FROM device, product p 
 		 WHERE p.id = device.product_id 
 		   AND p.type = #{type}
-		   AND group_id = #{pGroupID}
+		   AND group_id = #{pgroupID}
 	</select>
 	
 	<select id="overwriteDeviceInfo" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.overwriteDeviceInfo */	
 		Call sesm.overwriteDeviceInfo( #{id}, #{overDId}, #{name}, #{desc}, #{ip}, #{active}, #{log}, #{alarm}, #{serial}, #{company}, 
 		#{customer}, #{email}, #{zip}, #{address}, #{phone1}, #{phone2}, #{fax}, #{mid}, #{mpass}, #{gid}, 
-		#{productId}, #{snmpUseInherit}, #{snmpVersion}, #{snmpCommunity}, #{snmpLevel}, #{snmpUser}, #{snmpAuthprot}, #{snmpAuthpass}, #{snmpPrivprot}, #{snmpPrivpass}, 
+		#{productID}, #{snmpUseInherit}, #{snmpVersion}, #{snmpCommunity}, #{snmpLevel}, #{snmpUser}, #{snmpAuthprot}, #{snmpAuthpass}, #{snmpPrivprot}, #{snmpPrivpass}, 
 		#{memo1}, #{memo2}, #{code1}, #{code2} );
 	</select>
 
 	<select id="setDeviceInfo" parameterType="kr.nexg.esm.devices.dto.DevicesVo" resultType="map">
 		/* DevicesMapper.setDeviceInfo */	
 		Call sesm.setDeviceInfo( #{id}, #{name}, #{desc}, #{ip}, #{active}, #{log}, #{alarm}, #{serial}, #{company}, #{customer}, 
-		#{email}, #{zip}, #{address}, #{phone1}, #{phone2}, #{fax}, #{mid}, #{mpass}, #{gid}, #{productId}, 
+		#{email}, #{zip}, #{address}, #{phone1}, #{phone2}, #{fax}, #{mid}, #{mpass}, #{gid}, #{productID}, 
 		#{snmpUseInherit}, #{snmpVersion}, #{snmpCommunity}, #{snmpLevel}, #{snmpUser}, #{snmpAuthprot}, #{snmpAuthpass}, #{snmpPrivprot}, #{snmpPrivpass}, #{memo1}, 
 		#{memo2}, #{code1}, #{code2} );
 	</select>
