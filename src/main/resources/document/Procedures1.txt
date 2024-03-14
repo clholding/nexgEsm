@@ -321,3 +321,69 @@ BEGIN
   EXECUTE stmt3;
 
 END
+
+
+***** getDeviceStatus *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `sesm`.`getDeviceStatus`(IN ids VARCHAR(2048))
+BEGIN
+  -- 장비 상태 정보 조회
+  DECLARE strWhere VARCHAR(2080);
+
+  SET strWhere = '';
+
+  IF NULLIF(ids, '') IS NOT NULL AND ids != '0' THEN
+    SET strWhere = CONCAT(strWhere, ' AND FIND_IN_SET(d.id, "', ids, '")');
+  ELSEIF NULLIF(ids, '') IS NULL THEN
+    SET strWhere = CONCAT(strWhere, ' AND FIND_IN_SET(d.id, "0")');
+  END IF;
+
+  set @query = CONCAT('SELECT device_id, name, name1, ip, cpu, cpu_alarm, mem_total, mem_avail, mem_alarm, disk0_total,
+      disk0_used, disk0_alarm, disk1_total, disk1_used, disk1_alarm, session, session_alarm, tunnel, tunnel_alarm, rtt,
+      rtt_alarm, sum(rx_bytes) as rx_bytes, rbytes_alarm, sum(rx_pkts) as rx_pkts, rpkts_alarm, sum(rx_errs) as rx_errs, sum(rx_drops) as rx_drops, sum(tx_bytes) as tx_bytes, tbytes_alarm, sum(tx_pkts) as tx_pkts,
+      tpkts_alarm, sum(tx_errs) as tx_errs, sum(tx_drops) as tx_drops, updowntime,
+      CASE
+        WHEN status = 1 THEN CASE WHEN COUNT(CASE WHEN int_status = 0 OR eix_status LIKE "down%" THEN 1 END) > 0 THEN "점검" ELSE "정상" END
+        WHEN status <=0 THEN "장애"
+      END as status0,
+      status1, power, cpu_temp, cpu_temp_alarm, system_temp, system_temp_alarm, cert_expire_time, cert_alarm, cert, console1, console2, console3, console4, power1, power2,
+      power3, power4, code1, code2, hostname, product_id, agent, os, active, host,
+      host_alarm, rsrp, tunnel_info, lte_vender, lte_number, duration, cps, cps_alarm
+    from (
+      SELECT s.device_id, g.name, d.name as name1, d.ip,
+      s.cpu, s.cpu_alarm, s.mem_total, s.mem_avail, s.mem_alarm,
+      s.disk0_total, s.disk0_used, s.disk0_alarm, s.disk1_total, s.disk1_used, s.disk1_alarm,
+      s.session, s.session_alarm, s.tunnel, s.tunnel_alarm, s.rtt, s.rtt_alarm,
+      int_status.rx_bytes, s.rbytes_alarm, int_status.rx_pkts, s.rpkts_alarm, int_status.rx_errs, int_status.rx_drops,
+      int_status.tx_bytes, s.tbytes_alarm, int_status.tx_pkts, s.tpkts_alarm, int_status.tx_errs, int_status.tx_drops,
+      CASE
+        WHEN s.status = 1 THEN CONCAT(s.uptime DIV 86400, "days ", SEC_TO_TIME(s.uptime % 86400))
+        WHEN s.status <= 0 THEN CONCAT((UNIX_TIMESTAMP(NOW()) - s.downtime) DIV 86400, "days ", SEC_TO_TIME((UNIX_TIMESTAMP(NOW()) - s.downtime) % 86400))
+      END AS updowntime,
+      s.status as status, s.status as status1,
+      s.power, s.cpu_temp, s.cpu_temp_alarm, s.system_temp, s.system_temp_alarm,
+      CONCAT(cert_info.expire_time) AS cert_expire_time, CASE ((cert_info.expire_time-CURRENT_TIMESTAMP()) DIV 86400) <= 30 WHEN 1 THEN 0 WHEN 0 THEN 1 END AS cert_alarm, cert_info.cert,
+      cps.console1, cps.console2, cps.console3, cps.console4, cps.power1, cps.power2, cps.power3, cps.power4,
+      di.code1, di.code2, di.hostname, d.product_id, di.agent, di.os, d.active, s.host, s.host_alarm, s.rsrp, s.tunnel_info, di.lte_vender, di.lte_number, s.duration, s.cps, s.cps_alarm, int_status.status as int_status, eix.status as eix_status
+      FROM device as d, device_group as g ,device_status as s
+          LEFT JOIN int_info ON (int_info.device_id = s.device_id AND int_info.location = 1)
+          LEFT JOIN int_status ON (int_info.id = int_status.int_id)
+          LEFT JOIN cert_info ON (cert_info.device_id = s.device_id)
+          LEFT JOIN console_power_status cps ON (cps.device_id = s.device_id)
+          LEFT JOIN device_info di ON (di.device_id = s.device_id)
+          LEFT JOIN eix_status eix ON (eix.device_id = s.device_id)
+      WHERE s.device_id = d.id AND d.group_id = g.id ', strWhere, ' 
+      ) as A
+      group by device_id, name, name1, ip, cpu, cpu_alarm, mem_total, mem_avail, mem_alarm, 
+          disk0_total, disk0_used, disk0_alarm, disk1_total, disk1_used, disk1_alarm, 
+          session, session_alarm, tunnel, tunnel_alarm, rtt, rtt_alarm, rbytes_alarm, 
+          rpkts_alarm, tbytes_alarm, tpkts_alarm, 
+          updowntime, status, status1, power, cpu_temp, cpu_temp_alarm, 
+          system_temp, system_temp_alarm, cert_expire_time, cert_alarm, cert, 
+          console1, console2, console3, console4, power1, power2, power3, power4, 
+          code1, code2, hostname, product_id, agent, os, active, host, host_alarm, rsrp, tunnel_info,lte_vender, lte_number, duration, cps, cps_alarm
+      ORDER BY A.device_id');
+
+  PREPARE stmt FROM @query;
+  EXECUTE stmt;
+  DEALLOCATE PREPARE stmt;
+END

@@ -214,7 +214,39 @@ public class MonitoringController {
 	@PostMapping("/topN")
     public ResponseEntity<MessageVo> topN(@RequestBody MonitoringVo monitoringVo) {
 		
-		return null;
+		SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        
+        String sessionId = authentication.getName();
+        monitoringVo.setSessionId(sessionId);
+		
+    	HttpHeaders headers= new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+        
+        MessageVo message;
+        
+        try {
+        	
+        	List<Map<String, Object>> list = monitoringService.topN(monitoringVo);
+            int totalCount = list.size();
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("")
+                	.totalCount(totalCount)
+                	.entitys(list)
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}
+    	
+        return new ResponseEntity<>(message, headers, HttpStatus.OK);
     }
 	
 }

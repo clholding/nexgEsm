@@ -3,8 +3,13 @@
 <mapper namespace="kr.nexg.esm.nexgesm.mariadb.mapper.MonitorMapper">
 
 	<select id="getDeviceStatus" parameterType="String" resultType="map">
-		/* LogMapper.getDeviceStatus */	
+		/* MonitorMapper.getDeviceStatus */	
 		CALL sesm.getDeviceStatus( #{deviceIds} );
+	</select>
+	
+	<select id="getMonitorTopN" parameterType="map" resultType="map">
+		/* MonitorMapper.getMonitorTopN */	
+		CALL sesm.getMonitorTopN( #{fid}, #{type}, #{topn} );
 	</select>
 	
 </mapper>

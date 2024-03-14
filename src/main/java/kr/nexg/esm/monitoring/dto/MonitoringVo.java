@@ -9,5 +9,6 @@ import lombok.Data;
 public class MonitoringVo extends CommonVo {
 	private String mode;
 	private String groupID;
+	private String target;
 	private List<String> deviceIDs;
 }

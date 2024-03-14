@@ -12,5 +12,7 @@ public interface MonitorMapper {
 	
 	public List<Map<String, Object>> getDeviceStatus(String deviceIds);
 	
+	public List<Map<String, Object>> getMonitorTopN(Map<String, Object> paramMap);
+	
 	
 }

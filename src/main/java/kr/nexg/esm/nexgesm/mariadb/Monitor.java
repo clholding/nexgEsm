@@ -1,5 +1,6 @@
 package kr.nexg.esm.nexgesm.mariadb;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +14,17 @@ public class Monitor {
 	
 	@Autowired
 	MonitorMapper monitorMapper;
+	
+	@Component
+	public class TopN {
+		public List<Map<String, Object>> get_topn(String fid, int type, int topn) {
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("fid", fid);
+			map.put("type", type);
+			map.put("topn", topn);
+			return monitorMapper.getMonitorTopN(map);
+		}
+	}
 	
 	@Component
 	public class DeviceMonitor {

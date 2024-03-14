@@ -9,6 +9,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import kr.nexg.esm.common.util.CommonUtil;
 import kr.nexg.esm.monitoring.dto.MonitoringVo;
 import kr.nexg.esm.monitoring.mapper.MonitoringMapper;
 import kr.nexg.esm.nexgesm.mariadb.Monitor;
@@ -23,6 +24,68 @@ public class MonitoringService {
 	@Autowired
 	Monitor.DeviceMonitor deviceMonitor;
 	
+	public Map<String, String> convertStatusInfo(String type, String totalVal, String val, String alarmVal) throws Exception {
+		Map<String, String> result = new HashMap<>();
+		
+		float m_totalVal = 0;
+		if(totalVal != null && !"".equals(totalVal)) {
+			m_totalVal = Float.parseFloat(totalVal);
+		}
+		
+		float m_val = 0;
+		if(val != null && !"".equals(val)) {
+			m_val = Float.parseFloat(val);
+		}
+		
+		float m_alarmVal = 0;
+		if(alarmVal != null && !"".equals(alarmVal)) {
+			m_alarmVal = Float.parseFloat(alarmVal);
+		}
+		
+		String m_status = "0";
+		if("cpu".equals(type)) {
+			if(m_val > m_alarmVal && m_alarmVal > 0) {
+				m_status = "1";
+			}
+			m_val = (float) ((Math.round(m_val*100)) / 100.0);	//소수점 2자리
+		}else if("mem".equals(type)) {
+			float used = m_totalVal - m_val;
+			if(used > 0) {
+				m_val = (used / m_totalVal) * 100;
+			}
+			m_val = (float) ((Math.round(m_val*100)) / 100.0);	//소수점 2자리
+			if(m_val > m_alarmVal && m_alarmVal > 0) {
+				m_status = "1";
+			}
+			m_val = used;
+		}else if(type.contains("disk0 disk1")) {
+			float used = m_val;
+			if(m_val > 0) {
+				m_val = (used / m_totalVal) * 100;
+			}
+			m_val = (float) ((Math.round(m_val*100)) / 100.0);	//소수점 2자리
+			if(m_val > m_alarmVal && m_alarmVal > 0) {
+				m_status = "1";
+			}
+			m_val = (int) used;
+		}else if("tunnel".equals(type)) {
+			if(m_val < m_alarmVal && m_alarmVal > 0) {
+				m_status = "1";
+			}
+			m_val = (int) m_val;
+		}else {
+			if(m_val > m_alarmVal && m_alarmVal > 0) {
+				m_status = "1";
+			}
+			m_val = (int) m_val;
+		}
+		
+		result.put("num", m_val > 0 ? Float.toString(m_val) : "0");
+		result.put("state", m_status);
+		
+		return result;
+	}
+	
 	public List<Map<String, Object>> esmDevice(MonitoringVo monitoringVo) throws Exception{
 		
 		return null;
@@ -34,6 +97,7 @@ public class MonitoringService {
 		String rs_mode = monitoringVo.getMode();
 		String rs_groupID = monitoringVo.getGroupID();
 		
+		List<Map<String, Object>> result = new ArrayList<>();
 		
 		List<String> rs_deviceIDs = monitoringVo.getDeviceIDs();
 		String deviceIds = "";
@@ -91,7 +155,7 @@ public class MonitoringService {
 				cnt += 1;
 				Map<String, String> track = new HashMap<>();
 				track.put("name", (String) trackStatusList.get(j).get("num"));
-				track.put(ips_str, String.valueOf(trackStatusList.get(j).get("status")));
+				track.put("status", String.valueOf(trackStatusList.get(j).get("status")));
 				tracks.add(track);
 			}
 			
@@ -192,27 +256,27 @@ public class MonitoringService {
 			List<Map<String, String>> consoles = new ArrayList<>();
 			Map<String, String> console = new HashMap<>();
 			
-			String console1 = String.valueOf(deviceMonitorList.get(i).get("console1"));
-			String console2 = String.valueOf(deviceMonitorList.get(i).get("console2"));
-			String console3 = String.valueOf(deviceMonitorList.get(i).get("console3"));
-			String console4 = String.valueOf(deviceMonitorList.get(i).get("console4"));
+			String console1 = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("console1")));
+			String console2 = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("console2")));
+			String console3 = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("console3")));
+			String console4 = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("console4")));
 			
-			if(console1 != null && !"null".equals(console1) && !console1.isBlank()) {
+			if(console1 != null && !"".equals(console1)) {
 				console.put("name", "console #1");
 				console.put("status", console1);
 				consoles.add(console);
 			}
-			if(console2 != null && !"null".equals(console2) && !console2.isBlank()) {
+			if(console2 != null && !"".equals(console2)) {
 				console.put("name", "console #2");
 				console.put("status", console2);
 				consoles.add(console);
 			}
-			if(console3 != null && !"null".equals(console3) && !console3.isBlank()) {
+			if(console3 != null && !"".equals(console3)) {
 				console.put("name", "console #3");
 				console.put("status", console3);
 				consoles.add(console);
 			}
-			if(console4 != null && !"null".equals(console4) && !console4.isBlank()) {
+			if(console4 != null && !"".equals(console4)) {
 				console.put("name", "console #4");
 				console.put("status", console4);
 				consoles.add(console);
@@ -221,27 +285,27 @@ public class MonitoringService {
 			List<Map<String, String>> powers = new ArrayList<>();
 			Map<String, String> powerMap = new HashMap<>();
 			
-			String power1 = String.valueOf(deviceMonitorList.get(i).get("power1"));
-			String power2 = String.valueOf(deviceMonitorList.get(i).get("power2"));
-			String power3 = String.valueOf(deviceMonitorList.get(i).get("power3"));
-			String power4 = String.valueOf(deviceMonitorList.get(i).get("power4"));
+			String power1 = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("power1")));
+			String power2 = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("power2")));
+			String power3 = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("power3")));
+			String power4 = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("power4")));
 			
-			if(power1 != null && !"null".equals(power1) && !power1.isBlank()) {
+			if(power1 != null && !"".equals(power1)) {
 				powerMap.put("name", "power #1");
 				powerMap.put("status", power1);
 				powers.add(powerMap);
 			}
-			if(power2 != null && !"null".equals(power2) && !power2.isBlank()) {
+			if(power2 != null && !"".equals(power2)) {
 				powerMap.put("name", "power #2");
 				powerMap.put("status", power2);
 				powers.add(powerMap);
 			}
-			if(power3 != null && !"null".equals(power3) && !power3.isBlank()) {
+			if(power3 != null && !"".equals(power3)) {
 				powerMap.put("name", "power #3");
 				powerMap.put("status", power3);
 				powers.add(powerMap);
 			}
-			if(power4 != null && !"null".equals(power4) && !power4.isBlank()) {
+			if(power4 != null && !"".equals(power4)) {
 				powerMap.put("name", "power #4");
 				powerMap.put("status", power4);
 				powers.add(powerMap);
@@ -249,33 +313,191 @@ public class MonitoringService {
 			
 			
 			List<Map<String, Object>> failInterfaceList = monitoringMapper.getFailInterface(device_id);
-			String longtime_down = String.valueOf(failInterfaceList.get(0).get("longtime_down"));
-			String updown_repeat = String.valueOf(failInterfaceList.get(0).get("updown_repeat"));
+			String longtime_down = CommonUtil.getStringValuOf(String.valueOf(failInterfaceList.get(0).get("longtime_down")));
+			String updown_repeat = CommonUtil.getStringValuOf(String.valueOf(failInterfaceList.get(0).get("updown_repeat")));
 			
+			String gn = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("name")));
+			String dn = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("name1")));
+			String d_ip = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("ip")));
+			String cpu = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("cpu")));
+			String cpu_alarm = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("cpu_alarm")));
+			String mem_total = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("mem_total")));
+			String mem_avail = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("mem_avail")));
+			String mem_alarm = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("mem_alarm")));
+			String disk0_total = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("disk0_total")));
+			String disk0_used = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("disk0_used")));
+			String disk0_alarm = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("disk0_alarm")));
+			String disk1_total = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("disk1_total")));
+			String disk1_used = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("disk1_used")));
+			String disk1_alarm = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("disk1_alarm")));
+			String session = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("session")));
+			String session_alarm = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("session_alarm")));
+			String tunnel = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("tunnel")));
+			String tunnel_alarm = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("tunnel_alarm")));
+			String rtt = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("rtt")));
+			String rtt_alarm = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("rtt_alarm")));
+			String rx_bytes = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("rx_bytes")));
+			String rbytes_alarm = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("rbytes_alarm")));
+			String rx_pkts = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("rx_pkts")));
+			String rpkts_alarm = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("rpkts_alarm")));
+			String rx_errs = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("rx_errs")));
+			String rx_drops = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("rx_drops")));
+			String tx_bytes = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("tx_bytes")));
+			String tbytes_alarm = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("tbytes_alarm")));
+			String tx_pkts = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("tx_pkts")));
+			String tpkts_alarm = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("tpkts_alarm")));
+			String tx_errs = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("tx_errs")));
+			String tx_drops = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("tx_drops")));
+			String updowntime = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("updowntime")));
+			String status0 = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("status0")));
+			String status1 = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("status1")));
+			String cpu_temp = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("cpu_temp")));
+			String cpu_temp_alarm = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("cpu_temp_alarm")));
+			String system_temp = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("system_temp")));
+			String system_temp_alarm = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("system_temp_alarm")));
+			String code1 = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("code1")));
+			String code2 = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("code2")));
+			String hostname = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("hostname")));
+			String product_id = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("product_id")));
+			String agent = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("agent")));
+			String os = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("os")));
+			String active = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("active")));
+			String host = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("host")));
+			String host_alarm = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("host_alarm")));
+			String rsrp = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("rsrp")));
+			String tunnel_info = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("tunnel_info")));
+			String lte_vender = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("lte_vender")));
+			String lte_number = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("lte_number")));
+			String duration = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("duration")));
+			String cps = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("cps")));
+			String cps_alarm = CommonUtil.getStringValuOf(String.valueOf(deviceMonitorList.get(i).get("cps_alarm")));
 			
+			Map<String, String> _cpu = convertStatusInfo("cpu", "0", cpu, cpu_alarm);
+			Map<String, String> _mem = convertStatusInfo("mem", mem_total, mem_avail, mem_alarm);  // total-avail
+			Map<String, String> _disk0 = convertStatusInfo("disk0", disk0_total, disk0_used, disk0_alarm); // used
+			Map<String, String> _disk1 = convertStatusInfo("disk1", disk1_total, disk1_used, disk1_alarm);  // used
+			Map<String, String> _session = convertStatusInfo("session", "0", session, session_alarm);
+			Map<String, String> _host = convertStatusInfo("host", "0", host, host_alarm);
+			Map<String, String> _tunnel = convertStatusInfo("tunnel", "0", tunnel, tunnel_alarm);
+			Map<String, String> _cps = convertStatusInfo("cps", "0", cps, cps_alarm);
+			Map<String, String> _rtt = convertStatusInfo("rtt", "0", rtt, rtt_alarm);
+			Map<String, String> _rx_byte = convertStatusInfo("rx_byte", "0", rx_bytes, rbytes_alarm);
+			Map<String, String> _rx_pkt = convertStatusInfo("rx_pkt", "0", rx_pkts, rpkts_alarm);
+			Map<String, String> _rx_err = convertStatusInfo("rx_err", "0", rx_errs, "0");
+			Map<String, String> _rx_drops = convertStatusInfo("rx_drops", "0", rx_drops, "0");
+			Map<String, String> _tx_byte = convertStatusInfo("tx_byte", "0", tx_bytes, tbytes_alarm);
+			Map<String, String> _tx_pkt = convertStatusInfo("tx_pkt", "0", tx_pkts, tpkts_alarm);
+			Map<String, String> _tx_err = convertStatusInfo("rx_drops", "0", tx_errs, "0");
+			Map<String, String> _tx_drops = convertStatusInfo("rx_drops", "0", tx_drops, "0");
+			Map<String, String> _cpu_temp = convertStatusInfo("cpu_temp","0", cpu_temp, cpu_temp_alarm);
+			Map<String, String> _system_temp = convertStatusInfo("system_temp","0", system_temp, system_temp_alarm);
+			
+			List<Map<String, String>> states_list = new ArrayList<Map<String,String>>();
+			states_list.add(_cpu);
+			states_list.add(_mem);
+			states_list.add(_disk0);
+			states_list.add(_disk1);
+			states_list.add(_session);
+			states_list.add(_host);
+			states_list.add(_tunnel);
+			states_list.add(_cps);
+			states_list.add(_rtt);
+			states_list.add(_rx_byte);
+			states_list.add(_rx_pkt);
+			states_list.add(_rx_err);
+			states_list.add(_rx_drops);
+			states_list.add(_tx_byte);
+			states_list.add(_tx_pkt);
+			states_list.add(_tx_err);
+			states_list.add(_tx_drops);
+			states_list.add(_cpu_temp);
+			states_list.add(_system_temp);
+			
+			String status = status0;
+			
+			if("1".equals(status1)) {
+				for(int k=0; k<states_list.size(); k++) {
+					if("1".equals(states_list.get(k).get("state"))) {
+			            status = "경고";
+			            break;
+					}
+				}
+			}
+			
+			Map<String, Object> statesMap = new HashMap<String, Object>();
+			statesMap.put("cpu",_cpu);
+			statesMap.put("mem",_mem);
+			statesMap.put("disk0",_disk0);
+			statesMap.put("disk1",_disk1);
+			statesMap.put("session",_session);
+			statesMap.put("host",_host);
+			statesMap.put("tunnel",_tunnel);
+			statesMap.put("cps",_cps);
+			statesMap.put("rtt",_rtt);
+			statesMap.put("rx_byte",_rx_byte);
+			statesMap.put("rx_pkt",_rx_pkt);
+			statesMap.put("rx_err",_rx_err);
+			statesMap.put("rx_drops",_rx_drops);
+			statesMap.put("tx_byte",_tx_byte);
+			statesMap.put("tx_pkt",_tx_pkt);
+			statesMap.put("tx_err",_tx_err);
+			statesMap.put("tx_drops",_tx_drops);
+			statesMap.put("cpu_temp",_cpu_temp);
+			statesMap.put("system_temp",_system_temp);
+			
+			String code = "";
+			if(!code1.isBlank() && !code2.isBlank()) {
+				code = code1 + "-" + code2;
+			}
+			Map<String, Object> resultMap = new HashMap<String, Object>();
+			resultMap.put("deviceID", device_id);
+			resultMap.put("gn", gn);
+			resultMap.put("dn", dn);
+			resultMap.put("ip", d_ip);
+			resultMap.put("code", code);
+			resultMap.put("hn", hostname);
+			resultMap.put("product_id", product_id);
+			resultMap.put("agent", agent);
+			resultMap.put("os", os);
+			resultMap.put("rsrp", rsrp);
+			resultMap.put("tunnel_info", tunnel_info);
+			resultMap.put("lte_vender", lte_vender);
+			resultMap.put("lte_number", lte_number);
+			resultMap.put("duration", duration);
+			resultMap.put("states", statesMap);
+			resultMap.put("interfaces", interfaces);
+			resultMap.put("ips", ips_str);
+			resultMap.put("eixs", eixs);
+			resultMap.put("tracks", tracks);
+			resultMap.put("vrrps", vrrps);
+			
+			resultMap.put("redudant_power1", redudant_power1);
+			resultMap.put("redudant_power2", redudant_power2);
+			resultMap.put("cert_expire_time", _cert_expire_time);
+			resultMap.put("cert_state", _cert_state);
+			resultMap.put("cert_info", _cert_info);
+			resultMap.put("consoles", consoles);
+			resultMap.put("powers", powers);
+			resultMap.put("time", updowntime);
+			resultMap.put("status", status);
+			resultMap.put("longtime_down", longtime_down);
+			resultMap.put("updown_repeat", updown_repeat);
+			
+			result.add(resultMap);
 		}
 		
-		
+		return result;
+	}
+	
+	public List<Map<String, Object>> topN(MonitoringVo monitoringVo) throws Exception{
 		
 		List<Map<String, Object>> result = new ArrayList<>();
+		String rs_target = !monitoringVo.getTarget().isBlank() ? monitoringVo.getTarget() : "CPU";
+		String rs_viewCount = Integer.toString(monitoringVo.getLimit());
+		List<String> rs_deviceIDs = monitoringVo.getDeviceIDs();
+		String deviceIds = String.join(",", rs_deviceIDs);
 		
-//		for(int i=0; i<list.size(); i++) {
-//			
-//			Map<String, Object> map = new LinkedHashMap<>();
-//			String failCount = String.valueOf(list.get(i).get("fail_count"));
-//			String totalCount = String.valueOf(list.get(i).get("total_count"));
-//			String inspectCount = String.valueOf(list.get(i).get("inspect_count"));
-//			int normalCount = Integer.parseInt(totalCount) - Integer.parseInt(failCount) - Integer.parseInt(inspectCount);
-//			map.put("totalCount", Integer.parseInt(totalCount));
-//			map.put("failCount", Integer.parseInt(failCount));
-//			map.put("normalCount", normalCount);
-//			map.put("inspectCount", Integer.parseInt(inspectCount));
-			
-//			result.add(map);
-//		}
-//		
-//		return result;
-		return null;
+		return result;
 	}
 	
 }
