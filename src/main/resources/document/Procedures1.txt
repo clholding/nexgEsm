@@ -387,3 +387,27 @@ BEGIN
   EXECUTE stmt;
   DEALLOCATE PREPARE stmt;
 END
+
+
+***** getInputLog *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `sesm`.`getInputLog`(IN fids varchar(10000))
+BEGIN
+  -- 날짜별 로그 input 개수 조회
+  DECLARE strWhere VARCHAR(10000);
+  SET strWhere = '';
+
+  IF NULLIF(fids, '') IS NOT NULL AND fids != '0' THEN
+    SET strWhere = CONCAT(strWhere, ' AND FIND_IN_SET(device_id, "', fids, '")');
+  ELSEIF NULLIF(fids, '') IS NULL THEN
+    SET strWhere = CONCAT(strWhere, ' AND FIND_IN_SET(device_id, "0")');
+  END IF;
+
+  IF NULLIF(fids, '') IS NOT NULL THEN
+  SET @query = CONCAT('SELECT DATE_FORMAT(`date`, "%Y-%m-%d") as dt, SUM(`count`) as count FROM input_log
+  WHERE `date` > CURDATE() - INTERVAL 7 DAY ', strWhere, ' GROUP BY `date`');
+
+  PREPARE stmt FROM @query;
+  EXECUTE stmt;
+  DEALLOCATE PREPARE stmt;
+  END IF;
+END

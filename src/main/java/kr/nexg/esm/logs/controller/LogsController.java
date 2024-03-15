@@ -41,7 +41,7 @@ public class LogsController {
 	* 메인 > 탑 메뉴 메인 > 초기 대시보드
 	* 대쉬보드, 최근 장애 장비
 	* 
-	* @ param Map
+	* @ param LogsVo
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/lastFailDevice")
@@ -62,6 +62,84 @@ public class LogsController {
         try {
         	
         	List<Map<String, Object>> list = logsService.lastFailDevice(logsVo);
+            int totalCount = list.size();
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("")
+                	.totalCount(totalCount)
+                	.entitys(list)
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}
+    	
+        return new ResponseEntity<>(message, headers, HttpStatus.OK);
+    }
+	
+	/**
+	* 메인 > 탑 메뉴 메인 > 초기 대시보드
+	* 주간로그 발생 통계
+	* 
+	* @ param LogsVo
+	* @ return ResponseEntity
+	*/
+	@PostMapping("/weeklyLog")
+    public ResponseEntity<MessageVo> weeklyLog(@RequestBody LogsVo logsVo) {
+    	
+    	HttpHeaders headers= new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+        
+        MessageVo message;
+        
+        try {
+        	
+        	List<Map<String, Object>> list = logsService.weeklyLog(logsVo);
+            int totalCount = list.size();
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("")
+                	.totalCount(totalCount)
+                	.entitys(list)
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}
+    	
+        return new ResponseEntity<>(message, headers, HttpStatus.OK);
+    }
+	
+	/**
+	* 메인 > 탑 메뉴 메인 > 초기 대시보드
+	* 장비 장애 로그 패널
+	* 
+	* @ param LogsVo
+	* @ return ResponseEntity
+	*/
+	@PostMapping("/etcLogs")
+    public ResponseEntity<MessageVo> etcLogs(@RequestBody LogsVo logsVo) {
+    	
+    	HttpHeaders headers= new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+        
+        MessageVo message;
+        
+        try {
+        	
+        	List<Map<String, Object>> list = logsService.etcLogs(logsVo);
             int totalCount = list.size();
         	
         	message = MessageVo.builder()

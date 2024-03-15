@@ -43,6 +43,13 @@ public class Log {
 	}
 	
 	@Component
+	public class LogInput {
+		public List<Map<String, Object>> get_data(String fid) {
+			return logMapper.getInputLog(fid);
+		}
+	}
+	
+	@Component
 	public class EventLog {
 		public List<Map<String, Object>> get_event(String user, String mode, int interval_seconds) {
 			List<Map<String, Object>> list = logMapper.getDeviceListByLogin(user, 1, mode);

@@ -18,4 +18,6 @@ public interface LogMapper {
 	
 	public List<Map<String, Object>> getRealtimeEvent(String ids, int interval);
 	
+	public List<Map<String, Object>> getInputLog(String deviceIds);
+	
 }

@@ -11,5 +11,10 @@
 		/* LogMapper.getLastFailDevice */	
 		CALL sesm.getLastFailDevice( #{user}, #{mode}, #{skip}, #{limit} );
 	</select>
+	
+	<select id="getInputLog" parameterType="String" resultType="map">
+		/* LogMapper.getInputLog */	
+		CALL sesm.getInputLog( #{deviceIds} );
+	</select>
 
 </mapper>
