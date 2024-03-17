@@ -32,12 +32,15 @@ public class JwtTokenProvider {
  
     private final Key key;
     private final long tokenValidityInMilliseconds;
+    private final long tokenReValidityInMilliseconds;
     
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey,
-    		@Value("${jwt.token-validity-in-seconds}") long tokenValidityInMilliseconds) {
+    		@Value("${jwt.token-validity-in-seconds}") long tokenValidityInMilliseconds,
+    		@Value("${jwt.token-re-validity-in-seconds}") long tokenReValidityInMilliseconds) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.tokenValidityInMilliseconds = tokenValidityInMilliseconds;
+        this.tokenReValidityInMilliseconds = tokenReValidityInMilliseconds;
     }
  
     // 유저 정보를 가지고 AccessToken, RefreshToken 을 생성하는 메서드
@@ -61,7 +64,7 @@ public class JwtTokenProvider {
  
         // Refresh Token 생성
         String refreshToken = Jwts.builder()
-                .setExpiration(new Date(now + this.tokenValidityInMilliseconds))
+                .setExpiration(new Date(now + this.tokenReValidityInMilliseconds))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
  
