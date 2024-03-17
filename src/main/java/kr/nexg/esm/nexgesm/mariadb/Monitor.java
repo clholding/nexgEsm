@@ -33,4 +33,35 @@ public class Monitor {
 		}
 	}
 	
+	@Component
+	public class DeviceRealtimeMonitor {
+		public List<Map<String, Object>> get_alarminfo(String fid) {
+			return null;
+		}
+		
+		public List<Map<String, Object>> get_managed_nic(String fid) {
+			return null;
+		}
+		
+		public List<Map<String, Object>> get_monitoring_nic(String fid) {
+			return null;
+		}
+		
+		public List<Map<String, Object>> get_sysinfo(String fid) {
+			return null;
+		}
+		
+		public List<Map<String, Object>> get_monitor(String id, String ip, String mode) {
+			return null;
+		}
+		
+		public List<Map<String, Object>> get_interface(String id, String ip, String mode) {
+			return null;
+		}
+		
+		public List<Map<String, Object>> get_traffic(String ids, String ips, String names, String mode) {
+			return null;
+		}
+	}
+	
 }

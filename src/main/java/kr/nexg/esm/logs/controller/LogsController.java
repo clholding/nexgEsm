@@ -131,6 +131,12 @@ public class LogsController {
 	*/
 	@PostMapping("/etcLogs")
     public ResponseEntity<MessageVo> etcLogs(@RequestBody LogsVo logsVo) {
+		
+		SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        
+        String sessionId = authentication.getName();
+        logsVo.setSessionId(sessionId);
     	
     	HttpHeaders headers= new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));

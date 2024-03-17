@@ -16,5 +16,40 @@
 		/* LogMapper.getInputLog */	
 		CALL sesm.getInputLog( #{deviceIds} );
 	</select>
+	
+	<select id="getRebootLog" parameterType="map" resultType="map">
+		/* LogMapper.getRebootLog */	
+		CALL sesm.getRebootLog( #{fid}, #{sdate}, #{edate}, #{skip}, #{limit} );
+	</select>
+	
+	<select id="getFailLog" parameterType="map" resultType="map">
+		/* LogMapper.getFailLog */	
+		CALL sesm.getFailLog( #{fid}, #{sdate}, #{edate}, #{skip}, #{limit}, #{type}, #{mode} );
+	</select>
+	
+	<select id="getEsmAuditLog" parameterType="map" resultType="map">
+		/* LogMapper.getEsmAuditLog */	
+		CALL sesm.getEsmAuditLog( #{sdate}, #{edate}, #{skip}, #{limit}, #{level}, #{user}, #{msg} );
+	</select>
+	
+	<select id="getAlarmLog" parameterType="map" resultType="map">
+		/* LogMapper.getAlarmLog */	
+		CALL sesm.getAlarmLog( #{fid}, #{sdate}, #{edate}, #{skip}, #{limit}, #{level} );
+	</select>
+	
+	<select id="getResourceLog" parameterType="map" resultType="map">
+		/* LogMapper.getResourceLog */	
+		CALL sesm.getResourceLog( #{fid}, #{sdate}, #{edate}, #{skip}, #{limit} );
+	</select>
+	
+	<select id="getCommandLog" parameterType="map" resultType="map">
+		/* LogMapper.getCommandLog */	
+		CALL sesm.getCommandLog( #{fid}, #{sdate}, #{edate}, #{skip}, #{limit} );
+	</select>
+	
+	<insert id="addLogBox" parameterType="map">
+		/* LogMapper.addLogBox */
+		CALL addLogBox( #{logType}, #{user}, #{info});
+	</insert>
 
 </mapper>
