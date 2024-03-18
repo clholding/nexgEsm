@@ -12,5 +12,7 @@ public interface LogsMapper {
 	
 	public List<Map<String, Object>> lastFailDevice(String parentId);
 	
+	public List<Map<String, Object>> getGroupDeviceList(String gn, String mode);
+	
 	
 }

@@ -387,3 +387,230 @@ BEGIN
   EXECUTE stmt;
   DEALLOCATE PREPARE stmt;
 END
+
+
+***** getInputLog *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `sesm`.`getInputLog`(IN fids varchar(10000))
+BEGIN
+  -- 날짜별 로그 input 개수 조회
+  DECLARE strWhere VARCHAR(10000);
+  SET strWhere = '';
+
+  IF NULLIF(fids, '') IS NOT NULL AND fids != '0' THEN
+    SET strWhere = CONCAT(strWhere, ' AND FIND_IN_SET(device_id, "', fids, '")');
+  ELSEIF NULLIF(fids, '') IS NULL THEN
+    SET strWhere = CONCAT(strWhere, ' AND FIND_IN_SET(device_id, "0")');
+  END IF;
+
+  IF NULLIF(fids, '') IS NOT NULL THEN
+  SET @query = CONCAT('SELECT DATE_FORMAT(`date`, "%Y-%m-%d") as dt, SUM(`count`) as count FROM input_log
+  WHERE `date` > CURDATE() - INTERVAL 7 DAY ', strWhere, ' GROUP BY `date`');
+
+  PREPARE stmt FROM @query;
+  EXECUTE stmt;
+  DEALLOCATE PREPARE stmt;
+  END IF;
+END
+
+
+***** getRebootLog *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `sesm`.`getRebootLog`(
+  IN fids VARCHAR(10000), IN sdate VARCHAR(32), IN edate VARCHAR(32),
+  IN skip VARCHAR(8), IN limits VARCHAR(8))
+BEGIN
+  -- 기동 로그 조회
+  -- fid 0 인 경우 전체 장비 조회
+  DECLARE strWhere VARCHAR(10000);
+  DECLARE strLimit VARCHAR(32);
+
+  SET strWhere = '';
+  SET strLimit = '';
+
+  IF NULLIF(fids, '') IS NOT NULL AND fids != '0' THEN
+    SET strWhere = CONCAT(strWhere, ' AND FIND_IN_SET(d.id, "', fids, '")');
+  ELSEIF NULLIF(fids, '') IS NULL THEN
+    SET strWhere = CONCAT(strWhere, ' AND FIND_IN_SET(d.id, "0")');
+  END IF;
+
+  -- 기간 조건
+  IF (NULLIF(sdate, '') IS NOT NULL) AND (NULLIF(edate, '') IS NOT NULL) THEN
+    SET strWhere = CONCAT(strWhere, ' AND r.rdate <= "', edate, '" AND r.rdate >= "', sdate, '"');
+  END IF;
+
+  -- 조회 개수 조건
+  IF (NULLIF(skip, '') IS NOT NULL) AND (NULLIF(limits, '') IS NOT NULL) THEN
+    SET strLimit = CONCAT(strLimit, ' LIMIT ', skip, ',', limits);
+  END IF;
+
+  set @query = CONCAT('SELECT DATE_FORMAT(r.rdate, "%Y-%m-%d %T") as date, g.name as device_group_name, d.name as device_name, d.ip, "System Reboot" as msg, d.id
+    FROM reboot_log as r, device as d, device_group as g
+    WHERE r.device_id = d.id AND d.group_id = g.id ', strWhere, ' ORDER BY r.rdate DESC ', strLimit);
+
+  PREPARE stmt FROM @query;
+  EXECUTE stmt;
+  DEALLOCATE PREPARE stmt;
+END
+
+
+***** getFailLog *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `sesm`.`getFailLog`(
+  IN fids VARCHAR(10000),  -- "0" 전체 장비에 대한 장애 로그 조회 가능
+  IN sdate VARCHAR(32),
+  IN edate VARCHAR(32),
+  IN skip VARCHAR(8), IN limits VARCHAR(8),
+  IN type VARCHAR(8),  -- 장애 종료
+  IN mode INT)
+BEGIN
+  -- 장애 로그 조건 검색
+  DECLARE strWhere VARCHAR(10000);
+  DECLARE strLimit VARCHAR(32);
+
+  SET strWhere = '';
+  SET strLimit = '';
+
+  IF NULLIF(fids, '') IS NOT NULL AND fids != '0' THEN
+    SET strWhere = CONCAT(strWhere, ' AND FIND_IN_SET(d.id, "', fids, '")');
+  ELSEIF NULLIF(fids, '') IS NULL THEN
+    SET strWhere = CONCAT(strWhere, ' AND FIND_IN_SET(d.id, "0")');
+  END IF;
+
+
+  IF (NULLIF(sdate, '') IS NOT NULL) AND (NULLIF(edate, '') IS NOT NULL) THEN
+    SET strWhere = CONCAT(strWhere, ' AND f.rdate <= "', edate, '" AND f.rdate >= "', sdate, '"');
+  END IF;
+
+  IF NULLIF(type, '') IS NOT NULL THEN
+    SET strWhere = CONCAT(strWhere, ' AND CASE WHEN ', type, ' = 0 THEN f.type < 10 WHEN ', type, ' = 10 THEN f.type > 10 ELSE f.type = ', type, ' END');
+  END IF;
+
+  IF (NULLIF(skip, '') IS NOT NULL) AND (NULLIF(limits, '') IS NOT NULL) THEN
+    SET strLimit = CONCAT(strLimit, ' LIMIT ', skip, ',', limits);
+  END IF;
+
+  set @query = CONCAT('SELECT DATE_FORMAT(f.rdate, "%Y-%m-%d %T") as date, g.name as device_group_name, d.name as device_name, d.ip, fail.name as fail_name, f.info, d.id
+      FROM fail_log as f, device as d, device_group as g, fail, product p
+      WHERE f.device_id = d.id AND d.group_id = g.id AND d.product_id = p.id AND CASE ', mode, ' WHEN 0 THEN 1 = 1 ELSE p.type = ', mode, ' END
+      AND f.type = fail.id ', strWhere, ' ORDER BY f.seq DESC ', strLimit);
+
+  PREPARE stmt FROM @query;
+  EXECUTE stmt;
+  DEALLOCATE PREPARE stmt;
+END
+
+
+***** getAlarmLog *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `sesm`.`getAlarmLog`(IN fids VARCHAR(10000), IN sdate VARCHAR(32), IN edate VARCHAR(32), IN skip VARCHAR(8), IN limits VARCHAR(8), IN alarmlevel VARCHAR(8))
+BEGIN
+  -- 경보 로그 검색
+  DECLARE strWhere VARCHAR(10000);
+  DECLARE strLimit VARCHAR(32);
+
+  SET strWhere = '';
+  SET strLimit = '';
+
+  IF NULLIF(fids, '') IS NOT NULL AND fids != '0' THEN
+    SET strWhere = CONCAT(strWhere, ' AND FIND_IN_SET(d.id, "', fids, '")');
+  ELSEIF NULLIF(fids, '') IS NULL THEN
+    SET strWhere = CONCAT(strWhere, ' AND FIND_IN_SET(d.id, "0")');
+  END IF;
+
+  IF (NULLIF(sdate, '') IS NOT NULL) AND (NULLIF(edate, '') IS NOT NULL) THEN
+    SET strWhere = CONCAT(strWhere, ' AND a.cdate <= "', edate, '" AND a.cdate >= "', sdate, '"');
+  END IF;
+
+  IF NULLIF(alarmlevel, '') IS NOT NULL THEN
+    SET strWhere = CONCAT(strWhere, ' AND level = ', alarmlevel);
+  END IF;
+
+
+  IF (NULLIF(skip, '') IS NOT NULL) AND (NULLIF(limits, '') IS NOT NULL) THEN
+    SET strLimit = CONCAT(strLimit, ' LIMIT ', skip, ',', limits);
+  END IF;
+
+  set @query = CONCAT('SELECT DATE_FORMAT(a.cdate, "%Y-%m-%d %T") as date, g.name as device_group_name, d.name as device_name, d.ip, a.level, a.info, d.id
+      FROM alarm_log as a, device as d, device_group as g
+      WHERE a.device_id = d.id AND d.group_id = g.id ', strWhere, ' ORDER BY a.seq DESC ', strLimit);
+
+  PREPARE stmt FROM @query;
+  EXECUTE stmt;
+  DEALLOCATE PREPARE stmt;
+END
+
+
+***** getResourceLog *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `sesm`.`getResourceLog`(
+  IN fids VARCHAR(2048), IN sdate VARCHAR(32), IN edate VARCHAR(32),
+  IN skip VARCHAR(8), IN limits VARCHAR(8))
+BEGIN
+  -- 기동 로그 조회
+  -- fid 0 인 경우 전체 장비 조회
+  DECLARE strWhere VARCHAR(3072);
+  DECLARE strLimit VARCHAR(32);
+
+  SET strWhere = '';
+  SET strLimit = '';
+
+  IF NULLIF(fids, '') IS NOT NULL AND fids != '0' THEN
+    SET strWhere = CONCAT(strWhere, ' AND FIND_IN_SET(d.id, "', fids, '")');
+  ELSEIF NULLIF(fids, '') IS NULL THEN
+    SET strWhere = CONCAT(strWhere, ' AND FIND_IN_SET(d.id, "0")');
+  END IF;
+
+  -- 기간 조건
+  IF (NULLIF(sdate, '') IS NOT NULL) AND (NULLIF(edate, '') IS NOT NULL) THEN
+    SET strWhere = CONCAT(strWhere, ' AND r.rdate <= "', edate, '" AND r.rdate >= "', sdate, '"');
+  END IF;
+
+  -- 조회 개수 조건
+  IF (NULLIF(skip, '') IS NOT NULL) AND (NULLIF(limits, '') IS NOT NULL) THEN
+    SET strLimit = CONCAT(strLimit, ' LIMIT ', skip, ',', limits);
+  END IF;
+
+  set @query = CONCAT('SELECT DATE_FORMAT(r.rdate, "%Y-%m-%d %T") as date, g.name as device_group_name, d.name as device_name, d.ip, d.id,
+    r.cpu, r.mtotal, r.mfree, r.mcached, r.mbuffered, r.rsrp, r.tunnel
+    FROM resource_log as r, device as d, device_group as g
+    WHERE r.did = d.id AND d.group_id = g.id ', strWhere, ' ORDER BY r.rdate DESC ', strLimit);
+
+  PREPARE stmt FROM @query;
+  EXECUTE stmt;
+  DEALLOCATE PREPARE stmt;
+END
+
+
+***** getCommandLog *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `sesm`.`getCommandLog`(
+  IN fids VARCHAR(2048), IN sdate VARCHAR(32), IN edate VARCHAR(32),
+  IN skip VARCHAR(8), IN limits VARCHAR(8))
+BEGIN
+  -- 기동 로그 조회
+  -- fid 0 인 경우 전체 장비 조회
+  DECLARE strWhere VARCHAR(3072);
+  DECLARE strLimit VARCHAR(32);
+
+  SET strWhere = '';
+  SET strLimit = '';
+
+  IF NULLIF(fids, '') IS NOT NULL AND fids != '0' THEN
+    SET strWhere = CONCAT(strWhere, ' AND FIND_IN_SET(d.id, "', fids, '")');
+  ELSEIF NULLIF(fids, '') IS NULL THEN
+    SET strWhere = CONCAT(strWhere, ' AND FIND_IN_SET(d.id, "0")');
+  END IF;
+
+  -- 기간 조건
+  IF (NULLIF(sdate, '') IS NOT NULL) AND (NULLIF(edate, '') IS NOT NULL) THEN
+    SET strWhere = CONCAT(strWhere, ' AND m.ldate <= "', edate, '" AND m.ldate >= "', sdate, '"');
+  END IF;
+
+  -- 조회 개수 조건
+  IF (NULLIF(skip, '') IS NOT NULL) AND (NULLIF(limits, '') IS NOT NULL) THEN
+    SET strLimit = CONCAT(strLimit, ' LIMIT ', skip, ',', limits);
+  END IF;
+
+  set @query = CONCAT('SELECT DATE_FORMAT(m.ldate, "%Y-%m-%d %T") as date, g.name as device_group_name, d.name as device_name, d.ip, d.id, m.duration, m.status, m.cc, m.filename
+    FROM m2mg_set_log as m, device as d, device_group as g
+    WHERE m.did = d.id AND d.group_id = g.id ', strWhere, ' ORDER BY m.ldate DESC ', strLimit);
+
+  PREPARE stmt FROM @query;
+  EXECUTE stmt;
+  DEALLOCATE PREPARE stmt;
+END

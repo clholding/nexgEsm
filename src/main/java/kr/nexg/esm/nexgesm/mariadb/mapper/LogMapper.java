@@ -18,4 +18,21 @@ public interface LogMapper {
 	
 	public List<Map<String, Object>> getRealtimeEvent(String ids, int interval);
 	
+	public List<Map<String, Object>> getInputLog(String deviceIds);
+	
+	public List<Map<String, Object>> getRebootLog(Map<String, Object> map);
+	
+	public List<Map<String, Object>> getFailLog(Map<String, Object> map);
+	
+	public List<Map<String, Object>> getEsmAuditLog(Map<String, Object> map);
+	
+	public List<Map<String, Object>> getAlarmLog(Map<String, Object> map);
+	
+	public List<Map<String, Object>> getResourceLog(Map<String, Object> map);
+	
+	public List<Map<String, Object>> getCommandLog(Map<String, Object> map);
+	
+	public int addLogBox(Map<String, Object> map);
+	
+	
 }

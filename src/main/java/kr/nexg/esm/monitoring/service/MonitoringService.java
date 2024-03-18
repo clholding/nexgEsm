@@ -9,7 +9,9 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import kr.nexg.esm.administrator.dto.AdministratorEnum;
 import kr.nexg.esm.common.util.CommonUtil;
+import kr.nexg.esm.monitoring.dto.MonitorEnum;
 import kr.nexg.esm.monitoring.dto.MonitoringVo;
 import kr.nexg.esm.monitoring.mapper.MonitoringMapper;
 import kr.nexg.esm.nexgesm.mariadb.Monitor;
@@ -23,6 +25,41 @@ public class MonitoringService {
 	
 	@Autowired
 	Monitor.DeviceMonitor deviceMonitor;
+	
+	@Autowired
+	Monitor.TopN topN;
+	
+	public int convertValue(String val) {
+		if(val.isBlank()) {
+			return 0;
+		}else {
+			return Integer.parseInt(val);
+		}
+	}
+	
+	public int convertValue(int val) {
+		if(val < 0) {
+			return 0;
+		}else {
+			return val;
+		}
+	}
+	
+	public long convertValue(long val) {
+		if(val < 0) {
+			return 0;
+		}else {
+			return val;
+		}
+	}
+	
+	public float convertValue(float val) {
+		if(val < 0) {
+			return 0;
+		}else {
+			return val;
+		}
+	}
 	
 	public Map<String, String> convertStatusInfo(String type, String totalVal, String val, String alarmVal) throws Exception {
 		Map<String, String> result = new HashMap<>();
@@ -491,11 +528,140 @@ public class MonitoringService {
 	
 	public List<Map<String, Object>> topN(MonitoringVo monitoringVo) throws Exception{
 		
-		List<Map<String, Object>> result = new ArrayList<>();
 		String rs_target = !monitoringVo.getTarget().isBlank() ? monitoringVo.getTarget() : "CPU";
-		String rs_viewCount = Integer.toString(monitoringVo.getLimit());
+		int rs_viewCount = monitoringVo.getViewCount();
 		List<String> rs_deviceIDs = monitoringVo.getDeviceIDs();
 		String deviceIds = String.join(",", rs_deviceIDs);
+		int viewCount = 5;
+		
+		int res_type = Integer.parseInt(MonitorEnum.monitorType.valueOf(rs_target).getVal());
+		
+		if(rs_viewCount > 0) {
+			viewCount = rs_viewCount; 
+		}
+		
+		List<Map<String, Object>> list = topN.get_topn(deviceIds, res_type, viewCount);
+		List<Map<String, Object>> result = new ArrayList<>();
+		
+		for(int i=0; i<list.size(); i++) {
+			Map<String, Object> resultMap = new LinkedHashMap<>();
+			String gn = (String) list.get(i).get("device_group_name");
+			String dn = (String) list.get(i).get("device_name");
+			long total = 0;
+			int _total = 0;
+			long used = 0;
+			int num = 0;
+			long dbm = 0;
+			String rates = "";
+			String deviceID = "";
+			if(res_type >= 5 && res_type <= 8) {
+				String fieldName = "free";
+				if(res_type >= 7 || res_type == 5) {
+					fieldName = "used";
+				}
+				if(res_type == 5) {
+					total =  convertValue((long) list.get(i).get("mem_total"));
+					used = (long) list.get(i).get("mem_used");
+					rates = CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("mem")));
+					deviceID = String.valueOf(list.get(i).get("id"));
+				}else if(res_type == 6) {
+					total =  convertValue((long) list.get(i).get("smem_total"));
+					used = (long) list.get(i).get("smem_used");
+					rates = CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("smem")));
+					deviceID = String.valueOf(list.get(i).get("id"));
+				}else if(res_type == 7) {
+					total =  convertValue((long) list.get(i).get("disk0_total"));
+					used = (long) list.get(i).get("disk0_used");
+					rates = CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("disk0")));
+					deviceID = String.valueOf(list.get(i).get("id"));
+				}else if(res_type == 8) {
+					total =  convertValue((long) list.get(i).get("disk1_total"));
+					used = (long) list.get(i).get("disk1_used");
+					rates = CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("disk1")));
+					deviceID = String.valueOf(list.get(i).get("id"));
+				}
+				resultMap.put("gn", gn);
+				resultMap.put("dn", dn);
+				resultMap.put("total", total);
+				resultMap.put("used", used);
+				resultMap.put("rates", !rates.isBlank() ? rates : "0");
+				resultMap.put("deviceID", deviceID);
+				result.add(resultMap);
+			}else {
+				if(res_type == 9) {
+					num = convertValue((int) list.get(i).get("session"));
+					_total =  convertValue((int) list.get(i).get("total"));
+					deviceID = String.valueOf(list.get(i).get("id"));
+					resultMap.put("gn", gn);
+					resultMap.put("dn", dn);
+					resultMap.put("num", num);
+					resultMap.put("total", _total);
+					resultMap.put("deviceID", deviceID);
+					result.add(resultMap);
+				}else if(res_type == 10) {
+					num = convertValue((int) list.get(i).get("tunnel"));
+					_total =  convertValue((int) list.get(i).get("total"));
+					deviceID = String.valueOf(list.get(i).get("id"));
+					resultMap.put("gn", gn);
+					resultMap.put("dn", dn);
+					resultMap.put("num", num);
+					resultMap.put("total", _total);
+					resultMap.put("deviceID", deviceID);
+					result.add(resultMap);
+				}else if(res_type == 17) {
+					num = convertValue((int) list.get(i).get("host"));
+					_total =  convertValue((int) list.get(i).get("total"));
+					deviceID = String.valueOf(list.get(i).get("id"));
+					resultMap.put("gn", gn);
+					resultMap.put("dn", dn);
+					resultMap.put("num", num);
+					resultMap.put("total", _total);
+					resultMap.put("deviceID", deviceID);
+					result.add(resultMap);
+				}else if(res_type == 19) {
+					num = convertValue((int) list.get(i).get("cps"));
+					_total =  convertValue((int) list.get(i).get("total"));
+					deviceID = String.valueOf(list.get(i).get("id"));
+					resultMap.put("gn", gn);
+					resultMap.put("dn", dn);
+					resultMap.put("num", num);
+					resultMap.put("total", _total);
+					resultMap.put("deviceID", deviceID);
+					result.add(resultMap);
+				}else if(res_type == 18) {
+					dbm = convertValue(CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("rsrp"))));
+					deviceID = String.valueOf(list.get(i).get("id"));
+					resultMap.put("gn", gn);
+					resultMap.put("dn", dn);
+					resultMap.put("dbm", dbm);
+					resultMap.put("deviceID", deviceID);
+					result.add(resultMap);
+				}else if(res_type == 18) {
+					dbm = convertValue(CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("rsrp"))));
+					deviceID = String.valueOf(list.get(i).get("id"));
+					resultMap.put("gn", gn);
+					resultMap.put("dn", dn);
+					resultMap.put("dbm", dbm);
+					resultMap.put("deviceID", deviceID);
+					result.add(resultMap);
+				}else {
+					for(String key : list.get(i).keySet()){
+						if(!"device_name".equals(key) && !"device_group_name".equals(key) && !"id".equals(key)) {
+							rates = CommonUtil.getStringValuOf(String.valueOf(list.get(i).get(key)));
+							deviceID = String.valueOf(list.get(i).get("id"));
+							
+							
+						}
+		                
+		            }
+					resultMap.put("gn", gn);
+					resultMap.put("dn", dn);
+					resultMap.put("rates", !rates.isBlank() ? rates : "0");
+					resultMap.put("deviceID", deviceID);
+					result.add(resultMap);
+				}
+			}
+		}
 		
 		return result;
 	}
