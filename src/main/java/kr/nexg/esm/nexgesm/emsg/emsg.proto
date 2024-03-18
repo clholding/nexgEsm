@@ -1,0 +1,209 @@
+syntax = "proto2"
+
+package emsg;
+
+enum Sender {
+    S_NONE = 0;
+    S_ELOGD = 1;
+    S_ECOLLECTD = 2;
+    S_ESMD = 3;
+    S_WEB = 4;
+    S_INTCHECKER = 5;
+    S_ESNMPD = 6;
+    S_ETRAPD = 7;
+    S_ETALK = 101;     // 여기서부터는 내부테스트 용도.
+    S_ESERVER = 102;
+    S_USER1 = 201;     // 사용자 정의 데몬.(디버깅용)
+    S_USER2 = 202;
+    S_USER3 = 203;
+}
+
+
+enum CommandType {
+    CT_NONE = 0;
+    CT_RELOAD = 1;
+    CT_QUIT = 2;
+    CT_GET = 3;
+    CT_SET = 4;
+    CT_ADD = 5;
+    CT_REBOOT = 6;
+    CT_CHECK = 7;
+    CT_NOTIFY = 8;
+    CT_RUN = 9;
+}
+
+enum CommandSubType {
+    CST_NONE = 0;
+    CST_SYSINFO = 1;
+    CST_ALIVE = 2;
+    CST_POLICY = 3;
+    CST_ALARM = 4;
+    CST_IPSDB = 5;
+    CST_INTEGRITY = 6;
+    CST_AGENTINTEGRITY = 7;
+    CST_AGENT_START = 8;
+    CST_AGENT_ALIVE = 9;
+    CST_AGENT_IPCHANGE = 10;
+    CST_AGENT_VERSION = 11;
+    CST_NTP_SYNC = 12;
+    CST_UTM_RUNNING_CONFIG = 13;
+    CST_UTM_STARTUP_CONFIG = 14;
+    CST_UTM_TRAP_ALIVE = 15;
+    CST_UTM_OS_VERSION = 16;
+    CST_TRAP_CONFIG = 17;
+    CST_GEN_REPORT= 18;
+    CST_DOWN_LOG = 19;
+    CST_DOWN_ETCLOG = 20;
+    CST_UPLOAD_CONFIG = 21;
+    CST_UPGRADE_FW = 22;
+    CST_UPGRADE_AGENT = 23;
+    CST_UPGRADE_VOS = 24;
+    CST_TEST_BANDWIDTH = 25;
+    CST_SMS = 26;
+    CST_SW40_SYSINFO = 101;
+    CST_SW40_SNMP_ALIVE = 102;
+    CST_EQUIPMENT_SYSINFO = 201;
+    CST_EQUIPMENT_SNMP_ALIVE = 202;
+}
+
+enum MessageType {
+    MT_NONE = 0;
+    MT_NOTIFY = 1;
+}
+
+enum AlarmType {
+    AT_NONE = 0;
+    AT_CPU = 1;
+    AT_MEM = 2;
+    AT_DISK0 = 3;
+    AT_DISK1 = 4;
+    AT_SESSION = 5;
+    AT_TUNNEL = 6;
+    AT_RBYTES = 7;
+    AT_TBYTES = 8;
+    AT_RPKTS = 9;
+    AT_TPKTS = 10;
+    AT_RTT = 11;
+    AT_CPUTEMP = 12;
+    AT_SYSTEMP = 13;
+    AT_HOST = 14;
+}
+
+enum LogType {
+    LT_ALL = 0;
+    LT_SYSLOG = 1;
+}
+
+enum EventType {
+    ET_ALL = 0;
+    ET_ALARM = 1;
+    ET_CORRELATION = 2;
+    ET_FAIL = 3;
+    ET_AUDIT = 4;
+    ET_INTEGRITY = 5;
+}
+
+enum PolicyType {
+    PT_NONE = 0;
+    PT_FILTER = 1;
+    PT_NAT = 2;
+    PT_VPN = 3;
+    PT_IPS = 4;
+}
+
+enum IntegrityType {
+    IT_NONE = 0;
+    IT_VALID = 1;
+    IT_INVALID = 2;
+}
+
+enum ConfigType {
+    CFG_NONE = 0;
+    CFG_SYSTEM = 1;
+    CFG_MYSQL = 2;
+    CFG_MONGODB = 3;
+}
+
+enum StatusType {
+    ST_NONE = 0;
+    ST_PROCESS = 1;
+    ST_CPU = 2;
+    ST_DISK = 3;
+    ST_MEM = 4;
+}
+
+enum ReqType {
+    REQ_NONE = 0;
+    REQ_SET = 1;
+    REQ_GET = 2;
+    REQ_STOP = 3;
+    REQ_DUE_EXTEND = 4;
+}
+
+enum ResType {
+    RES_NONE = 0;
+    RES_OK = 1;
+    RES_NOTOK = 2;
+}
+
+enum ObjectType {
+    OT_NONE = 0;
+    OT_LOGFILTER = 1;
+}
+
+message SysLog {
+    required int64 timestamp = 1;
+    required int64 ipaddr = 2;
+    required int32 facility = 3;
+    required int32 level = 4;
+    required string svcname = 5;
+    required string info = 6;
+}
+
+message AVP {
+    required string attr = 1;
+    required string value = 2;
+}
+
+message EsmLog {
+    required Sender sender = 1;
+    required int32 type = 2;
+    required int32 subtype = 3;
+
+    optional SysLog log = 4;
+}
+
+message EsmEvent {
+    required Sender sender = 1;
+    required int32 type = 2;
+    required int32 subtype = 3;
+    optional int32 opt1 = 4;
+    optional int32 opt2 = 5;
+    optional string event = 6;
+}
+
+message EsmMessage {
+    required Sender sender = 1;
+    required int32 type = 2;
+    required int32 subtype = 3;
+    required string msg = 4;
+}
+
+message EsmCommand {
+    required Sender sender = 1;
+    required int32 type = 2;
+    required int32 subtype = 3;
+    optional int32 opt1 = 4;
+    optional int32 opt2 = 5;
+    optional string ip = 6;
+    optional string command = 7;
+    optional string msg = 8;
+}
+
+message EsmRpc {
+    required Sender sender = 1;
+    required int32 type = 2;
+    required int32 subtype = 3;
+    required string rpcmsg = 4;
+    repeated AVP avps = 5;
+}
