@@ -42,6 +42,8 @@ public class AuthVo implements UserDetails {
     private int blockingTime;
     private String adminFailAction;
     private String curTime;
+    
+    private String refreshToken;
  
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

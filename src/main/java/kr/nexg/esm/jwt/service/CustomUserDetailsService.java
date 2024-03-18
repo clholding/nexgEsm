@@ -1,6 +1,9 @@
 package kr.nexg.esm.jwt.service;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.Duration;
 import java.util.Date;
 import java.util.Map;
 
@@ -23,14 +26,22 @@ public class CustomUserDetailsService implements UserDetailsService {
 
 	@Autowired
 	DefaultMapper defaultMapper;
-
-	public int getMinDiff() {
-		int minDiff = 0;
-		
-		return minDiff;
-	}
+    
+    public long getMinDiff(String tarTime, String curTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime d1 = LocalDateTime.parse(tarTime, formatter);
+        LocalDateTime d2 = LocalDateTime.parse(curTime, formatter);
+        
+        Duration duration = Duration.between(d1, d2);
+        
+        if (duration.toDays() > 0) {
+            return duration.toDays() * 24 * 60;
+        } else {
+            return duration.toMinutes();
+        }
+    }
 	
-	public boolean updateUserInfo(AuthVo authVo, String mode) {
+	public void updateUserInfo(AuthVo authVo, String mode) {
 
         Date currentTime = new Date();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -45,8 +56,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         
         if(authVo.getFailcount() >= authVo.getMaxFailCount()) {
         	
-            int minutesDiff = 0;
+            long minutesDiff = getMinDiff(authVo.getLastLogin(), authVo.getCurTime());
             
+            log.info("minutesDiff : "+minutesDiff);
         	if(minutesDiff >= authVo.getBlockingTime()) {
         		
         		authVo.setFailcount(0);
@@ -72,8 +84,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         		defaultMapper.updateLoginTime(authVo);
         	}
         }
-		return true;
 	}
+	
 	public void failLoginProcess(AuthVo authVo) {
 		
 		updateUserInfo(authVo, "update");
@@ -105,13 +117,13 @@ public class CustomUserDetailsService implements UserDetailsService {
 			throw new BadCredentialsException(loginId + " -> 사용자가 없습니다.");
 		}
 		
-		checkLoginDelay(authVo);
-
-		if(authVo.getLoginStatus() == 3) {
-			failLoginProcess(authVo);
-		}else {
-			failLoginProcess(authVo);
-		}
+//		checkLoginDelay(authVo);
+//
+//		if(authVo.getLoginStatus() == 3) {
+//			failLoginProcess(authVo);
+//		}else {
+//			failLoginProcess(authVo);
+//		}
 		
 		return createUserDetails(loginId, authVo);
 	}
