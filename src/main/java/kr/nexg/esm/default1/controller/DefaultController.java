@@ -299,9 +299,9 @@ public class DefaultController {
 //    } 
     
 	@PostMapping("/logincheck")
-	public TokenVo login(@RequestBody AuthVo authVo) {
+	public TokenVo logincheck(@RequestBody AuthVo authVo) {
 
-		TokenVo tokenVo = authService.login(authVo);
+		TokenVo tokenVo = authService.logincheck(authVo);
 		
 		return tokenVo;
 	}

@@ -1,6 +1,7 @@
 package kr.nexg.esm.jwt.service;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,6 +18,7 @@ import kr.nexg.esm.jwt.dto.TokenVo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import kr.nexg.esm.common.util.SHA256;
+import kr.nexg.esm.default1.mapper.DefaultMapper;
 import kr.nexg.esm.devices.controller.DevicesController;
 
 @Slf4j
@@ -30,13 +32,12 @@ public class AuthService {
 	
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtTokenProvider jwtTokenProvider;
- 
+ 	
     @Transactional
-    public TokenVo login(AuthVo authVo) {
+    public TokenVo logincheck(AuthVo authVo) {
     	
         // 1. Login ID/PW 를 기반으로 Authentication 객체 생성
         // 이때 authentication 는 인증 여부를 확인하는 authenticated 값이 false
-    	
 //    	System.out.println("pwd : "+authVo.getPwd());
 //    	String encodedPassword = passwordEncoder.encode(authVo.getPwd());
 //    	System.out.println("encodedPassword : "+encodedPassword);
@@ -52,6 +53,7 @@ public class AuthService {
 //		}
 //    	log.info("pwd : "+pwd);
 //    	log.info("encodedPassword : "+passwordEncoder.encode(pwd));
+    	
     	
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(authVo.getLogin(), authVo.getPwd());
  
