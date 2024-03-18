@@ -22,6 +22,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 	@Autowired
 	DefaultMapper defaultMapper;
 
+	
 	@Override
 	@Transactional
 	public UserDetails loadUserByUsername(String loginId) throws UsernameNotFoundException {
@@ -31,7 +32,13 @@ public class CustomUserDetailsService implements UserDetailsService {
 			throw new BadCredentialsException(loginId + " -> 사용자가 없습니다.");
 		}
 		
-//		return adminVo;
+		if(!"1".equals(authVo.getActive())) {
+			authVo.setLoginStatus(21);
+//			setSyslog(authVo.getLogin(), "21");
+		}
+		
+		log.info("getLoginStatus : "+authVo.getLoginStatus());
+		
 		return createUserDetails(loginId, authVo);
 	}
 

@@ -15,5 +15,4 @@ public interface DefaultMapper {
 	
 	public AuthVo selectLogin(String login);
 	
-	public Map<String, Object> checkLogined(String login);
 }

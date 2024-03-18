@@ -30,17 +30,9 @@ public class AuthService {
 	@Autowired
 	PasswordEncoder passwordEncoder;
 	
-	@Autowired
-	DefaultMapper defaultMapper;
-	
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtTokenProvider jwtTokenProvider;
  	
-	public Map<String, Object> failLogin(String loginId) {
-		Map<String, Object> result = defaultMapper.checkLogined(loginId);
-		return result;
-	}
-	
     @Transactional
     public TokenVo logincheck(AuthVo authVo) {
     	

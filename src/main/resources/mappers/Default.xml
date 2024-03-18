@@ -5,7 +5,9 @@
 	<select id="selectLogin" parameterType="String" resultType="kr.nexg.esm.jwt.dto.AuthVo">
 		/* DefaultMapper.selectLogin */	
 		select *
-			 , (SELECT COUNT(status) FROM user WHERE status = 1) login_status            
+			 , case when (SELECT COUNT(status) FROM user WHERE status = 1) <![CDATA[>=]]> 100 then 100    
+			        else 0
+			    end login_status        
 		  from user
 		 where 1 = 1        	   
 	     <if test="login neq '' and login != null">
@@ -13,9 +15,5 @@
 	     </if>
 	</select>
 	
-	<select id="checkLogined" parameterType="String" resultType="map">
-		/* DefaultMapper.checkLogined */	
-		CALL selectUserByName( #{login} );
-	</select>
 	
 </mapper>

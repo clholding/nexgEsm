@@ -74,4 +74,10 @@ public class AuthVo implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
+	public void setLoginStatus(int loginStatus) {
+		this.loginStatus = loginStatus;
+	}
+    
+    
 }
