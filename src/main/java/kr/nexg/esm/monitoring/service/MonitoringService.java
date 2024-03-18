@@ -14,6 +14,7 @@ import kr.nexg.esm.common.util.CommonUtil;
 import kr.nexg.esm.monitoring.dto.MonitorEnum;
 import kr.nexg.esm.monitoring.dto.MonitoringVo;
 import kr.nexg.esm.monitoring.mapper.MonitoringMapper;
+import kr.nexg.esm.nexgesm.common.EsmConfig;
 import kr.nexg.esm.nexgesm.mariadb.Monitor;
 import kr.nexg.esm.util.mode_convert;
 
@@ -22,6 +23,9 @@ public class MonitoringService {
 	
 	@Autowired
 	MonitoringMapper monitoringMapper;
+	
+	@Autowired
+	EsmConfig esmConfig;
 	
 	@Autowired
 	Monitor.DeviceMonitor deviceMonitor;
@@ -124,8 +128,45 @@ public class MonitoringService {
 	}
 	
 	public List<Map<String, Object>> esmDevice(MonitoringVo monitoringVo) throws Exception{
+		kr.nexg.esm.nexgesm.util.System s = new kr.nexg.esm.nexgesm.util.System();
+		Map<String, Double> resultMap = s.esm_status();
 		
-		return null;
+		double cpu = resultMap.get("cpu");
+		double disk0_total = resultMap.get("disk0_total");
+		double disk0_used = resultMap.get("disk0_used");
+		double disk1_total = resultMap.get("disk1_total");
+		double disk1_used = resultMap.get("disk1_used");
+		double mem_total = resultMap.get("mem_total");
+		double mem_avail = resultMap.get("mem_available");
+		
+		Map<String, Object> cpuMap = new LinkedHashMap<>();
+		cpuMap.put("type", "CPU");
+		cpuMap.put("total", "100");
+		cpuMap.put("num", Double.toString(cpu));
+		
+		Map<String, Object> memoryMap = new LinkedHashMap<>();
+		memoryMap.put("type", "Memory");
+		memoryMap.put("total", Double.toString(mem_total));
+		memoryMap.put("num", Double.toString(mem_avail));
+		
+		Map<String, Object> disk0Map = new LinkedHashMap<>();
+		disk0Map.put("type", "Disk0");
+		disk0Map.put("total", Double.toString(disk0_total));
+		disk0Map.put("num", Double.toString(disk0_used));
+		
+		Map<String, Object> disk1Map = new LinkedHashMap<>();
+		disk1Map.put("type", "Disk1");
+		disk1Map.put("total", Double.toString(disk1_total));
+		disk1Map.put("num", Double.toString(disk1_used));
+		
+		List<Map<String, Object>> result = new ArrayList<>();
+		
+		result.add(cpuMap);
+		result.add(memoryMap);
+		result.add(disk0Map);
+		result.add(disk1Map);
+		
+		return result;
 	}
 	
 	public List<Map<String, Object>> list(MonitoringVo monitoringVo) throws Exception{

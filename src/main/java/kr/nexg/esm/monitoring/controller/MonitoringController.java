@@ -20,8 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 import kr.nexg.esm.common.dto.MessageVo;
-import kr.nexg.esm.global.controller.GlobalController;
-import kr.nexg.esm.global.dto.GlobalVo;
 import kr.nexg.esm.monitoring.dto.MonitoringVo;
 import kr.nexg.esm.monitoring.service.MonitoringService;
 import kr.nexg.esm.nexgesm.emsg.Nexgfw_pb2;
