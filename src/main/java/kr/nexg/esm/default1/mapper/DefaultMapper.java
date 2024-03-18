@@ -15,4 +15,7 @@ public interface DefaultMapper {
 	
 	public AuthVo selectLogin(String login);
 	
+	public int updateFailCount(AuthVo authVo);
+	
+	public int updateLoginTime(AuthVo authVo);
 }

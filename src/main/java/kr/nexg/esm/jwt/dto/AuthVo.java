@@ -31,12 +31,17 @@ public class AuthVo implements UserDetails {
     private String active;
     private String groupId;
     private String deviceId;
-    private String failcount;
+    private int failcount;
     private String pwdExpireDate;
     private String lastLogin;
     private String allowIp1;
     private String allowIp2;
     private int loginStatus;
+    
+    private int maxFailCount;
+    private int blockingTime;
+    private String adminFailAction;
+    private String curTime;
  
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -78,6 +83,16 @@ public class AuthVo implements UserDetails {
 	public void setLoginStatus(int loginStatus) {
 		this.loginStatus = loginStatus;
 	}
+
+	public void setFailcount(int failcount) {
+		this.failcount = failcount;
+	}
+
+	public void setCurTime(String curTime) {
+		this.curTime = curTime;
+	}
     
+	
+	
     
 }

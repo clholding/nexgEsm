@@ -1,5 +1,7 @@
 package kr.nexg.esm.jwt.service;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,22 +24,94 @@ public class CustomUserDetailsService implements UserDetailsService {
 	@Autowired
 	DefaultMapper defaultMapper;
 
+	public int getMinDiff() {
+		int minDiff = 0;
+		
+		return minDiff;
+	}
+	
+	public boolean updateUserInfo(AuthVo authVo, String mode) {
+
+        Date currentTime = new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String formattedTime = formatter.format(currentTime);
+        authVo.setCurTime(formattedTime);
+        
+        if("init".equals(mode) && authVo.getLoginStatus() != 13) {
+    		authVo.setFailcount(0);
+    		defaultMapper.updateFailCount(authVo);
+    		defaultMapper.updateLoginTime(authVo);
+        }
+        
+        if(authVo.getFailcount() >= authVo.getMaxFailCount()) {
+        	
+            int minutesDiff = 0;
+            
+        	if(minutesDiff >= authVo.getBlockingTime()) {
+        		
+        		authVo.setFailcount(0);
+        		defaultMapper.updateFailCount(authVo);
+        		defaultMapper.updateLoginTime(authVo);
+//				setSyslog(authVo.getLogin(), "4");
+				authVo.setLoginStatus(4);           		
+        		
+        	}else {
+        		if("delay".equals(authVo.getAdminFailAction())) {
+//    				setSyslog(authVo.getLogin(), "5");
+    				authVo.setLoginStatus(5);
+        		}else {
+//    				setSyslog(authVo.getLogin(), "11");
+    				authVo.setLoginStatus(11);        			
+        		}
+        	}
+        }else {
+        	if("update".equals(mode)){
+        		
+        		authVo.setFailcount(authVo.getFailcount()+1);
+        		defaultMapper.updateFailCount(authVo);
+        		defaultMapper.updateLoginTime(authVo);
+        	}
+        }
+		return true;
+	}
+	public void failLoginProcess(AuthVo authVo) {
+		
+		updateUserInfo(authVo, "update");
+//		setSyslog(authVo.getLogin(), "3");
+		
+		if(authVo.getFailcount() >= authVo.getMaxFailCount()) {
+			if("delay".equals(authVo.getAdminFailAction())) {
+//				setSyslog(authVo.getLogin(), "5");
+				authVo.setLoginStatus(5);
+			}else if("lock".equals(authVo.getAdminFailAction())) {
+//				setSyslog(authVo.getLogin(), "11");
+				authVo.setLoginStatus(11);
+			}
+		}
+	}
+	
+	public boolean checkLoginDelay(AuthVo authVo) {
+		
+		return true;
+	}
 	
 	@Override
 	@Transactional
 	public UserDetails loadUserByUsername(String loginId) throws UsernameNotFoundException {
+		
 		AuthVo authVo = defaultMapper.selectLogin(loginId);
 		
 		if (authVo == null) {
 			throw new BadCredentialsException(loginId + " -> 사용자가 없습니다.");
 		}
 		
-		if(!"1".equals(authVo.getActive())) {
-			authVo.setLoginStatus(21);
-//			setSyslog(authVo.getLogin(), "21");
+		checkLoginDelay(authVo);
+
+		if(authVo.getLoginStatus() == 3) {
+			failLoginProcess(authVo);
+		}else {
+			failLoginProcess(authVo);
 		}
-		
-		log.info("getLoginStatus : "+authVo.getLoginStatus());
 		
 		return createUserDetails(loginId, authVo);
 	}
