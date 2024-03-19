@@ -17,11 +17,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.google.protobuf.InvalidProtocolBufferException;
+
 import kr.nexg.esm.common.dto.MessageVo;
-import kr.nexg.esm.global.controller.GlobalController;
-import kr.nexg.esm.global.dto.GlobalVo;
 import kr.nexg.esm.monitoring.dto.MonitoringVo;
 import kr.nexg.esm.monitoring.service.MonitoringService;
+import kr.nexg.esm.nexgesm.emsg.Nexgfw_pb2;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -84,13 +85,27 @@ public class MonitoringController {
 	/**
 	* -
 	* -
+	 * @throws InvalidProtocolBufferException 
 	* 
 	* @ param MonitoringVo
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/device")
-    public ResponseEntity<MessageVo> device(@RequestBody MonitoringVo monitoringVo) {
+    public ResponseEntity<MessageVo> device(@RequestBody MonitoringVo monitoringVo) throws InvalidProtocolBufferException {
+		// 객체 생성 및 수정
+		int type = Nexgfw_pb2.CommandType.CT_GET.getNumber();
+		int code = Nexgfw_pb2.CommandCode.CC_SYSINFO.getNumber();
+		Nexgfw_pb2.Command command = Nexgfw_pb2.Command.newBuilder()
+				.setType(type)
+				.setCode(code)
+				.setEsmId("00001111222233335")
+				.build();
 		
+		// 객체 직렬화
+		byte[] byteArray = command.toByteArray();
+
+		// 객체 역직렬화
+		Nexgfw_pb2.Command deserializedUserProfile = Nexgfw_pb2.Command.parseFrom(byteArray);
 		return null;
     }
 	

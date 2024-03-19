@@ -1,0 +1,243 @@
+syntax = "proto2"
+
+package nexgfw;
+
+enum MsgType {
+	MT_NONE = 0;
+	MT_XMSD = 1;
+	MT_COMMAND = 2;
+	MT_RESPONSE = 3;
+}
+
+enum MsgCode {
+	MC_NONE = 0;
+}
+
+enum ResType {
+	RT_NONE = 0;
+	RT_OK = 1;
+	RT_ERROR = 2;
+}
+
+enum ResCode {
+	RC_NONE = 0;
+}
+
+enum CommandType {
+	CT_NONE = 0;
+	CT_GET = 1;
+	CT_SET = 2;
+	CT_NOTIFY = 3;
+	CT_REBOOT = 4;
+	CT_DEL = 5;
+}
+
+enum CommandCode {
+	CC_NONE = 0;
+	CC_SYSINFO = 1;
+	CC_POLICY = 2;
+	CC_INTERFACE = 3;
+	CC_ESMPOLICY = 4;
+	CC_IPSDB = 5;
+	CC_INTEGRITY = 6;
+	CC_START = 7;
+	CC_NEXGFWINFO = 8;
+	CC_AGENT = 9;
+	CC_OSUPGRADE = 10;
+	CC_EIXSESSIONINFO = 11;
+	CC_EIXTUNNELINFO = 12;
+	CC_EIXINTERFACEINFO = 13;
+	CC_VRRPSTATINFO = 14;
+	CC_TRACKINFO = 15;
+	CC_CLI = 16;
+}
+
+message XmsMsg {
+	required int32 msgtype = 1;
+	required int32 msgcode = 2;
+	required string msg = 3;
+}
+
+message Command {
+	required int32 type = 1;
+	required int32 code = 2;
+	optional string command = 3;
+	optional int32 opt1 = 4;
+	optional int32 opt2 = 5;
+	optional string esm_id = 6;
+}
+
+message Response {
+	required int32 type = 1;
+	optional int32 code = 2;
+	optional string msg = 3;
+}
+
+message Cpu {
+	required float used = 1;
+	required float load1 = 2;
+	required float load5 = 3;
+	required float load15 = 4;
+}
+
+message Memory {
+	required int32 total = 1;
+	required int32 avail = 2;
+	required int32 stotal = 3;
+	required int32 sfree = 4;
+}
+
+message Disk {
+	required int32 total = 1;
+	required int32 used = 2;
+}
+
+message Interface {
+	required string ifname = 1;
+	required string addr = 2;
+	required string netmask = 3;
+	required string hwaddr = 4;
+	required int64 tbytes = 5;
+	required int64 rbytes = 6;
+	required int64 tpackets = 7;
+	required int64 rpackets = 8;
+	required int64 terrors = 9;
+	required int64 rerrors = 10;
+	required int64 tdrops = 11;
+	required int64 rdrops = 12;
+	required int64 diff_tbytes = 13;
+	required int64 diff_rbytes = 14;
+	required int64 diff_tpackets = 15;
+	required int64 diff_rpackets = 16;
+	required int64 diff_terrors = 17;
+	required int64 diff_rerrors = 18;
+	required int64 diff_tdrops = 19;
+	required int64 diff_rdrops = 20;
+	required string link = 21;
+	optional int32 duplex = 22;
+	optional int32 speed = 23;
+}
+
+message IntInfo {
+    repeated Interface nics = 1;
+}
+
+message EixSession {
+    required string local = 1;
+    required string remote = 2;
+    required string status = 3;
+    required string upload = 4;
+    required string download = 5;
+    required string rtt = 6;
+    required string tunnel = 7;
+    required string name = 8;
+}
+
+message EixSessionInfo {
+    repeated EixSession eixsessions = 1;
+}
+
+message EixTunnel {
+    required string identity = 1;
+    required string peerip = 2;
+    required string status = 3;
+    required string uptime = 4;
+    optional string outpkts = 5;
+    optional string outbytes = 6;
+    optional string inpkts = 7;
+    optional string inbytes = 8;
+    required string name = 9;
+}
+
+message EixTunnelInfo {
+    repeated EixTunnel eixtunnels = 1;
+}
+
+message EixInterface {
+    required string name = 1;
+    required string inpkts = 2;
+    required string outpkts = 3;
+    required string inbytes = 4;
+    required string outbytes = 5;
+    required string used = 6;
+}
+
+message EixInterfaceInfo {
+    repeated EixInterface eixinterfaces = 1;
+}
+
+message VrrpState {
+    required string name = 1;
+    required string id = 2;
+    required string port = 3;
+    required string ip = 4;
+    required string priority = 5;
+    required string track = 6;
+    required string state = 7;
+}
+
+message VrrpStateInfo {
+    repeated VrrpState vrrpstates = 1;
+}
+
+message Track {
+    required string name = 1;
+    required string type = 2;
+    required string period = 3;
+    required string value = 4;
+    required string result = 5;
+}
+
+message TrackInfo {
+    repeated Track tracks = 1;
+}
+
+message SystemInfo {
+	required Cpu cpu = 1;
+	required Memory mem = 2;
+	required Disk disk0 = 3;
+	required Disk disk1 = 4;
+	required int32 session = 5;
+	required int32 tunnel = 6;
+	required int32 vrule = 7;
+	required int32 eixtunnel = 8;
+	required int32 eixrule = 9;
+	repeated Interface nics = 10;
+	required int32 uptime = 11;
+	required string pversion = 12;
+	required string aversion = 13;
+	required int32 power = 14;
+	required int32 cputemp = 15;
+	required int32 systemp = 16;
+	repeated EixTunnel eixs = 17;
+	repeated VrrpState vrrps = 18;
+	repeated Track tracks = 19;
+	optional int32 host = 20;
+}
+
+message PolicyInfo {
+	required string version = 1;
+	required string hash = 2;
+	required bytes policy = 3;
+}
+
+message NexgfwInfo {
+	required string hostname = 1;
+	required string version = 2;
+	required string license = 3;
+	required string serial = 4;
+	required string aversion = 5;
+	required int32  model = 6;
+	optional int32 virtualization = 7;
+}
+
+message Msg {
+    required int32 type = 1;
+    required int32 code = 2;
+    optional int32 opt1 = 3;
+    optional int32 opt2 = 4;
+    optional SystemInfo sysinfo = 5;
+    optional PolicyInfo policyinfo = 6;
+    optional NexgfwInfo nexgfwinfo = 7;
+    optional string agent_id = 8;
+}
