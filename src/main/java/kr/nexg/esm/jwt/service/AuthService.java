@@ -1,8 +1,5 @@
 package kr.nexg.esm.jwt.service;
 
-import java.security.NoSuchAlgorithmException;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -17,9 +14,6 @@ import kr.nexg.esm.jwt.dto.AuthVo;
 import kr.nexg.esm.jwt.dto.TokenVo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import kr.nexg.esm.common.util.SHA256;
-import kr.nexg.esm.default1.mapper.DefaultMapper;
-import kr.nexg.esm.devices.controller.DevicesController;
 
 @Slf4j
 @Service

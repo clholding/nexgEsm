@@ -5,9 +5,7 @@
 	<select id="selectLogin" parameterType="String" resultType="kr.nexg.esm.jwt.dto.AuthVo">
 		/* DefaultMapper.selectLogin */	
 		select *
-			 , case when (SELECT COUNT(status) FROM user WHERE status = 1) <![CDATA[>=]]> 100 then 100    
-			        else 0
-			    end login_status        
+			 , (SELECT COUNT(status) FROM user WHERE status = 1) as login_status
 			 , (SELECT val FROM config WHERE attr = 'login_max_fail_count') as max_fail_count
 			 , (SELECT val FROM config WHERE attr = 'login_blocking_time') as blocking_time
 			 , (SELECT val FROM config WHERE attr = 'login_admin_fail_action') as admin_fail_action
@@ -28,5 +26,9 @@
 		CALL updateLoginTime(#{login}, #{curTime});
 	</update>
 	
+	<select id="getUserURLs" parameterType="kr.nexg.esm.jwt.dto.AuthVo" resultType="map">
+		/* DefaultMapper.getUserURLs */	
+		CALL getUserURLs( #{login} );
+	</select>
 	
 </mapper>

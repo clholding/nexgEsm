@@ -18,4 +18,6 @@ public interface DefaultMapper {
 	public int updateFailCount(AuthVo authVo);
 	
 	public int updateLoginTime(AuthVo authVo);
+	
+	public Map<String, Object> getUserURLs(AuthVo authVo);
 }

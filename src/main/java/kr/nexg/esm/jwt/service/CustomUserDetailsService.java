@@ -7,6 +7,8 @@ import java.time.Duration;
 import java.util.Date;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.User;
@@ -16,6 +18,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import kr.nexg.esm.common.util.ClientIpUtil;
 import kr.nexg.esm.default1.mapper.DefaultMapper;
 import kr.nexg.esm.jwt.dto.AuthVo;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +30,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 	@Autowired
 	DefaultMapper defaultMapper;
     
+	@Autowired
+	private HttpServletRequest request;
+	
     public long getMinDiff(String tarTime, String curTime) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime d1 = LocalDateTime.parse(tarTime, formatter);
@@ -41,14 +47,14 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
     }
 	
-	public void updateUserInfo(AuthVo authVo, String mode) {
+	public int updateUserInfo(AuthVo authVo, String mode, int loginStatus) {
 
         Date currentTime = new Date();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String formattedTime = formatter.format(currentTime);
         authVo.setCurTime(formattedTime);
         
-        if("init".equals(mode) && authVo.getLoginStatus() != 13) {
+        if("init".equals(mode) && loginStatus != 13) {
     		authVo.setFailcount(0);
     		defaultMapper.updateFailCount(authVo);
     		defaultMapper.updateLoginTime(authVo);
@@ -65,15 +71,15 @@ public class CustomUserDetailsService implements UserDetailsService {
         		defaultMapper.updateFailCount(authVo);
         		defaultMapper.updateLoginTime(authVo);
 //				setSyslog(authVo.getLogin(), "4");
-				authVo.setLoginStatus(4);           		
+				loginStatus = 4;
         		
         	}else {
         		if("delay".equals(authVo.getAdminFailAction())) {
 //    				setSyslog(authVo.getLogin(), "5");
-    				authVo.setLoginStatus(5);
+    				loginStatus = 5;
         		}else {
 //    				setSyslog(authVo.getLogin(), "11");
-    				authVo.setLoginStatus(11);        			
+    				loginStatus = 11;
         		}
         	}
         }else {
@@ -84,27 +90,60 @@ public class CustomUserDetailsService implements UserDetailsService {
         		defaultMapper.updateLoginTime(authVo);
         	}
         }
+        
+        return loginStatus;
 	}
 	
-	public void failLoginProcess(AuthVo authVo) {
+	public int failLoginProcess(AuthVo authVo, int loginStatus) {
 		
-		updateUserInfo(authVo, "update");
+		loginStatus = updateUserInfo(authVo, "update", loginStatus);
 //		setSyslog(authVo.getLogin(), "3");
 		
 		if(authVo.getFailcount() >= authVo.getMaxFailCount()) {
 			if("delay".equals(authVo.getAdminFailAction())) {
 //				setSyslog(authVo.getLogin(), "5");
-				authVo.setLoginStatus(5);
+				loginStatus = 5;
 			}else if("lock".equals(authVo.getAdminFailAction())) {
 //				setSyslog(authVo.getLogin(), "11");
-				authVo.setLoginStatus(11);
+				loginStatus = 11;
 			}
 		}
+		
+		return loginStatus;
 	}
 	
-	public boolean checkLoginDelay(AuthVo authVo) {
+	public int checkLoginURL(AuthVo authVo, int loginStatus) {
 		
-		return true;
+		String clientIp = ClientIpUtil.getClientIP(request);
+		log.info("clientIp ============== "+clientIp);
+		
+		Map<String, Object> map = defaultMapper.getUserURLs(authVo);
+		if(map != null) {
+			
+			if(map.get("url1").equals(clientIp) || map.get("url2").equals(clientIp) || map.get("url3").equals(clientIp)) {
+				
+				loginStatus = 23;
+//				setSyslog(loginId, "23");
+			}
+		}
+		
+		return loginStatus;
+	}
+	public int checkLoginDelay(AuthVo authVo, int loginStatus) {
+		
+		if(!"1".equals(authVo.getActive())) {
+			loginStatus = 21;
+//			setSyslog(authVo.getLogin(), "21");
+		}
+		
+		loginStatus = checkLoginURL(authVo, loginStatus);
+		
+		String clientIp = ClientIpUtil.getClientIP(request);
+		
+		
+		
+		
+		return loginStatus;
 	}
 	
 	@Override
@@ -112,17 +151,32 @@ public class CustomUserDetailsService implements UserDetailsService {
 	public UserDetails loadUserByUsername(String loginId) throws UsernameNotFoundException {
 		
 		AuthVo authVo = defaultMapper.selectLogin(loginId);
+		int loginStatus = 0;
 		
 		if (authVo == null) {
+			
+			if(authVo.getLoginStatus() == 100) {
+				loginStatus = 100;
+//				setSyslog(loginId, "100");
+			}else {
+				loginStatus = 8;
+//				setSyslog(loginId, "8");
+			}
+			
 			throw new BadCredentialsException(loginId + " -> 사용자가 없습니다.");
 		}
 		
-//		checkLoginDelay(authVo);
-//
-//		if(authVo.getLoginStatus() == 3) {
-//			failLoginProcess(authVo);
+		if(authVo.getLoginStatus() >= 100) {
+			loginStatus = 100;
+		}
+		
+		loginStatus = checkLoginDelay(authVo, loginStatus);
+		
+		log.info("loginStatus : "+loginStatus);
+//		if(loginStatus == 3) {
+//			failLoginProcess(authVo, loginStatus);
 //		}else {
-//			failLoginProcess(authVo);
+//			failLoginProcess(authVo, loginStatus);
 //		}
 		
 		return createUserDetails(loginId, authVo);
