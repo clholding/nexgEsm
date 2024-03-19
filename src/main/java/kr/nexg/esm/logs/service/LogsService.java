@@ -4,7 +4,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -13,15 +12,12 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import kr.nexg.esm.common.util.CommonUtil;
 import kr.nexg.esm.common.util.CustomMessageException;
 import kr.nexg.esm.common.util.DateUtil;
 import kr.nexg.esm.logs.dto.LogsVo;
 import kr.nexg.esm.logs.mapper.LogsMapper;
 import kr.nexg.esm.nexgesm.mariadb.Log;
-import kr.nexg.esm.util.config;
 import kr.nexg.esm.util.mode_convert;
 
 @Service

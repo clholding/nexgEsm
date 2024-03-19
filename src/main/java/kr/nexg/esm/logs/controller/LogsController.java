@@ -1,10 +1,18 @@
 package kr.nexg.esm.logs.controller;
 
+import java.io.File;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -15,11 +23,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import kr.nexg.esm.common.dto.MessageVo;
-import kr.nexg.esm.global.controller.GlobalController;
 import kr.nexg.esm.logs.dto.LogsVo;
 import kr.nexg.esm.logs.service.LogsService;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +39,9 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/logs")
 public class LogsController {
+	
+	@Value("${logbox.path}")
+    private String logboxPath;
 	
 	@Autowired
 	LogsService logsService;
@@ -120,6 +129,38 @@ public class LogsController {
 		}
     	
         return new ResponseEntity<>(message, headers, HttpStatus.OK);
+    }
+	
+	/**
+	* -
+	* 파일 다운로드 처리
+	 * @throws Exception 
+	* 
+	* @ param LogsVo
+	* @ return ResponseEntity
+	*/
+	@PostMapping("/logBoxDownload")
+    public ResponseEntity<Resource> logBoxDownload(@RequestBody LogsVo logsVo) throws Exception {
+    	
+		HttpHeaders headers= new HttpHeaders();
+        
+        String rs_id = logsVo.getId();
+        
+        Resource resource = null;
+        
+        try {
+        	Path filePath = Paths.get(logboxPath + rs_id + ".csv");
+        	resource = new InputStreamResource(Files.newInputStream(filePath));
+        	headers.setContentType(MediaType.parseMediaType("application/csv"));
+            headers.setContentDisposition(ContentDisposition.builder("attachment").filename(rs_id+".csv").build());
+            
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			throw new Exception();
+		}
+        
+        return new ResponseEntity<>(resource, headers, HttpStatus.OK);
+        
     }
 	
 	/**

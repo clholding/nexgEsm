@@ -19,5 +19,6 @@ public class LogsVo extends CommonVo {
 	private String type;
 	private String level;
 	private String msg;
+	private String id;
 	private List<String> deviceIDs;
 }

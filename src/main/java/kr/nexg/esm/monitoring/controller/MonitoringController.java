@@ -92,6 +92,9 @@ public class MonitoringController {
 	*/
 	@PostMapping("/device")
     public ResponseEntity<MessageVo> device(@RequestBody MonitoringVo monitoringVo) throws InvalidProtocolBufferException {
+		
+		//### TO-DO ###
+		
 		// 객체 생성 및 수정
 		int type = Nexgfw_pb2.CommandType.CT_GET.getNumber();
 		int code = Nexgfw_pb2.CommandCode.CC_SYSINFO.getNumber();
@@ -118,7 +121,7 @@ public class MonitoringController {
 	*/
 	@PostMapping("/interface")
     public ResponseEntity<MessageVo> _interface(@RequestBody MonitoringVo monitoringVo) {
-		
+		//### TO-DO ###
 		return null;
     }
 	
@@ -131,7 +134,7 @@ public class MonitoringController {
 	*/
 	@PostMapping("/traffic")
     public ResponseEntity<MessageVo> traffic(@RequestBody MonitoringVo monitoringVo) {
-		
+		//### TO-DO ###
 		return null;
     }
 	
@@ -267,7 +270,7 @@ public class MonitoringController {
 	*/
 	@PostMapping("/setInterMonInfo")
     public ResponseEntity<MessageVo> setInterMonInfo(@RequestBody MonitoringVo monitoringVo) {
-		
+		//### TO-DO ###
 		return null;
     }
 	
