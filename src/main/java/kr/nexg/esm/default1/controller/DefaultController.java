@@ -306,6 +306,14 @@ public class DefaultController {
 		return tokenVo;
 	}
 	
+	@PostMapping("/refresh")
+	public TokenVo refresh(@RequestBody AuthVo authVo) {
+		
+		TokenVo tokenVo = authService.logincheck(authVo);
+		
+		return tokenVo;
+	}
+	
 //    @PostMapping("/logout")
 //    public ResponseEntity<MessageVo> logout() throws IOException  {
 //    	
