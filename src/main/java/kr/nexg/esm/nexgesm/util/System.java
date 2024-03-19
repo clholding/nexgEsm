@@ -25,8 +25,8 @@ public class System {
 	
 	public Map<String, Double> esm_status() {
 		double cpuUsage = ProcessUtil.cpuUsagePercentMonitor();
-		Map<String, Long> disk0 = ProcessUtil.diskUsageMonitor("/opt");
-		Map<String, Long> disk1 = ProcessUtil.diskUsageMonitor("/data");
+		Map<String, Long> disk0 = ProcessUtil.diskUsageMonitor("C:\\Temp");
+		Map<String, Long> disk1 = ProcessUtil.diskUsageMonitor("C:\\home");
 		Map<String, Long> mem = ProcessUtil.memoryUsageMonitor();
 		
 		Map<String, Double> result = new HashMap<>();

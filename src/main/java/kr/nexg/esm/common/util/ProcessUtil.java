@@ -8,6 +8,8 @@ import java.lang.management.OperatingSystemMXBean;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
+
 public class ProcessUtil {
 	public static Map<String, Long> diskUsageMonitor(String path) {
 		File file = null;
@@ -15,7 +17,8 @@ public class ProcessUtil {
 		try {
 			file = new File(path);
 			long total = file.getTotalSpace();
-			long used = file.getUsableSpace();
+//			long used = file.getUsableSpace();
+			long used = FileUtils.sizeOfDirectory(file);
 			
 			map.put("total", total);
 			map.put("used", used);

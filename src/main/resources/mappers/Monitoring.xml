@@ -32,4 +32,14 @@
 		CALL sesm.getFailInterface( #{deviceId} );
 	</select>
 	
+	<select id="getInterfaceInfoListByDevice" parameterType="String" resultType="map">
+		/* MonitoringMapper.getInterfaceInfoListByDevice */
+		CALL sesm.getInterfaceInfoListByDevice( #{deviceId} );
+	</select>
+	
+	<select id="getInterMonitorTable" parameterType="String" resultType="String">
+		/* MonitoringMapper.getInterMonitorTable */
+		CALL sesm.getInterMonitorTable( #{uid} );
+	</select>
+	
 </mapper>
