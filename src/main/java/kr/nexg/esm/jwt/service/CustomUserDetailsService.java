@@ -129,7 +129,13 @@ public class CustomUserDetailsService implements UserDetailsService {
 		
 		return loginStatus;
 	}
+	
+	public boolean isSuperUser(int role) {
+		return (role == 1 ? true: false);
+	}
 	public int checkLoginDelay(AuthVo authVo, int loginStatus) {
+		
+		String clientIp = ClientIpUtil.getClientIP(request);
 		
 		if(!"1".equals(authVo.getActive())) {
 			loginStatus = 21;
@@ -138,7 +144,61 @@ public class CustomUserDetailsService implements UserDetailsService {
 		
 		loginStatus = checkLoginURL(authVo, loginStatus);
 		
-		String clientIp = ClientIpUtil.getClientIP(request);
+		if(authVo.getAllowIp1() != null && authVo.getAllowIp1().length() > 0) {
+			if(!clientIp.equals(authVo.getAllowIp1())) {
+				if(!clientIp.equals(authVo.getAllowIp2())) {
+					loginStatus = 7;
+//					setSyslog(authVo.getLogin(), "7");
+				}
+			}
+		}
+		
+        Date currentTime = new Date();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String formattedTime = formatter.format(currentTime);
+        authVo.setCurTime(formattedTime);
+        
+		if(authVo.getFailcount() >= authVo.getMaxFailCount()) {
+			long minutesDiff = getMinDiff(authVo.getLastLogin(), authVo.getCurTime());
+			
+			if(minutesDiff >= authVo.getBlockingTime()) {
+	    		authVo.setFailcount(0);
+	    		defaultMapper.updateFailCount(authVo);
+	    		defaultMapper.updateLoginTime(authVo);
+	    		
+	    		loginStatus = 4;
+//	    		setSyslog(authVo.getLogin(), "4");
+			}else {
+	    		loginStatus = 5;
+//	    		setSyslog(authVo.getLogin(), "5");
+			}
+		}else {
+//			if() {
+//	    		loginStatus = 22;
+////	    		setSyslog(authVo.getLogin(), "22");
+//			}
+			
+			if("0".equals(authVo.getStatus())) {
+				
+	    		authVo.setFailcount(0);
+	    		defaultMapper.updateFailCount(authVo);
+	    		defaultMapper.updateLoginTime(authVo);
+	    		defaultMapper.updateUserData(clientIp, authVo.getLogin());
+				loginStatus = 13;
+				
+			}else if("1".equals(authVo.getStatus())) {
+				boolean isSuper = isSuperUser(authVo.getRole1());
+				if(isSuper) {
+					
+				}else {
+					
+				}
+			}else if("2".equals(authVo.getStatus())) {
+				
+			}
+			
+			
+		}
 		
 		
 		

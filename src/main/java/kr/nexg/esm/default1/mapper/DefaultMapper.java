@@ -20,4 +20,6 @@ public interface DefaultMapper {
 	public int updateLoginTime(AuthVo authVo);
 	
 	public Map<String, Object> getUserURLs(AuthVo authVo);
+	
+	public int updateUserData(String remoteIp, String login);
 }

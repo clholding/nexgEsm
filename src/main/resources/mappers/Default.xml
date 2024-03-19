@@ -4,12 +4,15 @@
 
 	<select id="selectLogin" parameterType="String" resultType="kr.nexg.esm.jwt.dto.AuthVo">
 		/* DefaultMapper.selectLogin */	
-		select *
+		select u.*
 			 , (SELECT COUNT(status) FROM user WHERE status = 1) as login_status
 			 , (SELECT val FROM config WHERE attr = 'login_max_fail_count') as max_fail_count
 			 , (SELECT val FROM config WHERE attr = 'login_blocking_time') as blocking_time
 			 , (SELECT val FROM config WHERE attr = 'login_admin_fail_action') as admin_fail_action
-		  from user
+			 , ug.role1
+		  from user u
+		  left join user_group ug
+		    on u.group_id = ug.id
 		 where 1 = 1        	   
 	     <if test="login neq '' and login != null">
 		   and SHA2(login,256) = #{login}
@@ -31,4 +34,12 @@
 		CALL getUserURLs( #{login} );
 	</select>
 	
+	<update id="updateUserData" parameterType="String" >
+		/* DefaultMapper.updateUserData */	
+		UPDATE user 
+		   SET hbtime = CURRENT_TIMESTAMP()
+		     , ip1 = #{remoteIp} 
+		     , status = 1 
+		 WHERE login = #{login}
+	</update>
 </mapper>
