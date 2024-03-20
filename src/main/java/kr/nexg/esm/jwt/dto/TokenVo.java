@@ -11,4 +11,5 @@ public class TokenVo {
 	private String grantType;
 	private String accessToken;
 	private String refreshToken;
+	private int loginStatus;
 }

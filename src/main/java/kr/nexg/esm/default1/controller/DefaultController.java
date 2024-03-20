@@ -1,5 +1,7 @@
 package kr.nexg.esm.default1.controller;
 
+import java.text.ParseException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +25,7 @@ public class DefaultController {
     JwtTokenProvider jwtTokenProvider;
     
 	@PostMapping("/logincheck")
-	public TokenVo logincheck(@RequestBody AuthVo authVo) {
+	public TokenVo logincheck(@RequestBody AuthVo authVo) throws ParseException {
 
 		TokenVo tokenVo = authService.logincheck(authVo);
 		
