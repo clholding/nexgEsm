@@ -1,5 +1,7 @@
 package kr.nexg.esm.nexgesm.mariadb;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -297,6 +299,31 @@ public class Log {
 //		      downinfo['dbtype'] = 'AlarmLog'
 //
 //		      bg.run_command(CST_DOWN_ETCLOG, json.dumps(downinfo))
+		}
+	}
+	
+	@Component
+	public class LogBox {
+		public List<Map<String, Object>> get_log_box(String sdate, String edate, String skip, String limit) {
+			Map<String, Object> map = new HashMap<>();
+			map.put("sdate", sdate);
+			map.put("edate", edate);
+			map.put("skip", skip);
+			map.put("limit", limit);
+			return logMapper.getLogBox(map);
+		}
+		
+		public Map<String, Object> del_log_box(List<String> ids, String path, String user) throws FileNotFoundException {
+			for(String id : ids) {
+				String log_file = path + id + ".csv";
+				File file = new File(log_file);
+				if(file.exists()) {
+					file.delete();
+				}else {
+					throw new FileNotFoundException("file not found!");
+				}
+			}
+			return logMapper.delLogBox(String.join(",", ids), user);
 		}
 	}
 	

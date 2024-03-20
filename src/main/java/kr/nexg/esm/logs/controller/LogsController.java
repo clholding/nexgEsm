@@ -133,7 +133,7 @@ public class LogsController {
 	
 	/**
 	* -
-	* 파일 다운로드 처리
+	* logbox 파일 다운로드 처리
 	 * @throws Exception 
 	* 
 	* @ param LogsVo
@@ -160,7 +160,94 @@ public class LogsController {
 		}
         
         return new ResponseEntity<>(resource, headers, HttpStatus.OK);
+    }
+	
+	/**
+	* -
+	* -
+	 * @throws Exception 
+	* 
+	* @ param LogsVo
+	* @ return ResponseEntity
+	*/
+	@PostMapping("/logBoxList")
+    public ResponseEntity<MessageVo> logBoxList(@RequestBody LogsVo logsVo) throws Exception {
+    	
+		HttpHeaders headers= new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
         
+        MessageVo message;
+        
+        try {
+            
+            Map<String, Object> result = logsService.logBoxList(logsVo);
+        	List<Map<String, Object>> list = (List<Map<String, Object>>) result.get("result");
+            int totalCount = (int) result.get("totalCount");
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("")
+                	.totalCount(totalCount)
+                	.entitys(list)
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}
+    	
+        return new ResponseEntity<>(message, headers, HttpStatus.OK);
+    }
+	
+	/**
+	* -
+	* -
+	 * @throws Exception 
+	* 
+	* @ param LogsVo
+	* @ return ResponseEntity
+	*/
+	@PostMapping("/delLogBox")
+    public ResponseEntity<MessageVo> delLogBox(@RequestBody LogsVo logsVo) throws Exception {
+    	
+		SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        
+        String sessionId = authentication.getName();
+        logsVo.setSessionId(sessionId);
+        
+        logsVo.setPath(logboxPath);
+    	
+    	HttpHeaders headers= new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+        
+        MessageVo message;
+        
+        try {
+        	
+        	logsService.delLogBox(logsVo);
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("삭제가 완료되었습니다.")
+                	.totalCount(0)
+                	.entitys("")
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}
+    	
+        return new ResponseEntity<>(message, headers, HttpStatus.OK);
     }
 	
 	/**
@@ -187,6 +274,45 @@ public class LogsController {
         try {
         	
         	List<Map<String, Object>> list = logsService.etcLogs(logsVo);
+            int totalCount = list.size();
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("")
+                	.totalCount(totalCount)
+                	.entitys(list)
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}
+    	
+        return new ResponseEntity<>(message, headers, HttpStatus.OK);
+    }
+	
+	/**
+	* -
+	* -
+	* 
+	* @ param LogsVo
+	* @ return ResponseEntity
+	*/
+	@PostMapping("/etcDownload")
+    public ResponseEntity<MessageVo> etcDownload(@RequestBody LogsVo logsVo) {
+		
+    	HttpHeaders headers= new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+        
+        MessageVo message;
+        
+        try {
+        	
+        	List<Map<String, Object>> list = logsService.etcDownload(logsVo);
             int totalCount = list.size();
         	
         	message = MessageVo.builder()

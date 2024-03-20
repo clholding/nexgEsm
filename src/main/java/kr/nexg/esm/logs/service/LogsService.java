@@ -4,17 +4,21 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import kr.nexg.esm.administrator.dto.AdministratorEnum;
 import kr.nexg.esm.common.util.CommonUtil;
 import kr.nexg.esm.common.util.CustomMessageException;
 import kr.nexg.esm.common.util.DateUtil;
+import kr.nexg.esm.logs.dto.LogsEnum;
 import kr.nexg.esm.logs.dto.LogsVo;
 import kr.nexg.esm.logs.mapper.LogsMapper;
 import kr.nexg.esm.nexgesm.mariadb.Log;
@@ -43,6 +47,9 @@ public class LogsService {
 	
 	@Autowired
 	Log.AlarmLog alarmLog;
+	
+	@Autowired
+	Log.LogBox logBox;
 	
 	@Autowired
 	Log.LogInput logInput;
@@ -111,6 +118,91 @@ public class LogsService {
 		}
 		
 		return result;
+	}
+	
+	public Map<String, Object> logBoxList(LogsVo logsVo) throws Exception{
+		
+		int page = logsVo.getPage();
+		int viewCount = logsVo.getViewCount() > 0 ? logsVo.getViewCount() : 25;
+		
+		String rs_page = Integer.toString(page);
+		String rs_viewCount = Integer.toString(viewCount);
+		
+		String rs_startDate = logsVo.getStartDate();
+		String rs_endDate = logsVo.getEndDate();
+		
+		if(rs_startDate.isBlank()) {
+			rs_startDate = DateUtil.getDateFormat("yyyy-MM-dd") + " 00:00:00";
+		}
+		
+		if(rs_endDate.isBlank()) {
+			rs_endDate = DateUtil.getDateFormat("yyyy-MM-dd") + " 23:59:59";
+		}
+		
+		List<Map<String, Object>> list = logBox.get_log_box(rs_startDate, rs_endDate, rs_page, rs_viewCount);
+		List<Map<String, Object>> result = new ArrayList<>();
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		
+		int cnt = 0;
+		int rowcnt = 0;
+		String downUrl = "";
+		for(int i=0; i<list.size(); i++) {
+			
+			String id = CommonUtil.setEmptyString(String.valueOf(list.get(i).get("id")));
+			String sdate = CommonUtil.setEmptyString(String.valueOf(list.get(i).get("sdate")));
+			String edate = CommonUtil.setEmptyString(String.valueOf(list.get(i).get("edate")));
+			String user = CommonUtil.setEmptyString(String.valueOf(list.get(i).get("user")));
+			String type = CommonUtil.setEmptyString(String.valueOf(list.get(i).get("type")));
+			String info = CommonUtil.setEmptyString(String.valueOf(list.get(i).get("info")));
+			String status = CommonUtil.setEmptyString(String.valueOf(list.get(i).get("status")));
+			String path = CommonUtil.setEmptyString(String.valueOf(list.get(i).get("path")));
+			String totalCount = CommonUtil.setEmptyString(String.valueOf(list.get(i).get("totalCount")));
+			
+			
+			if(cnt == 0) {
+				rowcnt = Integer.parseInt(totalCount);
+			}
+			
+			if(Integer.parseInt(status) == 2) {
+				downUrl = "/logs/logBoxList?datas={'id':'" + id + "'}";
+			}else {
+				downUrl = "None";
+			}
+			
+			String logType = "";
+			for(LogsEnum.logTypes logTypes : LogsEnum.logTypes.values()) {
+				if(type.equals(logTypes.getVal())) {
+					logType = logTypes.name();
+					break;
+				}
+			}
+			
+			Map<String, Object> map = new LinkedHashMap<>();
+			map.put("id", id);
+			map.put("time", sdate);
+			map.put("login", user);
+			map.put("type", logType);
+			map.put("desc", info);
+			map.put("status", LogsEnum.logDownStatus.valueOf("_"+status).getVal());
+			map.put("downUrl", downUrl);
+			
+			result.add(map);
+			
+		}
+		
+		resultMap.put("result", result);
+		resultMap.put("totalCount", rowcnt);
+		
+		return resultMap;
+	}
+	
+	public void delLogBox(LogsVo logsVo) throws Exception{
+		
+		String sessionId = logsVo.getSessionId();
+		String path = logsVo.getPath();
+		List<String> rs_ids = logsVo.getIds();
+		
+		logBox.del_log_box(rs_ids, path, sessionId);
 	}
 	
 	public List<Map<String, Object>> etcLogs(LogsVo logsVo) throws Exception{
@@ -262,6 +354,61 @@ public class LogsService {
 		}
 		
 		return result;
+	}
+	
+	public List<Map<String, Object>> etcDownload(LogsVo logsVo) throws Exception{
+		
+		
+		String rs_target = logsVo.getTarget();
+		String rs_startDate = logsVo.getStartDate();
+		String rs_endDate = logsVo.getEndDate();
+		String desc = logsVo.getDesc();
+		String rs_dn = logsVo.getDn();
+		String rs_gn = logsVo.getGn();
+		String rs_fip = logsVo.getFip();
+		String rs_type = logsVo.getType();
+		String rs_level = logsVo.getLevel();
+		List<String> rs_deviceIDs = logsVo.getDeviceIDs();
+		String deviceIds = String.join(",", rs_deviceIDs);
+		
+		String rs_mode = logsVo.getMode();
+		int mode = mode_convert.convert_modedata(rs_mode);
+		
+		
+		
+		
+		
+		if(!rs_gn.isBlank()) {
+		 	List<Map<String, Object>> rows = logsMapper.getGroupDeviceList(rs_gn, Integer.toString(mode));
+		 	
+		 	if(rows.size() > 0) {
+		 		List<String> gn_ids = new ArrayList<String>();
+		 		for(int i=0; i<rows.size(); i++) {
+		 			gn_ids.add(String.valueOf(rows.get(i).get("id")));
+		 		}
+		 		rs_deviceIDs = gn_ids;
+		 	}else {
+		 		throw new CustomMessageException("not find deviceID in Group");
+		 	}
+		}
+		
+		if(!rs_dn.isBlank()) {
+			List<String> rs_ids = new ArrayList<String>();
+			rs_ids.add(rs_dn);
+			rs_deviceIDs = rs_ids;
+		}
+		
+		
+		if(!rs_startDate.isBlank()) {
+			rs_startDate = DateUtil.getDateTimeFormat(rs_startDate, "yyyy-MM-dd HH:mm:ss");
+		}
+		
+		if(!rs_endDate.isBlank()) {
+			rs_endDate = DateUtil.getDateTimeFormat(rs_endDate, "yyyy-MM-dd HH:mm:ss");
+		}
+		
+		
+		return null;
 	}
 	
 }

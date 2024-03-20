@@ -34,5 +34,9 @@ public interface LogMapper {
 	
 	public int addLogBox(Map<String, Object> map);
 	
+	public List<Map<String, Object>> getLogBox(Map<String, Object> map);
+	
+	public Map<String, Object> delLogBox(String ids, String user);
+	
 	
 }

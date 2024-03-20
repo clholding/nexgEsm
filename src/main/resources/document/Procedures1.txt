@@ -614,3 +614,54 @@ BEGIN
   EXECUTE stmt;
   DEALLOCATE PREPARE stmt;
 END
+
+
+***** getLogBox *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `sesm`.`getLogBox`(
+  IN sdate VARCHAR(32), IN edate VARCHAR(32),
+  IN skip VARCHAR(8), IN limits VARCHAR(8),
+  IN type VARCHAR(8), IN status VARCHAR(8),
+  IN users VARCHAR(128))
+BEGIN
+  -- log_box (로그 검색 결과를 파일로 저장한 리스트) 조회
+  DECLARE strWhere VARCHAR(1024);
+  DECLARE strLimit VARCHAR(32);
+
+  SET strWhere = '';
+  SET strLimit = '';
+
+  IF (NULLIF(sdate, '') IS NOT NULL) AND (NULLIF(edate, '') IS NOT NULL) THEN
+    SET strWhere = CONCAT(strWhere, ' AND sdate <= "', edate, '" AND sdate >= "', sdate, '"');
+  END IF;
+
+  IF NULLIF(type, '') IS NOT NULL THEN
+    SET strWhere = CONCAT(strWhere, ' AND type = ', type);
+  END IF;
+
+  IF NULLIF(status, '') IS NOT NULL THEN
+    SET strWhere = CONCAT(strWhere, ' AND status = ', status);
+  END IF;
+
+  IF NULLIF(users, '') IS NOT NULL THEN
+    SET strWhere = CONCAT(strWhere, ' AND user = "', users, '"');
+  END IF;
+
+  IF (NULLIF(skip, '') IS NOT NULL) AND (NULLIF(limits, '') IS NOT NULL) THEN
+    SET strLimit = CONCAT(strLimit, ' LIMIT ', skip, ',', limits);
+  END IF;
+
+  set @query = CONCAT('SELECT COUNT(*) INTO @Total FROM log_box WHERE 1 = 1 ', strWhere);
+
+  PREPARE stmt FROM @query;
+  EXECUTE stmt;
+  DEALLOCATE PREPARE stmt;
+
+  set @query = CONCAT('SELECT id, DATE_FORMAT(sdate, "%Y-%m-%d %T") as sdate, DATE_FORMAT(edate, "%Y-%m-%d %T") as edate,
+    user, type, info, status, path, ', @Total, ' as totalCount
+    FROM log_box WHERE 1 = 1 ', strWhere, ' ORDER BY id DESC ', strLimit);
+
+  PREPARE stmt FROM @query;
+  EXECUTE stmt;
+  DEALLOCATE PREPARE stmt;
+END
+
