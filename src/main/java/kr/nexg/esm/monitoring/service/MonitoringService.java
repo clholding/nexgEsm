@@ -304,7 +304,8 @@ public class MonitoringService {
 			String redudant_power1 = "";
 			String redudant_power2 = "";
 			
-			int power = Integer.parseInt(String.valueOf(deviceMonitorList.get(i).get("power")));
+			String power_str = CommonUtil.setEmptyString(String.valueOf(deviceMonitorList.get(i).get("power")));
+			int power = !"".equals(power_str) ? Integer.parseInt(power_str) : 0;
 			if(power == 0) {
 				redudant_power1 = "1";
 				redudant_power2 = "1";
