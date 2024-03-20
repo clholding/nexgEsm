@@ -36,6 +36,9 @@ public class AuthVo implements UserDetails {
     private String lastLogin;
     private String allowIp1;
     private String allowIp2;
+    private String status;
+    private String hbtime;
+    private int role1;
     private int loginStatus;
     
     private int maxFailCount;
