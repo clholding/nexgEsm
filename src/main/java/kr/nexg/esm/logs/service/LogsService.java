@@ -4,7 +4,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.TextStyle;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -13,15 +12,12 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import kr.nexg.esm.common.util.CommonUtil;
 import kr.nexg.esm.common.util.CustomMessageException;
 import kr.nexg.esm.common.util.DateUtil;
 import kr.nexg.esm.logs.dto.LogsVo;
 import kr.nexg.esm.logs.mapper.LogsMapper;
 import kr.nexg.esm.nexgesm.mariadb.Log;
-import kr.nexg.esm.util.config;
 import kr.nexg.esm.util.mode_convert;
 
 @Service
@@ -175,12 +171,12 @@ public class LogsService {
 			List<Map<String, Object>> list = rebootLog.get_log(deviceIds, rs_startDate, rs_endDate, rs_page, rs_viewCount);
 			for(int i=0; i<list.size(); i++) {
 				Map<String, Object> resultMap = new LinkedHashMap<>();
-				resultMap.put("time", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("date"))));
-				resultMap.put("gn", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("device_group_name"))));
-				resultMap.put("dn", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("device_name"))));
-				resultMap.put("fip", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("ip"))));
-				resultMap.put("msg", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("msg"))));
-				resultMap.put("deviceID", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("id"))));
+				resultMap.put("time", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("date"))));
+				resultMap.put("gn", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("device_group_name"))));
+				resultMap.put("dn", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("device_name"))));
+				resultMap.put("fip", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("ip"))));
+				resultMap.put("msg", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("msg"))));
+				resultMap.put("deviceID", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("id"))));
 				
 				result.add(resultMap);
 			}
@@ -189,13 +185,13 @@ public class LogsService {
 			List<Map<String, Object>> list = failLog.get_log(deviceIds, rs_startDate, rs_endDate, rs_page, rs_viewCount, rs_type, mode);
 			for(int i=0; i<list.size(); i++) {
 				Map<String, Object> resultMap = new LinkedHashMap<>();
-				resultMap.put("time", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("date"))));
-				resultMap.put("gn", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("device_group_name"))));
-				resultMap.put("dn", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("device_name"))));
-				resultMap.put("fip", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("ip"))));
-				resultMap.put("type", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("fail_name"))));
-				resultMap.put("info", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("info"))));
-				resultMap.put("deviceID", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("id"))));
+				resultMap.put("time", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("date"))));
+				resultMap.put("gn", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("device_group_name"))));
+				resultMap.put("dn", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("device_name"))));
+				resultMap.put("fip", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("ip"))));
+				resultMap.put("type", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("fail_name"))));
+				resultMap.put("info", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("info"))));
+				resultMap.put("deviceID", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("id"))));
 				
 				result.add(resultMap);
 			}
@@ -203,14 +199,14 @@ public class LogsService {
 			List<Map<String, Object>> list = esmAuditLog.get_log(rs_startDate, rs_endDate, rs_page, rs_viewCount, rs_level, sessionId, rs_msg);
 			for(int i=0; i<list.size(); i++) {
 				Map<String, Object> resultMap = new LinkedHashMap<>();
-				resultMap.put("time", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("date"))));
-				resultMap.put("level", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("level"))));
-				resultMap.put("user", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("user"))));
-				resultMap.put("src", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("src"))));
-				resultMap.put("sport", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("sport"))));
-				resultMap.put("dst", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("dst"))));
-				resultMap.put("dport", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("dport"))));
-				resultMap.put("msg", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("action"))));
+				resultMap.put("time", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("date"))));
+				resultMap.put("level", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("level"))));
+				resultMap.put("user", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("user"))));
+				resultMap.put("src", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("src"))));
+				resultMap.put("sport", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("sport"))));
+				resultMap.put("dst", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("dst"))));
+				resultMap.put("dport", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("dport"))));
+				resultMap.put("msg", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("action"))));
 				
 				result.add(resultMap);
 			}
@@ -218,13 +214,13 @@ public class LogsService {
 			List<Map<String, Object>> list = alarmLog.get_log(deviceIds, rs_startDate, rs_endDate, rs_page, rs_viewCount);
 			for(int i=0; i<list.size(); i++) {
 				Map<String, Object> resultMap = new LinkedHashMap<>();
-				resultMap.put("time", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("date"))));
-				resultMap.put("gn", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("device_group_name"))));
-				resultMap.put("dn", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("device_name"))));
-				resultMap.put("fip", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("ip"))));
-				resultMap.put("type", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("level"))));
-				resultMap.put("info", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("info"))));
-				resultMap.put("deviceID", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("id"))));
+				resultMap.put("time", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("date"))));
+				resultMap.put("gn", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("device_group_name"))));
+				resultMap.put("dn", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("device_name"))));
+				resultMap.put("fip", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("ip"))));
+				resultMap.put("type", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("level"))));
+				resultMap.put("info", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("info"))));
+				resultMap.put("deviceID", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("id"))));
 				
 				result.add(resultMap);
 			}
@@ -232,18 +228,18 @@ public class LogsService {
 			List<Map<String, Object>> list = resourceLog.get_log(deviceIds, rs_startDate, rs_endDate, rs_page, rs_viewCount);
 			for(int i=0; i<list.size(); i++) {
 				Map<String, Object> resultMap = new LinkedHashMap<>();
-				resultMap.put("time", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("date"))));
-				resultMap.put("gn", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("device_group_name"))));
-				resultMap.put("dn", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("device_name"))));
-				resultMap.put("fip", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("ip"))));
-				resultMap.put("deviceID", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("id"))));
-				resultMap.put("cpu", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("cpu"))));
-				resultMap.put("mtotal", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("mtotal"))));
-				resultMap.put("mfree", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("mfree"))));
-				resultMap.put("mcached", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("mcached"))));
-				resultMap.put("mbuffered", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("mbuffered"))));
-				resultMap.put("rsrp", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("rsrp"))));
-				resultMap.put("tunnel", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("tunnel"))));
+				resultMap.put("time", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("date"))));
+				resultMap.put("gn", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("device_group_name"))));
+				resultMap.put("dn", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("device_name"))));
+				resultMap.put("fip", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("ip"))));
+				resultMap.put("deviceID", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("id"))));
+				resultMap.put("cpu", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("cpu"))));
+				resultMap.put("mtotal", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("mtotal"))));
+				resultMap.put("mfree", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("mfree"))));
+				resultMap.put("mcached", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("mcached"))));
+				resultMap.put("mbuffered", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("mbuffered"))));
+				resultMap.put("rsrp", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("rsrp"))));
+				resultMap.put("tunnel", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("tunnel"))));
 				
 				result.add(resultMap);
 			}
@@ -251,15 +247,15 @@ public class LogsService {
 			List<Map<String, Object>> list = commandLog.get_log(deviceIds, rs_startDate, rs_endDate, rs_page, rs_viewCount);
 			for(int i=0; i<list.size(); i++) {
 				Map<String, Object> resultMap = new LinkedHashMap<>();
-				resultMap.put("time", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("date"))));
-				resultMap.put("gn", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("device_group_name"))));
-				resultMap.put("dn", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("device_name"))));
-				resultMap.put("fip", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("ip"))));
-				resultMap.put("deviceID", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("id"))));
-				resultMap.put("duration", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("duration"))));
-				resultMap.put("status", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("status"))));
-				resultMap.put("cc", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("cc"))));
-				resultMap.put("filename", CommonUtil.getStringValuOf(String.valueOf(list.get(i).get("filename"))));
+				resultMap.put("time", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("date"))));
+				resultMap.put("gn", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("device_group_name"))));
+				resultMap.put("dn", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("device_name"))));
+				resultMap.put("fip", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("ip"))));
+				resultMap.put("deviceID", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("id"))));
+				resultMap.put("duration", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("duration"))));
+				resultMap.put("status", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("status"))));
+				resultMap.put("cc", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("cc"))));
+				resultMap.put("filename", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("filename"))));
 				
 				result.add(resultMap);
 			}

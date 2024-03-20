@@ -24,5 +24,9 @@ public interface MonitoringMapper {
 	
 	public List<Map<String, Object>> getFailInterface(String deviceId);
 	
+	public List<Map<String, Object>> getDeviceInterfaceInfo(String deviceId);
+	
+	public String getInterMonitorTable(String uid);
+	
 	
 }

@@ -40,7 +40,7 @@ public class MonitoringController {
 
 	/**
 	* -
-	* -
+	* 서버 상태
 	* 
 	* @ param MonitoringVo
 	* @ return ResponseEntity
@@ -92,6 +92,9 @@ public class MonitoringController {
 	*/
 	@PostMapping("/device")
     public ResponseEntity<MessageVo> device(@RequestBody MonitoringVo monitoringVo) throws InvalidProtocolBufferException {
+		
+		//### TO-DO ###
+		
 		// 객체 생성 및 수정
 		int type = Nexgfw_pb2.CommandType.CT_GET.getNumber();
 		int code = Nexgfw_pb2.CommandCode.CC_SYSINFO.getNumber();
@@ -118,26 +121,26 @@ public class MonitoringController {
 	*/
 	@PostMapping("/interface")
     public ResponseEntity<MessageVo> _interface(@RequestBody MonitoringVo monitoringVo) {
-		
+		//### TO-DO ###
 		return null;
     }
 	
 	/**
-	* -
-	* -
+	* 메인 > 탑 메뉴 메인 > 모니터링 > 실시간 트래픽
+	* 실시간 트래픽
 	* 
 	* @ param MonitoringVo
 	* @ return ResponseEntity
 	*/
 	@PostMapping("/traffic")
     public ResponseEntity<MessageVo> traffic(@RequestBody MonitoringVo monitoringVo) {
-		
+		//### TO-DO ###
 		return null;
     }
 	
 	/**
-	* -
-	* -
+	* 메인 > 탑 메뉴 메인 > 모니터링 > 통합장비 정보
+	* 통합장비 정보 목록
 	* 
 	* @ param MonitoringVo
 	* @ return ResponseEntity
@@ -190,7 +193,33 @@ public class MonitoringController {
 	@PostMapping("/getDeviceInterfaceInfo")
     public ResponseEntity<MessageVo> getDeviceInterfaceInfo(@RequestBody MonitoringVo monitoringVo) {
 		
-		return null;
+    	HttpHeaders headers= new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+        
+        MessageVo message;
+        
+        try {
+        	
+        	List<Map<String, Object>> list = monitoringService.getDeviceInterfaceInfo(monitoringVo);
+            int totalCount = list.size();
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("")
+                	.totalCount(totalCount)
+                	.entitys(list)
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}
+    	
+        return new ResponseEntity<>(message, headers, HttpStatus.OK);
     }
 	
 	/**
@@ -203,7 +232,33 @@ public class MonitoringController {
 	@PostMapping("/getInterMonInfo")
     public ResponseEntity<MessageVo> getInterMonInfo(@RequestBody MonitoringVo monitoringVo) {
 		
-		return null;
+		HttpHeaders headers= new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+        
+        MessageVo message;
+        
+        try {
+        	
+        	List<Map<String, Object>> list = monitoringService.getInterMonInfo(monitoringVo);
+            int totalCount = list.size();
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("")
+                	.totalCount(totalCount)
+                	.entitys(list)
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}
+    	
+        return new ResponseEntity<>(message, headers, HttpStatus.OK);
     }
 	
 	/**
@@ -215,13 +270,13 @@ public class MonitoringController {
 	*/
 	@PostMapping("/setInterMonInfo")
     public ResponseEntity<MessageVo> setInterMonInfo(@RequestBody MonitoringVo monitoringVo) {
-		
+		//### TO-DO ###
 		return null;
     }
 	
 	/**
-	* -
-	* -
+	* 메인 > 탑 메뉴 메인 > 모니터링 > 주요장비 정보
+	* 주요장비 정보 목록
 	* 
 	* @ param MonitoringVo
 	* @ return ResponseEntity
