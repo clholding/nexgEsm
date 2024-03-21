@@ -305,6 +305,12 @@ public class LogsController {
 	@PostMapping("/etcDownload")
     public ResponseEntity<MessageVo> etcDownload(@RequestBody LogsVo logsVo) {
 		
+		SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = context.getAuthentication();
+        
+        String sessionId = authentication.getName();
+        logsVo.setSessionId(sessionId);
+		
     	HttpHeaders headers= new HttpHeaders();
         headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
         
@@ -312,14 +318,13 @@ public class LogsController {
         
         try {
         	
-        	List<Map<String, Object>> list = logsService.etcDownload(logsVo);
-            int totalCount = list.size();
+        	Map<String, String> result = logsService.etcDownload(logsVo);
         	
         	message = MessageVo.builder()
                 	.success("true")
-                	.message("")
-                	.totalCount(totalCount)
-                	.entitys(list)
+                	.message("로그 > 보관함에 로그가 저장되었습니다.")
+                	.totalCount(0)
+                	.entitys(result)
                 	.build();
 		} catch (Exception e) {
 			log.error("Error : ", e);
@@ -332,6 +337,42 @@ public class LogsController {
 		}
     	
         return new ResponseEntity<>(message, headers, HttpStatus.OK);
+    }
+	
+	/**
+	* -
+	* -
+	* 
+	* @ param LogsVo
+	* @ return ResponseEntity
+	*/
+	@PostMapping("/logs")
+    public ResponseEntity<MessageVo> logs(@RequestBody LogsVo logsVo) {
+		return null;
+    }
+	
+	/**
+	* -
+	* -
+	* 
+	* @ param LogsVo
+	* @ return ResponseEntity
+	*/
+	@PostMapping("/download")
+    public ResponseEntity<MessageVo> download(@RequestBody LogsVo logsVo) {
+		return null;
+    }
+	
+	/**
+	* -
+	* -
+	* 
+	* @ param LogsVo
+	* @ return ResponseEntity
+	*/
+	@PostMapping("/recent_ipslogs")
+    public ResponseEntity<MessageVo> recent_ipslogs(@RequestBody LogsVo logsVo) {
+		return null;
     }
 	
 }

@@ -303,7 +303,7 @@ public class LogsService {
 				result.add(resultMap);
 			}
 		}else if("Alarm".equals(rs_target)) {
-			List<Map<String, Object>> list = alarmLog.get_log(deviceIds, rs_startDate, rs_endDate, rs_page, rs_viewCount);
+			List<Map<String, Object>> list = alarmLog.get_log(deviceIds, rs_startDate, rs_endDate, rs_page, rs_viewCount, rs_level);
 			for(int i=0; i<list.size(); i++) {
 				Map<String, Object> resultMap = new LinkedHashMap<>();
 				resultMap.put("time", CommonUtil.setEmptyString(String.valueOf(list.get(i).get("date"))));
@@ -356,27 +356,25 @@ public class LogsService {
 		return result;
 	}
 	
-	public List<Map<String, Object>> etcDownload(LogsVo logsVo) throws Exception{
+	public Map<String, String> etcDownload(LogsVo logsVo) throws Exception{
 		
+		String sessionId = logsVo.getSessionId();
 		
 		String rs_target = logsVo.getTarget();
 		String rs_startDate = logsVo.getStartDate();
 		String rs_endDate = logsVo.getEndDate();
-		String desc = logsVo.getDesc();
 		String rs_dn = logsVo.getDn();
 		String rs_gn = logsVo.getGn();
-		String rs_fip = logsVo.getFip();
+//		String rs_fip = logsVo.getFip();
+		String rs_user = logsVo.getUser();
 		String rs_type = logsVo.getType();
 		String rs_level = logsVo.getLevel();
+		String rs_desc = logsVo.getDesc();
 		List<String> rs_deviceIDs = logsVo.getDeviceIDs();
 		String deviceIds = String.join(",", rs_deviceIDs);
 		
 		String rs_mode = logsVo.getMode();
 		int mode = mode_convert.convert_modedata(rs_mode);
-		
-		
-		
-		
 		
 		if(!rs_gn.isBlank()) {
 		 	List<Map<String, Object>> rows = logsMapper.getGroupDeviceList(rs_gn, Integer.toString(mode));
@@ -398,7 +396,6 @@ public class LogsService {
 			rs_deviceIDs = rs_ids;
 		}
 		
-		
 		if(!rs_startDate.isBlank()) {
 			rs_startDate = DateUtil.getDateTimeFormat(rs_startDate, "yyyy-MM-dd HH:mm:ss");
 		}
@@ -407,8 +404,23 @@ public class LogsService {
 			rs_endDate = DateUtil.getDateTimeFormat(rs_endDate, "yyyy-MM-dd HH:mm:ss");
 		}
 		
+		Map<String, String> result = new HashMap<String, String>();
+		String logboxId = "";
+		if("Reboot".equals(rs_target)) {
+			
+		}else if("Fail".equals(rs_target)) {
+			logboxId = failLog.get_log_save(sessionId, rs_desc, deviceIds, rs_startDate, rs_endDate, rs_type);
+		}else if("EsmAudit".equals(rs_target)) {
+			logboxId = esmAuditLog.get_log_save(rs_user, rs_desc, rs_startDate, rs_endDate, rs_level);
+		}else if("Alarm".equals(rs_target)) {
+			logboxId = alarmLog.get_log_save(sessionId, rs_desc, deviceIds, rs_startDate, rs_endDate, rs_level);
+		}else if("Resource".equals(rs_target)) {
+		}else if("Command".equals(rs_target)) {
+		}
 		
-		return null;
+		result.put("logbox_id", logboxId);
+		
+		return result;
 	}
 	
 }

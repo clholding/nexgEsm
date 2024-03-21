@@ -16,6 +16,7 @@ public class LogsVo extends CommonVo {
 	private String dn;
 	private String gn;
 	private String fip;
+	private String user;
 	private String type;
 	private String level;
 	private String msg;
