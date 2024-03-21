@@ -1,5 +1,8 @@
 package kr.nexg.esm.jwt.dto;
 
+import java.util.List;
+import java.util.Map;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,13 +18,14 @@ public class TokenVo {
 	private boolean isFailLogin;
 	private String alertWarning;
 	
-	public String theme;
-	public String curTimeFmt;
-	public String curTime;
-	public String dc;
-	public String locale;
-	public String confMaxCnt;
-	public String defMode;
-	public String userAlarm;
-	public String userPopupTime;
+	private String theme;
+	private String curTimeFmt;
+	private String curTime;
+	private String dc;
+	private String locale;
+	private Map<String, Integer> confMaxCnt;
+	private String defMode;
+	private String userAlarm;
+	private String userPopupTime;
+	private int fileCount;
 }

@@ -31,12 +31,10 @@ public class DefaultController {
     JwtTokenProvider jwtTokenProvider;
     
 
-	public Map<String, Object> index(AuthVo authVo) {
+	public TokenVo index(TokenVo tokenVo) {
 		
-		Map<String, Object> map = new HashMap<String,Object>(); 
-		
-		if(authVo == null) {
-			login(authVo, 14);
+		if(tokenVo == null) {
+			login(tokenVo, 14);
 		}else {
 			Map<String, Integer> configMaxCount = new HashMap<>();
 	        configMaxCount.put("polFilter", 1000000);
@@ -79,7 +77,7 @@ public class DefaultController {
 	        String curTime = currentTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
 	        String curTimeFmt = currentTime.format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss (E)"));
 
-	        String defMode = authVo.getDefMode();
+	        String defMode = tokenVo.getDefMode();
 	        
 	        log.info("defMode =============="+defMode);
 	        if (defMode != null) {
@@ -105,29 +103,26 @@ public class DefaultController {
 	            }
 	        }
 	        
-	        map.put("theme", "navy");
-	        map.put("curTimeFmt", curTimeFmt);
-	        map.put("curTime", curTime);
-	        map.put("dc", "0");
-	        map.put("locale", "ko");
-	        map.put("confMaxCnt", configMaxCount);
-	        map.put("defMode", defMode);
-	        map.put("userAlarm", authVo.getAlarm());
-	        map.put("userPopupTime", authVo.getPopupTime());
+			tokenVo.setTheme("navy");
+			tokenVo.setCurTimeFmt(curTimeFmt);
+			tokenVo.setCurTime(curTime);
+			tokenVo.setDc("0");
+			tokenVo.setLocale("ko");
+			tokenVo.setConfMaxCnt(configMaxCount);
+			tokenVo.setDefMode(defMode);
         
 		}
 		
-		return map;
+		return tokenVo;
 	}
 	
-	public Map<String, Object> login(AuthVo authVo, int loginStatus) {
+	public TokenVo login(TokenVo tokenVo, int loginStatus) {
 		
-		Map<String, Object> map = new HashMap<String,Object>(); 
-		if(authVo != null && loginStatus != 14) {
-			map = index(authVo);
+		if(tokenVo != null && loginStatus != 14) {
+			tokenVo = index(tokenVo);
 		}
 		
-		return map;
+		return tokenVo;
 	}
 	
 	@PostMapping("/forcedLogin")
@@ -138,34 +133,46 @@ public class DefaultController {
 			tokenVo = logincheck(authVo);
 		}else {
 			authService.setSyslog(authVo, "14");
-			login(authVo, 14);
+			login(tokenVo, 14);
 		}
 		return tokenVo;
 		
 	}
 	
+	/*
+	 * 로그인
+	 */
 	@PostMapping("/logincheck")
 	public TokenVo logincheck(@RequestBody AuthVo authVo) throws ParseException {
 		
 		TokenVo tokenVo = authService.logincheck(authVo);
 	
 		if(tokenVo == null) {
-			tokenVo.setAlertWarning("로그인에 실패하였습니다.");
-			tokenVo.setFailLogin(true);
-		}else {
 			
-			if(tokenVo.getLoginStatus() == 3) {
-//				tokenVo.setAlertWarning("비활성화된 관리자 계정입니다.");
-				tokenVo.setFailLogin(true);
+			tokenVo = new TokenVo(null, null, null, 0, false, null, null, null, null, null, null, null, null, null, null, 0);
+			tokenVo.setAlertWarning("로그인에 실패하였습니다.");
+			tokenVo.setFailLogin(false);
+
+		}else {
+
+			log.info("getLoginStatus = "+tokenVo.getLoginStatus());
+			
+			if(tokenVo.getLoginStatus() == 13) {
+				authService.setSyslog(authVo, "1");
+				tokenVo.setFailLogin(false);
+				tokenVo = index(tokenVo);
+			}else if(tokenVo.getLoginStatus() == 88) {
+				authService.forcedLogin(authVo);
+				tokenVo = index(tokenVo);
 			}else if(tokenVo.getLoginStatus() == 4) {
 				tokenVo.setAlertWarning("해당 관리자의 접속 지연이 해제되었습니다. 다시 로그인해주시기 바랍니다.");
 				tokenVo.setFailLogin(true);
 			}else if(tokenVo.getLoginStatus() == 5) {
 				tokenVo.setAlertWarning("해당 관리자는 접속 지연중입니다.");
 				tokenVo.setFailLogin(true);
-			}else if(tokenVo.getLoginStatus() == 13) {
-
-				
+			}else if(tokenVo.getLoginStatus() == 3) {
+				tokenVo.setAlertWarning("로그인에 실패하였습니다. 로그인 시도 = "+tokenVo.getFileCount());
+				tokenVo.setFailLogin(true);				
 			}else if(tokenVo.getLoginStatus() == 14) {
 				tokenVo.setAlertWarning("다른 관리자가 이미 로그인 되어있습니다.");
 				tokenVo.setFailLogin(false);
@@ -175,39 +182,21 @@ public class DefaultController {
 			}else if(tokenVo.getLoginStatus() == 22) {
 				tokenVo.setAlertWarning("비밀번호 유효기간이 만료되었습니다. 비밀번호를 변경해주세요.");
 				tokenVo.setFailLogin(true);
-//				change_password();
-			}else if(tokenVo.getLoginStatus() == 88) {
-				index(authVo);
 			}else if(tokenVo.getLoginStatus() == 100) {
 				tokenVo.setAlertWarning("서버에 로그인 할수 있는 최대 ID 는 100개 입니다.");
 				tokenVo.setFailLogin(true);
 			}
 			
-			Map<String, Object> map = login(authVo, tokenVo.getLoginStatus());
-			String theme = String.valueOf(map.get("theme"));
-			String curTimeFmt = String.valueOf(map.get("curTimeFmt"));
-			String curTime = String.valueOf(map.get("curTime"));
-			String dc = String.valueOf(map.get("dc"));
-			String locale = String.valueOf(map.get("locale"));
-			String confMaxCnt = String.valueOf(map.get("confMaxCnt"));
-			String defMode = String.valueOf(map.get("defMode"));
-			String userAlarm = String.valueOf(map.get("userAlarm"));
-			String userPopupTime = String.valueOf(map.get("userPopupTime"));
-			
-			tokenVo.setTheme(theme);
-			tokenVo.setCurTimeFmt(curTimeFmt);
-			tokenVo.setCurTime(curTime);
-			tokenVo.setDc(dc);
-			tokenVo.setLocale(locale);
-			tokenVo.setConfMaxCnt(confMaxCnt);
-			tokenVo.setDefMode(defMode);
-			tokenVo.setUserAlarm(userAlarm);
-			tokenVo.setUserPopupTime(userPopupTime);
+			tokenVo = login(tokenVo, tokenVo.getLoginStatus());			
+
 		}
 		
 		return tokenVo;
 	}
 	
+	/*
+	 * 재인증
+	 */
 	@PostMapping("/refresh")
 	public TokenVo refresh(@RequestBody AuthVo authVo) {
 		
@@ -221,9 +210,36 @@ public class DefaultController {
 		return tokenVo;
 	}
 	
+	/*
+	 * 로그아웃
+	 */
 	@PostMapping("/logout")
 	public TokenVo logout() {
 
+		TokenVo tokenVo = authService.logout();
+		
+		return tokenVo;
+	}
+	
+	/*
+	 * 비밀번호 유효성 검사
+	 */
+	@PostMapping("/checkpasswordrule")
+	public TokenVo checkpasswordrule(@RequestBody AuthVo authVo) {
+		
+//		datas: {"login_id":"e507103","old_pwd":"Admin123!@#","new_pwd":"Dyddl81*"}
+		TokenVo tokenVo = authService.logout();
+		
+		return tokenVo;
+	}
+	
+	/*
+	 * 비밀번호 변경
+	 */
+	@PostMapping("/changepassword")
+	public TokenVo changepassword(@RequestBody AuthVo authVo) {
+		
+//		datas: {"login_id":"e507103","old_pwd":"Admin123!@#","new_pwd":"Dyddl81*"}
 		TokenVo tokenVo = authService.logout();
 		
 		return tokenVo;

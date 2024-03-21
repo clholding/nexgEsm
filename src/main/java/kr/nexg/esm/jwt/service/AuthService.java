@@ -142,6 +142,14 @@ public class AuthService {
         }
     }
     
+    public void forcedLogin(AuthVo authVo) {
+    	
+    	String remoteIP = ClientIpUtil.getClientIP(request);
+    	defaultMapper.updateUserData(remoteIP, authVo.getLogin());
+    	
+    	setSyslog(authVo, "18");
+    }
+    
     public long getMinDiff(String tarTime, String curTime) {
     	
     	log.info("getMinDiff ============== " );
@@ -248,12 +256,12 @@ public class AuthService {
 	public boolean checkLoginURL(AuthVo authVo) {
 		log.info("checkLoginURL ============== " + authVo);
 		
-		String clientIp = ClientIpUtil.getClientIP(request);
-		log.info("clientIp ============== "+clientIp);
+		String remoteIP = ClientIpUtil.getClientIP(request);
+		log.info("remoteIP ============== "+remoteIP);
 		
 		Map<String, Object> map = defaultMapper.getUserURLs(authVo);
 		if(map != null) {
-			if(map.get("url1").equals(clientIp) || map.get("url2").equals(clientIp) || map.get("url3").equals(clientIp)) {
+			if(map.get("url1").equals(remoteIP) || map.get("url2").equals(remoteIP) || map.get("url3").equals(remoteIP)) {
 				loginStatus = 23;
 		//		setSyslog(authVo, "23");
 				return false;
@@ -269,7 +277,7 @@ public class AuthService {
 	public boolean checkLoginDelay(AuthVo authVo, String login, String pw) throws ParseException {
 		log.info("checkLoginDelay ============== " + authVo);
 		
-		String clientIp = ClientIpUtil.getClientIP(request);
+		String remoteIP = ClientIpUtil.getClientIP(request);
 		
         Date currentTime = new Date();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -314,8 +322,8 @@ public class AuthService {
     			}
     			
     			if(authVo.getAllowIp1() != null && authVo.getAllowIp1().length() > 0) {
-        			if(!clientIp.equals(authVo.getAllowIp1())) {
-        				if(!clientIp.equals(authVo.getAllowIp2())) {
+        			if(!remoteIP.equals(authVo.getAllowIp1())) {
+        				if(!remoteIP.equals(authVo.getAllowIp2())) {
         					loginStatus = 7;
 //        					setSyslog(authVo, "7");
         					return true;
@@ -355,7 +363,7 @@ public class AuthService {
         	    		authVo.setFailcount(0);
         	    		defaultMapper.updateFailCount(authVo);
         	    		defaultMapper.updateLoginTime(authVo);
-        	    		defaultMapper.updateUserData(clientIp, authVo.getLogin());
+        	    		defaultMapper.updateUserData(remoteIP, authVo.getLogin());
         				loginStatus = 13;
         				return false;
         				
@@ -364,7 +372,7 @@ public class AuthService {
         				if(isSuper) {
         					long secDiff = getSecDiff(authVo.getHbtime(), authVo.getCurTime());
         					if(secDiff >= 30) {
-        						defaultMapper.updateUserData(clientIp, authVo.getLogin());
+        						defaultMapper.updateUserData(remoteIP, authVo.getLogin());
         						loginStatus = 13;
         						return false;
         					}else {
@@ -378,7 +386,7 @@ public class AuthService {
         					
         					long secDiff = getSecDiff(authVo.getHbtime(), authVo.getCurTime());
         					if(secDiff >= 30) {
-        						defaultMapper.updateUserData(clientIp, authVo.getLogin());
+        						defaultMapper.updateUserData(remoteIP, authVo.getLogin());
         						loginStatus = 13;
         						return false;
         					}else {
@@ -390,7 +398,7 @@ public class AuthService {
         				
         				long secDiff = getSecDiff(authVo.getHbtime(), authVo.getCurTime());
         				if(secDiff >= 30) {
-        					defaultMapper.updateUserData(clientIp, authVo.getLogin());
+        					defaultMapper.updateUserData(remoteIP, authVo.getLogin());
         					loginStatus = 13;
         				}else {
 //        					setSyslog(authVo, "11");
@@ -422,11 +430,13 @@ public class AuthService {
     public TokenVo logincheck(AuthVo vo) throws ParseException {
     	
     	boolean stateCheck = false; 
+    	boolean userCheck = false; 
     	
     	AuthVo authVo = defaultMapper.selectLogin(vo.getLogin());
     	if(authVo == null) {
 //    		stateCheck = failLogin(authVo);
     		stateCheck = true;
+    		userCheck = false; 
     	}else {
     		if(authVo.getLoginStatus() >= 100) {
     			loginStatus = 0;
@@ -434,11 +444,16 @@ public class AuthService {
     	}
     	
     	if(!stateCheck) {
-    		checkLoginDelay(authVo, vo.getLogin(), vo.getPwd());
+    		stateCheck = checkLoginDelay(authVo, vo.getLogin(), vo.getPwd());
+    		userCheck = true;
     	}
 		
 		if(loginStatus == 11) {
 			stateCheck = true; 
+			userCheck = true;
+		}
+		if(loginStatus == 13 || loginStatus == 14) {
+			authVo.setFailcount(0);
 		}
 		
 		log.info("loginStatus : "+loginStatus);
@@ -447,14 +462,15 @@ public class AuthService {
 		
 		if(loginStatus == 3 && !stateCheck) {
 			stateCheck = failLogin(authVo);
+			userCheck = false;
 		}else if(!stateCheck){
 			stateCheck = failLogin(authVo);
+			userCheck = false;
 		}
     	
-		
 		TokenVo tokenInfo = null;
 		
-		if(stateCheck) {
+		if(stateCheck && userCheck) {
 			// 1. Login ID/PW 를 기반으로 Authentication 객체 생성
 			// 이때 authentication 는 인증 여부를 확인하는 authenticated 값이 false
 			UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(vo.getLogin(), vo.getPwd());
@@ -464,8 +480,13 @@ public class AuthService {
 			
 			// 3. 인증 정보를 기반으로 JWT 토큰 생성
 			tokenInfo = jwtTokenProvider.generateToken(authentication);
+			tokenInfo.setDefMode(authVo.getDefMode());
+			tokenInfo.setUserAlarm(authVo.getAlarm());
+			tokenInfo.setUserPopupTime(authVo.getPopupTime());
 			tokenInfo.setLoginStatus(loginStatus);
+			tokenInfo.setFileCount(authVo.getFailcount());
 		}
+		
  
         return tokenInfo;
     }
