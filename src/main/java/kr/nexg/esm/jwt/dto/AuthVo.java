@@ -38,6 +38,9 @@ public class AuthVo implements UserDetails {
     private String allowIp2;
     private String status;
     private String hbtime;
+    private String defMode;
+    private String alarm;
+    private String popupTime;
     private int role1;
     private int loginStatus;
     
@@ -45,6 +48,8 @@ public class AuthVo implements UserDetails {
     private int blockingTime;
     private String adminFailAction;
     private String curTime;
+    
+    private String forcedLogin;
     
     private String refreshToken;
  

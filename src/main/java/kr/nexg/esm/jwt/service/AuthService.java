@@ -17,6 +17,8 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 //import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import kr.nexg.esm.common.util.ClientIpUtil;
 import kr.nexg.esm.default1.mapper.DefaultMapper;
 import kr.nexg.esm.jwt.JwtTokenProvider;
+import kr.nexg.esm.jwt.SecurityUtil;
 import kr.nexg.esm.jwt.dto.AuthVo;
 import kr.nexg.esm.jwt.dto.TokenVo;
 import kr.nexg.esm.nexgesm.mariadb.Log;
@@ -251,12 +254,12 @@ public class AuthService {
 		Map<String, Object> map = defaultMapper.getUserURLs(authVo);
 		if(map != null) {
 			if(map.get("url1").equals(clientIp) || map.get("url2").equals(clientIp) || map.get("url3").equals(clientIp)) {
+				loginStatus = 23;
+		//		setSyslog(authVo, "23");
 				return false;
 			}
 		}
 		
-		loginStatus = 23;
-//		setSyslog(authVo, "23");
 		return true;
 	}
 	
@@ -306,9 +309,9 @@ public class AuthService {
     			
     		}else{
     			
-//    			if(checkLoginURL(authVo)) {
-//    				return true;
-//    			}
+    			if(checkLoginURL(authVo)) {
+    				return true;
+    			}
     			
     			if(authVo.getAllowIp1() != null && authVo.getAllowIp1().length() > 0) {
         			if(!clientIp.equals(authVo.getAllowIp1())) {
@@ -399,17 +402,18 @@ public class AuthService {
     			
     		}
     		
-        }else {
-        	if(loginStatus == 100) {
-        		loginStatus = 100;
-//        		setSyslog(login, "100");
-        		return true;
-        	}else {
-        		loginStatus = 8;
-//        		setSyslog(login, "8");
-        		return true;
-        	}
         }
+//        else {
+//        	if(loginStatus == 100) {
+//        		loginStatus = 100;
+//        		setSyslog(login, "100");
+//        		return true;
+//        	}else {
+//        		loginStatus = 8;
+//        		setSyslog(login, "8");
+//        		return true;
+//        	}
+//        }
 		
 		return true;
 	}
@@ -421,14 +425,17 @@ public class AuthService {
     	
     	AuthVo authVo = defaultMapper.selectLogin(vo.getLogin());
     	if(authVo == null) {
-    		stateCheck = failLogin(authVo);
+//    		stateCheck = failLogin(authVo);
+    		stateCheck = true;
     	}else {
     		if(authVo.getLoginStatus() >= 100) {
     			loginStatus = 0;
     		}
     	}
     	
-    	stateCheck = checkLoginDelay(authVo, vo.getLogin(), vo.getPwd());
+    	if(!stateCheck) {
+    		checkLoginDelay(authVo, vo.getLogin(), vo.getPwd());
+    	}
 		
 		if(loginStatus == 11) {
 			stateCheck = true; 
@@ -462,4 +469,21 @@ public class AuthService {
  
         return tokenInfo;
     }
+    
+    
+    @Transactional
+    public TokenVo logout() {
+    	
+        String login = SecurityUtil.getId();
+        
+        defaultMapper.updateUserStatus(login);
+        defaultMapper.deleteUserToken(login);
+        
+        String remoteIP = ClientIpUtil.getClientIP(request);
+    	audit.esmlog(3, login, remoteIP, "Logout");
+    	
+        TokenVo tokenInfo = null;
+        return tokenInfo;
+    }
+    
 }

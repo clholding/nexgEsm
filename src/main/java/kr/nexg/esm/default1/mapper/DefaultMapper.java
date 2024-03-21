@@ -22,4 +22,7 @@ public interface DefaultMapper {
 	public Map<String, Object> getUserURLs(AuthVo authVo);
 	
 	public int updateUserData(String remoteIp, String login);
+	
+	public int updateUserStatus(String login);
+	public int deleteUserToken(String login);
 }
