@@ -1,22 +1,34 @@
 package kr.nexg.esm.default1.controller;
 
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
 import java.time.format.DateTimeFormatter;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import kr.nexg.esm.common.dto.MessageVo;
+import kr.nexg.esm.common.util.ClientIpUtil;
 import kr.nexg.esm.jwt.JwtTokenProvider;
 import kr.nexg.esm.jwt.dto.AuthVo;
 import kr.nexg.esm.jwt.dto.TokenVo;
 import kr.nexg.esm.jwt.service.AuthService;
+import kr.nexg.esm.nexgesm.mariadb.Log;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -30,6 +42,8 @@ public class DefaultController {
 	@Autowired
     JwtTokenProvider jwtTokenProvider;
     
+	@Autowired
+	Log.EsmAuditLog esmAuditLog;
 
 	public TokenVo index(TokenVo tokenVo) {
 		
@@ -225,23 +239,103 @@ public class DefaultController {
 	 * 비밀번호 유효성 검사
 	 */
 	@PostMapping("/checkpasswordrule")
-	public TokenVo checkpasswordrule(@RequestBody AuthVo authVo) {
-		
-//		datas: {"login_id":"e507103","old_pwd":"Admin123!@#","new_pwd":"Dyddl81*"}
-		TokenVo tokenVo = authService.logout();
-		
-		return tokenVo;
-	}
+    public ResponseEntity<MessageVo> checkpasswordrule(HttpServletRequest request, @RequestBody AuthVo authVo) throws IOException  {
+	  	
+	  HttpHeaders headers= new HttpHeaders();
+	  headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+	
+      MessageVo message;
+    
+      try {
+    	  
+    	    String remoteIP = ClientIpUtil.getClientIP(request);
+    	
+//	      	Map<String, Object> result = authService.checkpasswordrule();
+    	    String return_msg = "";
+	        int totalCount = 0;
+	        
+	        if("pass".equals(return_msg)) {
+	        	message = MessageVo.builder()
+	        			.success("true")
+	        			.message("비밀번호 유효성이 확인되었습니다")
+	        			.totalCount(totalCount)
+	        			.entitys("")
+	        			.build();
+	        	
+	        	esmAuditLog.esmlog(5, authVo.getLogin(), remoteIP, "비밀번호 유효성 검사를 성공하였습니다.");
+	        	
+	        }else {
+	        	message = MessageVo.builder()
+	        			.success("false")
+	        			.message(return_msg)
+	        			.totalCount(totalCount)
+	        			.entitys("")
+	        			.build();
+	        	
+	        	esmAuditLog.esmlog(3, authVo.getLogin(), remoteIP, "비밀번호 유효성 검사를 실패하였습니다");
+	        }
+    	
+    	
+	  } catch (Exception e) {
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("비밀번호 유효성 검사를 실패하였습니다")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+	  }  
+  	
+  	  return new ResponseEntity<>(message, headers, HttpStatus.OK);
+  	
+    } 
 	
 	/*
 	 * 비밀번호 변경
 	 */
 	@PostMapping("/changepassword")
-	public TokenVo changepassword(@RequestBody AuthVo authVo) {
+	public ResponseEntity<MessageVo> changepassword(@RequestBody AuthVo authVo) {
 		
-//		datas: {"login_id":"e507103","old_pwd":"Admin123!@#","new_pwd":"Dyddl81*"}
-		TokenVo tokenVo = authService.logout();
-		
-		return tokenVo;
-	}
+	  HttpHeaders headers= new HttpHeaders();
+	  headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+	  
+      MessageVo message;
+      
+      try {
+    	  
+    	    AuthVo vo = authService.changepassword(authVo);
+	        int totalCount = 0;
+	        
+	        if(vo != null) {
+	        	message = MessageVo.builder()
+	        			.success("true")
+	        			.message("비밀번호 변경에 성공하였습니다. 변경된 비밀번호로 다시 로그인해주세요.")
+	        			.totalCount(totalCount)
+	        			.entitys("")
+	        			.build();
+	        	
+	        	
+	        }else {
+	        	message = MessageVo.builder()
+	        			.success("false")
+	        			.message("존재하지 않는 계정입니다.")
+	        			.totalCount(totalCount)
+	        			.entitys("")
+	        			.build();
+	        }
+    	
+    	
+	  } catch (Exception e) {
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("비밀번호 갱신에 실패하였습니다.")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+	  }  
+  	
+  	  return new ResponseEntity<>(message, headers, HttpStatus.OK);
+  	
+    } 		
+	
+	
 }

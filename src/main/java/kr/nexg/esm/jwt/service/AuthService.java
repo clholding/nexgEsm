@@ -201,7 +201,7 @@ public class AuthService {
         
         if(authVo.getFailcount() >= authVo.getMaxFailCount()) {
         	
-            long minutesDiff = getMinDiff(authVo.getLastLogin(), authVo.getCurTime());
+            long minutesDiff = getMinDiff(authVo.getLdate(), authVo.getCurTime());
             
             log.info("minutesDiff : "+minutesDiff);
         	if(minutesDiff >= authVo.getBlockingTime()) {
@@ -303,7 +303,7 @@ public class AuthService {
     				
     				defaultMapper.updateLoginTime(authVo);
     			}else if(authVo.getFailcount() > authVo.getMaxFailCount()){
-    				long minutesDiff = getMinDiff(authVo.getLastLogin(), authVo.getCurTime());
+    				long minutesDiff = getMinDiff(authVo.getLdate(), authVo.getCurTime());
     				
     				if(minutesDiff >= authVo.getBlockingTime()) {
     					authVo.setFailcount(1);
@@ -332,7 +332,7 @@ public class AuthService {
         		}
         		
         		if(authVo.getFailcount() >= authVo.getMaxFailCount()) {
-        			long minutesDiff = getMinDiff(authVo.getLastLogin(), authVo.getCurTime());
+        			long minutesDiff = getMinDiff(authVo.getLdate(), authVo.getCurTime());
         			
         			if(minutesDiff >= authVo.getBlockingTime()) {
         	    		authVo.setFailcount(0);
@@ -507,4 +507,14 @@ public class AuthService {
         return tokenInfo;
     }
     
+    public AuthVo changepassword(AuthVo authVo) {
+    	
+    	AuthVo vo = defaultMapper.selectLogin(authVo.getLogin());
+    	
+    	if(vo != null) {
+    		defaultMapper.updateUserPassword(vo);
+    	}
+    	
+    	return vo;
+    }
 }

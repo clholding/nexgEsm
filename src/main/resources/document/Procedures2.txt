@@ -1166,3 +1166,36 @@ BEGIN
     SELECT 1 as col;
   END IF;
 END
+
+***** updateUserPassword *****
+CREATE DEFINER=`sesm`@`%` PROCEDURE `updateUserPassword`(
+  IN user_name VARCHAR(128),
+  IN old_pw VARCHAR(128),
+  IN new_pw VARCHAR(128))
+BEGIN
+  DECLARE pwd_cycle INT DEFAULT 0;
+  DECLARE get_pw VARCHAR(128) DEFAULT '';
+  DECLARE cur_state INT DEFAULT 0;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET cur_state = 1;
+  DECLARE CONTINUE HANDLER FOR SQLWARNING  SET cur_state = 1;
+  DECLARE CONTINUE HANDLER FOR SQLEXCEPTION SET cur_state = 1;
+
+  START TRANSACTION;
+
+  SELECT pwd INTO get_pw FROM user WHERE login = user_name;
+  SELECT pwd_expire_cycle INTO pwd_cycle FROM user WHERE login = user_name;
+
+  IF get_pw != old_pw THEN
+    SET cur_state = 1;
+  ELSE
+    UPDATE user SET pwd = new_pw, pwd_expire_date = DATE_ADD(NOW(), INTERVAL pwd_cycle DAY) WHERE login = user_name;
+  END IF;
+
+  IF cur_state THEN
+    ROLLBACK;
+    SELECT 0 as col;
+  ELSE
+    COMMIT;
+    SELECT 1 as col;
+  END IF;
+END

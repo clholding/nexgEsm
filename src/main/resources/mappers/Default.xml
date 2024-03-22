@@ -56,4 +56,10 @@
 		  FROM user_token 
 		 WHERE user_login = #{login}
 	</delete>
+	
+	<select id="updateUserPassword" parameterType="kr.nexg.esm.jwt.dto.AuthVo" resultType="map">
+		/* DefaultMapper.updateUserPassword */	
+		Call sesm.updateUserPassword( #{login}, #{oldPass}, #{newPass} );
+	</select>	
+	
 </mapper>

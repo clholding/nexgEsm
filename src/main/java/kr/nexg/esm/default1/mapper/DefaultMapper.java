@@ -25,4 +25,6 @@ public interface DefaultMapper {
 	
 	public int updateUserStatus(String login);
 	public int deleteUserToken(String login);
+	
+	public Map<String, Object> updateUserPassword(AuthVo authVo);
 }
