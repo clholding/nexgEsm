@@ -42,4 +42,24 @@
 		     , status = 1 
 		 WHERE login = #{login}
 	</update>
+	
+	<update id="updateUserStatus" parameterType="String" >
+		/* DefaultMapper.updateUserStatus */	
+		UPDATE user 
+		   SET status = 0 
+		 WHERE login = #{login}
+	</update>
+	
+	<delete id="deleteUserToken" parameterType="String" >
+		/* DefaultMapper.deleteUserToken */	
+		DELETE 
+		  FROM user_token 
+		 WHERE user_login = #{login}
+	</delete>
+	
+	<select id="updateUserPassword" parameterType="kr.nexg.esm.jwt.dto.AuthVo" resultType="map">
+		/* DefaultMapper.updateUserPassword */	
+		Call sesm.updateUserPassword( #{login}, #{oldPass}, #{newPass} );
+	</select>	
+	
 </mapper>

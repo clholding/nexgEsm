@@ -25,6 +25,8 @@ public class AuthVo implements UserDetails {
 	private int id;
     private String login;
     private String pwd;
+    private String oldPwd;
+    private String newPwd;
     private String name;
     private String desc;
     private String email;
@@ -33,11 +35,14 @@ public class AuthVo implements UserDetails {
     private String deviceId;
     private int failcount;
     private String pwdExpireDate;
-    private String lastLogin;
+    private String ldate;
     private String allowIp1;
     private String allowIp2;
     private String status;
     private String hbtime;
+    private String defMode;
+    private String alarm;
+    private String popupTime;
     private int role1;
     private int loginStatus;
     
@@ -45,6 +50,8 @@ public class AuthVo implements UserDetails {
     private int blockingTime;
     private String adminFailAction;
     private String curTime;
+    
+    private String forcedLogin;
     
     private String refreshToken;
  
