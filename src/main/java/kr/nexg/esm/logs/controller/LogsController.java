@@ -1,6 +1,5 @@
 package kr.nexg.esm.logs.controller;
 
-import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -8,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
@@ -25,7 +25,18 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mongodb.ConnectionString;
+import com.mongodb.MongoClientSettings;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
+
+import kr.nexg.esm.common.MongoClientManager;
 import kr.nexg.esm.common.dto.MessageVo;
+import kr.nexg.esm.common.dto.MongoVo;
 import kr.nexg.esm.logs.dto.LogsVo;
 import kr.nexg.esm.logs.service.LogsService;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +53,18 @@ public class LogsController {
 	
 	@Value("${logbox.path}")
     private String logboxPath;
+	
+	@Value("${mongo.host}")
+    private String mongoHost;
+	
+	@Value("${mongo.port}")
+    private String mongoPort;
+	
+	@Value("${mongo.username:}")
+    private String mongoUsername;
+	
+	@Value("${mongo.password:}")
+    private String mongoPassword;
 	
 	@Autowired
 	LogsService logsService;
@@ -348,7 +371,54 @@ public class LogsController {
 	*/
 	@PostMapping("/logs")
     public ResponseEntity<MessageVo> logs(@RequestBody LogsVo logsVo) {
-		return null;
+		
+//		MongoClientManager mongoClientManager = new MongoClientManager(mongoHost, mongoPort, mongoUsername, mongoPassword);
+//		MongoClient mongoClient = mongoClientManager.getMongoClient();
+//        MongoDatabase database = mongoClient.getDatabase("db_20240321");
+//        MongoCollection<Document> collection = database.getCollection("doc_00");
+//        
+//        MongoCursor<Document> cursor = collection.find()
+//        	    .limit(3)
+//        	    .iterator();
+//        try {
+//            while (cursor.hasNext()) {
+//                Document document = cursor.next();
+//                System.out.println(document.toJson());
+//            }
+//        } finally {
+//            cursor.close();
+//        }
+//
+//        // 연결을 닫습니다.
+//        mongoClientManager.close();
+		
+		HttpHeaders headers= new HttpHeaders();
+        headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
+        
+        MessageVo message;
+        
+        try {
+            
+        	List<Map<String, Object>> list = logsService.logs(logsVo);
+            int totalCount = list.size();
+        	
+        	message = MessageVo.builder()
+                	.success("true")
+                	.message("")
+                	.totalCount(totalCount)
+                	.entitys(list)
+                	.build();
+		} catch (Exception e) {
+			log.error("Error : ", e);
+			message = MessageVo.builder()
+	            	.success("false")
+	            	.message("")
+	            	.errMsg(e.getMessage())
+	            	.errTitle("")
+	            	.build();
+		}
+    	
+        return new ResponseEntity<>(message, headers, HttpStatus.OK);
     }
 	
 	/**

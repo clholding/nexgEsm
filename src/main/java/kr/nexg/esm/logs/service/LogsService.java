@@ -21,6 +21,7 @@ import kr.nexg.esm.common.util.DateUtil;
 import kr.nexg.esm.logs.dto.LogsEnum;
 import kr.nexg.esm.logs.dto.LogsVo;
 import kr.nexg.esm.logs.mapper.LogsMapper;
+import kr.nexg.esm.nexgesm.log.Log1;
 import kr.nexg.esm.nexgesm.mariadb.Log;
 import kr.nexg.esm.util.mode_convert;
 
@@ -54,12 +55,35 @@ public class LogsService {
 	@Autowired
 	Log.LogInput logInput;
 	
+	@Autowired
+	Log1.Meta meta;
+	
 	public String getLocalizedDayOfWeek(String date_string) {
 		LocalDate date = LocalDate.parse(date_string);
 		
 		DayOfWeek dayOfWeek = date.getDayOfWeek();
 		String dayOfWeek_kr = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.KOREAN);
 		return "("+dayOfWeek_kr+")";
+	}
+	
+	public Map<String, Object> convertType(Map<String, Object> map) {
+		Map<String, Object> temp = map;
+		if(map.size() > 0) {
+			if(map.containsKey("level")) {
+				temp.put("level", Integer.parseInt((String) temp.get("level")));
+			}
+			if(map.containsKey("proto")) {
+				temp.put("proto", Integer.parseInt((String) temp.get("proto")));
+			}
+			if(map.containsKey("sport")) {
+				temp.put("sport", Integer.parseInt((String) temp.get("sport")));
+			}
+			if(map.containsKey("dport")) {
+				temp.put("dport", Integer.parseInt((String) temp.get("dport")));
+			}
+		}
+		return temp;
+		
 	}
 	
 	public List<Map<String, Object>> lastFailDevice(LogsVo logsVo) throws Exception{
@@ -419,6 +443,108 @@ public class LogsService {
 		}
 		
 		result.put("logbox_id", logboxId);
+		
+		return result;
+	}
+	
+	public List<Map<String, Object>> logs(LogsVo logsVo) throws Exception{
+		
+		String sessionId = logsVo.getSessionId();
+		int page = logsVo.getPage();
+		int viewCount = logsVo.getViewCount();
+		
+		String rs_target = logsVo.getTarget();
+		String rs_page = Integer.toString(page);
+		String rs_viewCount = Integer.toString(viewCount);
+		String rs_startDate = logsVo.getStartDate();
+		String rs_endDate = logsVo.getEndDate();
+		Map<String, Object> rs_headers = logsVo.getHeader();
+		Map<String, Object> rs_dictionaries = logsVo.getDictionaries();
+		
+		
+		
+		String rs_dn = logsVo.getDn();
+		String rs_gn = logsVo.getGn();
+		String rs_fip = logsVo.getFip();
+		List<String> rs_deviceIDs = logsVo.getDeviceIDs();
+		String deviceIds = String.join(",", rs_deviceIDs);
+		
+		String rs_mode = logsVo.getMode();
+		int mode = mode_convert.convert_modedata(rs_mode);
+		
+		if(!rs_gn.isBlank()) {
+		 	List<Map<String, Object>> rows = logsMapper.getGroupDeviceList(rs_gn, Integer.toString(mode));
+		 	
+		 	if(rows.size() > 0) {
+		 		List<String> gn_ids = new ArrayList<String>();
+		 		for(int i=0; i<rows.size(); i++) {
+		 			gn_ids.add(String.valueOf(rows.get(i).get("id")));
+		 		}
+		 		rs_deviceIDs = gn_ids;
+		 	}else {
+		 		throw new CustomMessageException("not find deviceID in Group");
+		 	}
+		}
+		
+		if(!rs_dn.isBlank()) {
+			List<String> rs_ids = new ArrayList<String>();
+			rs_ids.add(rs_dn);
+			rs_deviceIDs = rs_ids;
+		}
+		
+		if(!rs_fip.isBlank()) {
+			List<String> rs_ids = new ArrayList<String>();
+			rs_ids.add(rs_fip);
+			rs_deviceIDs = rs_ids;
+		}
+		
+		int skip = (page - 1) * (viewCount - 1);
+		
+		if(rs_startDate.isBlank()) {
+			rs_startDate = DateUtil.getDateFormat("yyyy-MM-dd") + " 00:00:00";
+		}
+		
+		if(rs_endDate.isBlank()) {
+			rs_endDate = DateUtil.getDateFormat("yyyy-MM-dd") + " 23:59:59";
+		}
+		
+		rs_headers = convertType(rs_headers);
+		rs_dictionaries = convertType(rs_dictionaries);
+		
+		int logNum = Integer.parseInt(LogsEnum.logTypes.valueOf(rs_target).getVal());
+		String logTarget = LogsEnum.logTargetMap.valueOf(rs_target).getVal();
+		List<Integer> fid = rs_deviceIDs.stream()
+                .map(Integer::parseInt)
+                .collect(Collectors.toList());
+		
+		Map<String, Object> paramMap = new HashMap<>();
+		paramMap.put("fid", paramMap);
+		paramMap.put("start", rs_startDate);
+		paramMap.put("end", rs_endDate);
+		paramMap.put("logNum", logNum );
+		paramMap.put("header", rs_headers);
+		paramMap.put("skip", skip);
+		paramMap.put("limit", viewCount);
+		paramMap.put("dictionaries", rs_dictionaries);
+		paramMap.put("logTarget", logTarget);
+		
+		meta.log_query(paramMap);
+		
+		
+		
+//		List<Map<String, Object>> list = logInput.get_data(deviceIds);
+		List<Map<String, Object>> result = new ArrayList<>();
+		
+//		for(int i=0; i<list.size(); i++) {
+//			
+//			Map<String, Object> map = new LinkedHashMap<>();
+//			String strDate = String.valueOf(list.get(i).get("dt"));
+//			String count = String.valueOf(list.get(i).get("count"));
+//			map.put("date", strDate + getLocalizedDayOfWeek(strDate));
+//			map.put("num", String.valueOf(list.get(i).get("count")));
+//			
+//			result.add(map);
+//		}
 		
 		return result;
 	}

@@ -25,4 +25,6 @@ public class LogsVo extends CommonVo {
 	private String desc;
 	private List<String> ids;
 	private List<String> deviceIDs;
+	private Map<String, Object> header;
+	private Map<String, Object> dictionaries;
 }
