@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import kr.nexg.esm.administrator.dto.AdministratorEnum;
+import kr.nexg.esm.common.dto.MongoVo;
 import kr.nexg.esm.common.util.CommonUtil;
 import kr.nexg.esm.common.util.CustomMessageException;
 import kr.nexg.esm.common.util.DateUtil;
@@ -447,7 +448,7 @@ public class LogsService {
 		return result;
 	}
 	
-	public List<Map<String, Object>> logs(LogsVo logsVo) throws Exception{
+	public List<Map<String, Object>> logs(LogsVo logsVo, MongoVo mongoVo) throws Exception{
 		
 		String sessionId = logsVo.getSessionId();
 		int page = logsVo.getPage();
@@ -528,7 +529,7 @@ public class LogsService {
 		paramMap.put("dictionaries", rs_dictionaries);
 		paramMap.put("logTarget", logTarget);
 		
-		meta.log_query(paramMap);
+		meta.log_query(paramMap, mongoVo);
 		
 		
 		

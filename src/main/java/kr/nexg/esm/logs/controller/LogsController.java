@@ -58,7 +58,7 @@ public class LogsController {
     private String mongoHost;
 	
 	@Value("${mongo.port}")
-    private String mongoPort;
+    private int mongoPort;
 	
 	@Value("${mongo.username:}")
     private String mongoUsername;
@@ -372,6 +372,11 @@ public class LogsController {
 	@PostMapping("/logs")
     public ResponseEntity<MessageVo> logs(@RequestBody LogsVo logsVo) {
 		
+		MongoVo mongoVo = new MongoVo();
+		mongoVo.setMongoHost(mongoHost);
+		mongoVo.setMongoPort(mongoPort);
+		mongoVo.setMongoUsername(mongoUsername);
+		mongoVo.setMongoPassword(mongoPassword);
 //		MongoClientManager mongoClientManager = new MongoClientManager(mongoHost, mongoPort, mongoUsername, mongoPassword);
 //		MongoClient mongoClient = mongoClientManager.getMongoClient();
 //        MongoDatabase database = mongoClient.getDatabase("db_20240321");
@@ -399,7 +404,7 @@ public class LogsController {
         
         try {
             
-        	List<Map<String, Object>> list = logsService.logs(logsVo);
+        	List<Map<String, Object>> list = logsService.logs(logsVo, mongoVo);
             int totalCount = list.size();
         	
         	message = MessageVo.builder()
