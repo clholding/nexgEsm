@@ -9,6 +9,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import kr.nexg.esm.common.dto.MessageVo;
 import kr.nexg.esm.nexgesm.mariadb.Config;
 import kr.nexg.esm.nexgesm.mariadb.Log;
 
@@ -21,12 +22,16 @@ public class Device {
 	@Autowired
 	Config.Config1 config1;
 	
-    public Device() {
-        // Constructor
-    }
+	@Autowired
+	Producer producer;
+	
+//    public Device() {
+//        // Constructor
+//    }
 
     public void apply_device(String user_id, String host_ip) throws IOException {
     	
+    	producer.sendMessage();
     	
     	esmAuditLog.esmlog(1, user_id, host_ip, "전체 장비 설정 적용 하였습니다.");
     	
