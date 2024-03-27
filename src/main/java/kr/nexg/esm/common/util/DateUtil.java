@@ -3,6 +3,10 @@ package kr.nexg.esm.common.util;
 import java.text.FieldPosition;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.sql.Timestamp;
@@ -599,6 +603,19 @@ public class DateUtil {
 	    catch(Exception e) {
 	    }
 	    return ret;
+	}
+	
+	/**
+	 *  UTC 시간 변환 -> 9시간 전
+	 *
+	 * @param strDate String 타입의 날짜
+	 * @return 변경된 날짜
+	 */
+	public static Instant getUtcTime(String strDate, String pFormat) throws Exception {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pFormat);
+		LocalDateTime localDateTime = LocalDateTime.parse(strDate, formatter);
+		Instant instant = localDateTime.toInstant(ZoneOffset.of("+0900"));
+	    return instant;
 	}
 
 }
