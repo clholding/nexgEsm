@@ -32,7 +32,7 @@ public interface LogMapper {
 	
 	public List<Map<String, Object>> getCommandLog(Map<String, Object> map);
 	
-	public int addLogBox(Map<String, Object> map);
+	public Map<String, Object> addLogBox(Map<String, Object> map);
 	
 	public List<Map<String, Object>> getLogBox(Map<String, Object> map);
 	
