@@ -13,7 +13,8 @@ public class Producer {
 	
 	public void sendMessage() {
 
-		rabbitTemplage.convertAndSend("esm.elogd", "hello.key");
+		rabbitTemplage.setRoutingKey("esm.elogd");
+		rabbitTemplage.convertAndSend("esm.elogd", "amq.gen-Ql5kI2NspkwhXh6nCq7kdg");
 //		rabbitTemplage.convertAndSend("esm.ecollectd", "hello.key");
 //		rabbitTemplage.convertAndSend("esm.etrapd", "hello.key");
 		
