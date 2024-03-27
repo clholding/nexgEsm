@@ -1,6 +1,8 @@
 package kr.nexg.esm.nexgesm.log;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -11,10 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Sorts;
 
 import kr.nexg.esm.common.MongoClientManager;
 import kr.nexg.esm.common.dto.MongoVo;
@@ -57,30 +61,43 @@ public class Log1 {
 			String mongoPort = Integer.toString(mongoVo.getMongoPort());
 			String mongoUsername = mongoVo.getMongoUsername();
 			String mongoPassword = mongoVo.getMongoPassword();
-			MongoClientManager mongoClientManager = new MongoClientManager(mongoHost, mongoPort, mongoUsername, mongoPassword);
+			MongoClientManager mongoClientManager = new MongoClientManager(mongoHost, mongoPort, mongoUsername, mongoPassword);	//몽고DB connection 연결
 			MongoClient mongoClient = mongoClientManager.getMongoClient();
-	        MongoDatabase database = mongoClient.getDatabase("db_20240321");
-	        MongoCollection<Document> collection = database.getCollection("doc_00");
 	        
-	        String sDate = "2024-03-20 23:59:59";
-	        Instant instant = DateUtil.getUtcTime(sDate, "yyyy-MM-dd HH:mm:ss");
-	        
-	        Document query = new Document("time",
-                    new Document("$gte", Date.from(instant)));
-	        
-	        MongoCursor<Document> cursor = collection.find(query)
-	        	    .limit(3)
-	        	    .iterator();
-	        try {
-	            while (cursor.hasNext()) {
-	                Document document = cursor.next();
-	                System.out.println(document.toJson());
-	            }
-	        } finally {
-	            cursor.close();
-		        mongoClientManager.close();
-	        }
-	
+			String start = (String) paramMap.get("start");
+			String end = (String) paramMap.get("end");
+			int skip = (int) paramMap.get("skip");
+			int limit = (int) paramMap.get("limit");
+			int count = 0;
+			LocalDateTime localDateTime = DateUtil.getStringToLocalDateTime(end, "yyyy-MM-dd HH:mm:ss");
+			
+			
+//			while(true) {
+				String yyyyMMdd = localDateTime.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+				String HH = localDateTime.format(DateTimeFormatter.ofPattern("HH"));
+				MongoDatabase database = mongoClient.getDatabase("db_" + yyyyMMdd);
+		        MongoCollection<Document> collection = database.getCollection("doc_" + HH);
+		        
+		        Instant start_instant = DateUtil.getUtcTime(start, "yyyy-MM-dd HH:mm:ss");
+		        Instant end_instant = DateUtil.getUtcTime(end, "yyyy-MM-dd HH:mm:ss");
+		        
+		        Document query = new Document("time",
+	                    new Document("$gte", start_instant)
+	                    .append("$lte", end_instant)
+		        		);
+		        
+		        FindIterable<Document> result = collection.find(query)
+		        		.skip(skip)
+		        	    .limit(limit)
+		        	    .sort(Sorts.descending("_id"));
+		        try {
+		        	for (Document doc : result) {
+		                System.out.println(doc.toJson());
+		            }
+		        } finally {
+			        mongoClientManager.close();
+		        }
+//			}
 	        
 			return null;
 		}

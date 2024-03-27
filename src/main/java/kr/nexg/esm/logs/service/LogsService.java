@@ -452,7 +452,7 @@ public class LogsService {
 		
 		String sessionId = logsVo.getSessionId();
 		int page = logsVo.getPage();
-		int viewCount = logsVo.getViewCount();
+		int viewCount = logsVo.getViewCount() > 0 ? logsVo.getViewCount() : 101;
 		
 		String rs_target = logsVo.getTarget();
 		String rs_page = Integer.toString(page);
@@ -461,9 +461,6 @@ public class LogsService {
 		String rs_endDate = logsVo.getEndDate();
 		Map<String, Object> rs_headers = logsVo.getHeader();
 		Map<String, Object> rs_dictionaries = logsVo.getDictionaries();
-		
-		
-		
 		String rs_dn = logsVo.getDn();
 		String rs_gn = logsVo.getGn();
 		String rs_fip = logsVo.getFip();
@@ -512,6 +509,9 @@ public class LogsService {
 		rs_headers = convertType(rs_headers);
 		rs_dictionaries = convertType(rs_dictionaries);
 		
+		String start = DateUtil.getDateTimeFormat(rs_startDate, "yyyy-MM-dd HH:mm:ss");
+		String end = DateUtil.getDateTimeFormat(rs_endDate, "yyyy-MM-dd HH:mm:ss");
+		
 		int logNum = Integer.parseInt(LogsEnum.logTypes.valueOf(rs_target).getVal());
 		String logTarget = LogsEnum.logTargetMap.valueOf(rs_target).getVal();
 		List<Integer> fid = rs_deviceIDs.stream()
@@ -520,8 +520,8 @@ public class LogsService {
 		
 		Map<String, Object> paramMap = new HashMap<>();
 		paramMap.put("fid", paramMap);
-		paramMap.put("start", rs_startDate);
-		paramMap.put("end", rs_endDate);
+		paramMap.put("start", start);
+		paramMap.put("end", end);
 		paramMap.put("logNum", logNum );
 		paramMap.put("header", rs_headers);
 		paramMap.put("skip", skip);

@@ -617,5 +617,17 @@ public class DateUtil {
 		Instant instant = localDateTime.toInstant(ZoneOffset.of("+0900"));
 	    return instant;
 	}
+	
+	/**
+	 *  String -> LocalDateTime
+	 *
+	 * @param strDate String 타입의 날짜
+	 * @return 변경된 날짜
+	 */
+	public static LocalDateTime getStringToLocalDateTime(String strDate, String pFormat) throws Exception {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pFormat);
+		LocalDateTime localDateTime = LocalDateTime.parse(strDate, formatter);
+	    return localDateTime;
+	}
 
 }
