@@ -27,6 +27,7 @@ import kr.nexg.esm.common.dto.MessageVo;
 import kr.nexg.esm.common.util.ClientIpUtil;
 import kr.nexg.esm.configuration.dto.ConfigurationVo;
 import kr.nexg.esm.configuration.service.ConfigurationService;
+import kr.nexg.esm.nexgesm.command.Integrity;
 import kr.nexg.esm.nexgesm.mariadb.Config;
 import kr.nexg.esm.nexgesm.mariadb.Log;
 import kr.nexg.esm.util.config;
@@ -172,6 +173,9 @@ public class ConfigurationController {
 	    
 	    try {
 	    	
+	    	Integrity integrity = new Integrity();
+	    	integrity.check_integrity();
+	    	
 	        int totalCount = 0;
 	    	message = MessageVo.builder()
 	            	.success("true")
@@ -235,7 +239,7 @@ public class ConfigurationController {
      * TopNav > 시스템 설정 > 시스템 > 에이전트 무결성 상태 > 무결성 확인
      */ 	
     @PostMapping("/checkAgentIntegrity")
-    public ResponseEntity<MessageVo> checkAgentIntegrity() throws IOException  {
+    public ResponseEntity<MessageVo> checkAgentIntegrity(@RequestBody ConfigurationVo configurationVo) throws IOException  {
   	
 		HttpHeaders headers= new HttpHeaders();
 		headers.setContentType(new MediaType("application", "json", Charset.forName("UTF-8")));
@@ -243,6 +247,9 @@ public class ConfigurationController {
 	    MessageVo message;
 	    
 	    try {
+	    	
+	    	Integrity integrity = new Integrity();
+	    	integrity.check_agent_integrity(Integer.parseInt(configurationVo.getId()), configurationVo.getIp());
 	    	
 	        int totalCount = 0;
 	    	message = MessageVo.builder()

@@ -37,5 +37,7 @@ public class ConfigurationVo {
     private String rxpType;
     private String txp;
     private String txpType;
+    private String id;
+    private String ip;
 
 }
