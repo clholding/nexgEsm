@@ -13,6 +13,8 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.server.Session;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -49,6 +51,9 @@ public class AuthService {
 	@Autowired
 	Log.EsmAuditLog audit;
 	
+    @Autowired
+    private JavaMailSender emailSender;
+	   
 	@Autowired
 	private HttpServletRequest request;
 	
@@ -81,10 +86,16 @@ public class AuthService {
             audit.esmlog(3, String.valueOf(id), String.valueOf(remoteIP), String.valueOf(msg));
 
             if (f_count == authVo.getMaxFailCount()) {
-//                Smtp smtp_util = new Smtp();
+            	
                 String smtp_title = "[ESM] " + String.valueOf(id) + " login " + String.valueOf(f_count) + " failed";
                 String smtp_body = "ID : " + String.valueOf(id) + "\nIP : " + String.valueOf(remoteIP) + "\nLogin fail count: " + String.valueOf(f_count);
-//                smtp_util.send_mail(null, null, String.valueOf(smtp_title), String.valueOf(smtp_body));
+                
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setTo("");
+                message.setSubject(smtp_title);
+                message.setText(smtp_body);
+                emailSender.send(message);
+                
             }
         } else if (type.equals("4")) {
             msg = "Login unlocked.";
@@ -209,15 +220,15 @@ public class AuthService {
         		authVo.setFailcount(0);
         		defaultMapper.updateFailCount(authVo);
         		defaultMapper.updateLoginTime(authVo);
-//				setSyslog(authVo, "4");
+				setSyslog(authVo, "4");
 				loginStatus = 4;
         		
         	}else {
         		if("delay".equals(authVo.getAdminFailAction())) {
-//    				setSyslog(authVo, "5");
+    				setSyslog(authVo, "5");
     				loginStatus = 5;
         		}else {
-//    				setSyslog(authVo, "11");
+    				setSyslog(authVo, "11");
     				loginStatus = 11;
         		}
         		return false;
@@ -238,14 +249,14 @@ public class AuthService {
 		log.info("failLogin ============== " + authVo);
 		
 		updateUserInfo(authVo, "update");
-//		setSyslog(authVo, "3");
+		setSyslog(authVo, "3");
 		
 		if(authVo.getFailcount() >= authVo.getMaxFailCount()) {
 			if("delay".equals(authVo.getAdminFailAction())) {
-//				setSyslog(authVo, "5");
+				setSyslog(authVo, "5");
 				loginStatus = 5;
 			}else if("lock".equals(authVo.getAdminFailAction())) {
-//				setSyslog(authVo, "11");
+				setSyslog(authVo, "11");
 				loginStatus = 11;
 			}
 		}
@@ -263,7 +274,7 @@ public class AuthService {
 		if(map != null) {
 			if(map.get("url1").equals(remoteIP) || map.get("url2").equals(remoteIP) || map.get("url3").equals(remoteIP)) {
 				loginStatus = 23;
-		//		setSyslog(authVo, "23");
+				setSyslog(authVo, "23");
 				return false;
 			}
 		}
@@ -288,7 +299,7 @@ public class AuthService {
         	
         	if(!"1".equals(authVo.getActive())) {
     			loginStatus = 21;
-//    			setSyslog(authVo, "21");
+    			setSyslog(authVo, "21");
     			return true;
     		}
     		
@@ -312,7 +323,7 @@ public class AuthService {
     			
     			defaultMapper.updateFailCount(authVo);
     			loginStatus = 3;
-//    			setSyslog(authVo, "3")
+    			setSyslog(authVo, "3");
     			return true;
     			
     		}else{
@@ -325,7 +336,7 @@ public class AuthService {
         			if(!remoteIP.equals(authVo.getAllowIp1())) {
         				if(!remoteIP.equals(authVo.getAllowIp2())) {
         					loginStatus = 7;
-//        					setSyslog(authVo, "7");
+        					setSyslog(authVo, "7");
         					return true;
         				}
         			}
@@ -340,11 +351,11 @@ public class AuthService {
         	    		defaultMapper.updateLoginTime(authVo);
         	    		
         	    		loginStatus = 4;
-//        	    		setSyslog(authVo, "4");
+        	    		setSyslog(authVo, "4");
         	    		return true;
         			}else {
         	    		loginStatus = 5;
-//        	    		setSyslog(authVo, "5");
+        	    		setSyslog(authVo, "5");
         	    		return true;
         			}
         		}else {
@@ -354,7 +365,7 @@ public class AuthService {
 
                     if (expireDate.before(currentTime2)) {
                     	loginStatus = 22;
-//        	    		setSyslog(authVo, "22");
+        	    		setSyslog(authVo, "22");
         				return true;
         			}
         			
@@ -379,7 +390,7 @@ public class AuthService {
         						authVo.setFailcount(0);
         						defaultMapper.updateFailCount(authVo);
         						defaultMapper.updateLoginTime(authVo);
-//        						setSyslog(authVo, "14");
+        						setSyslog(authVo, "14");
         						return false;
         					}
         				}else {
@@ -390,7 +401,7 @@ public class AuthService {
         						loginStatus = 13;
         						return false;
         					}else {
-//        						setSyslog(authVo, "11");
+        						setSyslog(authVo, "11");
         						return true;
         					}
         				}
@@ -401,7 +412,7 @@ public class AuthService {
         					defaultMapper.updateUserData(remoteIP, authVo.getLogin());
         					loginStatus = 13;
         				}else {
-//        					setSyslog(authVo, "11");
+        					setSyslog(authVo, "11");
         				}
         				return false;
         			}
