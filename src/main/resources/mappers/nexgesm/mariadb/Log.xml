@@ -47,9 +47,19 @@
 		CALL sesm.getCommandLog( #{fid}, #{sdate}, #{edate}, #{skip}, #{limit} );
 	</select>
 	
-	<insert id="addLogBox" parameterType="map">
+	<select id="addLogBox" parameterType="map" resultType="map">
 		/* LogMapper.addLogBox */
 		CALL addLogBox( #{logType}, #{user}, #{info});
-	</insert>
+	</select>
+	
+	<select id="getLogBox" parameterType="map" resultType="map">
+		/* LogMapper.getLogBox */	
+		CALL sesm.getLogBox( #{sdate}, #{edate}, #{skip}, #{limit}, '', '', '' );
+	</select>
+	
+	<select id="delLogBox" parameterType="map" resultType="map">
+		/* LogMapper.delLogBox */	
+		CALL sesm.delLogBox( #{ids}, #{user} );
+	</select>
 
 </mapper>

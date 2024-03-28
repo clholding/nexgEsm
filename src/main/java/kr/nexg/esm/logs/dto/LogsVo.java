@@ -16,9 +16,15 @@ public class LogsVo extends CommonVo {
 	private String dn;
 	private String gn;
 	private String fip;
+	private String user;
 	private String type;
 	private String level;
 	private String msg;
 	private String id;
+	private String path;
+	private String desc;
+	private List<String> ids;
 	private List<String> deviceIDs;
+	private Map<String, Object> header;
+	private Map<String, Object> dictionaries;
 }

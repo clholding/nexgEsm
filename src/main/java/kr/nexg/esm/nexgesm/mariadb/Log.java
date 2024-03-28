@@ -1,5 +1,7 @@
 package kr.nexg.esm.nexgesm.mariadb;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,7 +45,7 @@ public class Log {
 			return list;
 		}
 		
-		public void get_log_save(String user, String info, String sdate, String edate, String level, String msg) {
+		public String get_log_save(String user, String info, String sdate, String edate, String level) {
 			int logType = LogsConstants.LOG_TYPE_ESMAUDIT;
 			Map<String, Object> map = new HashMap<>();
 			map.put("sdate", sdate);
@@ -52,13 +54,14 @@ public class Log {
 			map.put("limit", LogsConstants.LOGSAVE_RECORD_LIMIT);
 			map.put("level", level);
 			map.put("user", user);
-			map.put("msg", msg);
+			map.put("msg", "");
 			
 			Map<String, Object> boxMap = new HashMap<>();
 			boxMap.put("logType", logType);
 			boxMap.put("user", user);
 			boxMap.put("info", info);
-			String logbox_id = Integer.toString(logMapper.addLogBox(boxMap));
+			int select_id = (int) logMapper.addLogBox(boxMap).get("select_id");
+			String logbox_id = Integer.toString(select_id);
 			List<Map<String, Object>> list = logMapper.getEsmAuditLog(map);
 			
 			//### TO-DO ###
@@ -70,6 +73,8 @@ public class Log {
 //		      downinfo['dbtype'] = 'RebootLog'
 //
 //		      bg.run_command(CST_DOWN_ETCLOG, json.dumps(downinfo))
+			
+			return logbox_id;
 		}
 	}
 	
@@ -87,7 +92,7 @@ public class Log {
 			return list;
 		}
 		
-		public void get_log_save(String user, String info, String fid, String sdate, String edate) {
+		public String get_log_save(String user, String info, String fid, String sdate, String edate) {
 			int logType = LogsConstants.LOG_TYPE_RESOURCE;
 			Map<String, Object> map = new HashMap<>();
 			map.put("fid", fid);
@@ -100,7 +105,8 @@ public class Log {
 			boxMap.put("logType", logType);
 			boxMap.put("user", user);
 			boxMap.put("info", info);
-			String logbox_id = Integer.toString(logMapper.addLogBox(boxMap));
+			int select_id = (int) logMapper.addLogBox(boxMap).get("select_id");
+			String logbox_id = Integer.toString(select_id);
 			List<Map<String, Object>> list = logMapper.getResourceLog(map);
 			
 			//### TO-DO ###
@@ -112,6 +118,8 @@ public class Log {
 //		      downinfo['dbtype'] = 'ResourceLog'
 //
 //		      bg.run_command(CST_DOWN_ETCLOG, json.dumps(downinfo))
+			
+			return logbox_id;
 		}
 	}
 	
@@ -129,7 +137,7 @@ public class Log {
 			return list;
 		}
 		
-		public void get_log_save(String user, String info, String fid, String sdate, String edate) {
+		public String get_log_save(String user, String info, String fid, String sdate, String edate) {
 			int logType = LogsConstants.LOG_TYPE_COMMAND;
 			Map<String, Object> map = new HashMap<>();
 			map.put("fid", fid);
@@ -142,7 +150,8 @@ public class Log {
 			boxMap.put("logType", logType);
 			boxMap.put("user", user);
 			boxMap.put("info", info);
-			String logbox_id = Integer.toString(logMapper.addLogBox(boxMap));
+			int select_id = (int) logMapper.addLogBox(boxMap).get("select_id");
+			String logbox_id = Integer.toString(select_id);
 			List<Map<String, Object>> list = logMapper.getCommandLog(map);
 			
 			//### TO-DO ###
@@ -154,6 +163,8 @@ public class Log {
 //		      downinfo['dbtype'] = 'CommandLog'
 //
 //		      bg.run_command(CST_DOWN_ETCLOG, json.dumps(downinfo))
+			
+			return logbox_id;
 		}
 	}
 	
@@ -183,7 +194,7 @@ public class Log {
 			return list;
 		}
 		
-		public void get_log_save(String user, String info, String fid, String sdate, String edate) {
+		public String get_log_save(String user, String info, String fid, String sdate, String edate, String type) {
 			int logType = LogsConstants.LOG_TYPE_FAIL;
 			Map<String, Object> map = new HashMap<>();
 			map.put("fid", fid);
@@ -191,12 +202,15 @@ public class Log {
 			map.put("edate", edate);
 			map.put("skip", "0");
 			map.put("limit", LogsConstants.LOGSAVE_RECORD_LIMIT);
+			map.put("type", type);
+			map.put("mode", 0);
 			
 			Map<String, Object> boxMap = new HashMap<>();
 			boxMap.put("logType", logType);
 			boxMap.put("user", user);
 			boxMap.put("info", info);
-			String logbox_id = Integer.toString(logMapper.addLogBox(boxMap));
+			int select_id = (int) logMapper.addLogBox(boxMap).get("select_id");
+			String logbox_id = Integer.toString(select_id);
 			List<Map<String, Object>> list = logMapper.getFailLog(map);
 			
 			//### TO-DO ###
@@ -208,6 +222,8 @@ public class Log {
 //		      downinfo['dbtype'] = 'FailLog'
 //
 //		      bg.run_command(CST_DOWN_ETCLOG, json.dumps(downinfo))
+			
+			return logbox_id;
 		}
 	}
 	
@@ -226,7 +242,7 @@ public class Log {
 				
 		}
 		
-		public void get_log_save(String user, String info, String fid, String sdate, String edate) {
+		public String get_log_save(String user, String info, String fid, String sdate, String edate) {
 			int logType = LogsConstants.LOG_TYPE_REBOOT;
 			Map<String, Object> map = new HashMap<>();
 			map.put("fid", fid);
@@ -239,7 +255,8 @@ public class Log {
 			boxMap.put("logType", logType);
 			boxMap.put("user", user);
 			boxMap.put("info", info);
-			String logbox_id = Integer.toString(logMapper.addLogBox(boxMap));
+			int select_id = (int) logMapper.addLogBox(boxMap).get("select_id");
+			String logbox_id = Integer.toString(select_id);
 			List<Map<String, Object>> list = logMapper.getRebootLog(map);
 			
 			//### TO-DO ###
@@ -251,13 +268,14 @@ public class Log {
 //		      downinfo['dbtype'] = 'RebootLog'
 //
 //		      bg.run_command(CST_DOWN_ETCLOG, json.dumps(downinfo))
+			
+			return logbox_id;
 		}
 	}
 	
 	@Component
 	public class AlarmLog {
-		public List<Map<String, Object>> get_log(String fid, String sdate, String edate, String skip, String limit) {
-			String level = "1";
+		public List<Map<String, Object>> get_log(String fid, String sdate, String edate, String skip, String limit, String level) {
 			Map<String, Object> map = new HashMap<>();
 			map.put("fid", fid);
 			map.put("sdate", sdate);
@@ -270,8 +288,7 @@ public class Log {
 			return list;
 		}
 		
-		public void get_log_save(String user, String info, String fid, String sdate, String edate) {
-			String level = "1";
+		public String get_log_save(String user, String info, String fid, String sdate, String edate, String level) {
 			int logType = LogsConstants.LOG_TYPE_ALARM;
 			Map<String, Object> map = new HashMap<>();
 			map.put("fid", fid);
@@ -285,7 +302,8 @@ public class Log {
 			boxMap.put("logType", logType);
 			boxMap.put("user", user);
 			boxMap.put("info", info);
-			String logbox_id = Integer.toString(logMapper.addLogBox(boxMap));
+			int select_id = (int) logMapper.addLogBox(boxMap).get("select_id");
+			String logbox_id = Integer.toString(select_id);
 			List<Map<String, Object>> list = logMapper.getAlarmLog(map);
 			
 			//### TO-DO ###
@@ -297,6 +315,33 @@ public class Log {
 //		      downinfo['dbtype'] = 'AlarmLog'
 //
 //		      bg.run_command(CST_DOWN_ETCLOG, json.dumps(downinfo))
+			
+			return logbox_id;
+		}
+	}
+	
+	@Component
+	public class LogBox {
+		public List<Map<String, Object>> get_log_box(String sdate, String edate, String skip, String limit) {
+			Map<String, Object> map = new HashMap<>();
+			map.put("sdate", sdate);
+			map.put("edate", edate);
+			map.put("skip", skip);
+			map.put("limit", limit);
+			return logMapper.getLogBox(map);
+		}
+		
+		public Map<String, Object> del_log_box(List<String> ids, String path, String user) throws FileNotFoundException {
+			for(String id : ids) {
+				String log_file = path + id + ".csv";
+				File file = new File(log_file);
+				if(file.exists()) {
+					file.delete();
+				}else {
+					throw new FileNotFoundException("file not found!");
+				}
+			}
+			return logMapper.delLogBox(String.join(",", ids), user);
 		}
 	}
 	
